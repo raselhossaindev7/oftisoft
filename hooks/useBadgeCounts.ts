@@ -24,13 +24,15 @@ export function useBadgeCounts() {
         enabled: authCheckComplete && !!user?.id && isAuthenticated,
     });
 
-    const { data: orders = [] } = useQuery({
+    const { data: ordersResponse = [] } = useQuery({
         queryKey: ['orders'],
         queryFn: ordersAPI.getOrders,
         refetchInterval: 60000, // Refetch every minute
         // Only run after auth check is complete AND user is authenticated
         enabled: authCheckComplete && isAuthenticated,
     });
+
+    const orders = Array.isArray(ordersResponse) ? ordersResponse : (ordersResponse as any)?.data ?? [];
 
     const { data: leadsStats } = useQuery({
         queryKey: ['leads-stats'],

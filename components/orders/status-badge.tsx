@@ -3,12 +3,12 @@ import { CheckCircle2, Clock, XCircle, RotateCcw, AlertCircle } from "lucide-rea
 import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
-    status: string;
+    status: string | undefined;
     className?: string;
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-    switch (status.toLowerCase()) {
+    switch ((status || '').toLowerCase()) {
         case "completed":
             return (
                 <Badge className={cn("bg-green-500/10 text-green-500 border-green-500/20 gap-1.5 hover:bg-green-500/20 transition-colors", className)}>
@@ -40,6 +40,6 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
                 </Badge>
             );
         default:
-            return <Badge variant="outline" className={cn("gap-1.5", className)}>{status}</Badge>;
+            return <Badge variant="outline" className={cn("gap-1.5", className)}>{status || "—"}</Badge>;
     }
 }

@@ -17,7 +17,8 @@ import {
     Layers,
     ArrowUpRight,
     SearchX,
-    FileArchive
+    FileArchive,
+    Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
@@ -51,7 +53,11 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { useProducts } from "@/hooks/useProducts";
 import { useCategories } from "@/hooks/useCategories";
+import { useRole } from "@/hooks/useRole";
+import { RoleGuard } from "@/components/auth/role-guard";
 import { Product } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { adminAPI } from "@/lib/api";
 import {
     Dialog,
     DialogContent,
@@ -73,12 +79,28 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function ProductManagementPage() {
+    const { isAdmin } = useRole();
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
     const [isUploading, setIsUploading] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+    const [versionTarget, setVersionTarget] = useState<Product | null>(null);
+    const [versionForm, setVersionForm] = useState({ version: "", changelog: "", importance: "minor" });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
+    const queryClient = useQueryClient();
+
+    const createVersionMutation = useMutation({
+        mutationFn: (data: { productId: string; version: string; changelog: string; importance: string }) =>
+            adminAPI.createVersion(data.productId, { version: data.version, changelog: data.changelog, importance: data.importance }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast.success("New version released! All owners will be notified.");
+            setVersionTarget(null);
+            setVersionForm({ version: "", changelog: "", importance: "minor" });
+        },
+        onError: () => toast.error("Failed to create version"),
+    });
     
     const { products, stats, isLoading, isStatsLoading, deleteProduct, isDeleting } = useProducts(
         undefined,
@@ -89,11 +111,7 @@ export default function ProductManagementPage() {
 
     const downloadCsvTemplate = () => {
         const headers = ["name", "description", "price", "category", "stock", "sku", "status"];
-        const rows = [
-            ["Example Product", "Product description here", "29.99", "Category Name", "100", "SKU-001", "active"],
-            ["Another Product", "Another description", "49.99", "Category Name", "50", "SKU-002", "draft"],
-        ];
-        const csv = [headers.join(","), ...rows.map(r => r.map(c => `"${c}"`).join(","))].join("\n");
+        const csv = headers.join(",");
         const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -115,7 +133,7 @@ export default function ProductManagementPage() {
             const text = e.target?.result as string;
             const lines = text.split("\n").filter(Boolean);
             if (lines.length > 1) {
-                toast.success(`${lines.length - 1} products imported successfully`);
+                toast.success(`${lines.length - 1} products parsed. Backend import endpoint coming soon.`);
             } else {
                 toast.error("CSV file is empty or invalid");
             }
@@ -138,6 +156,7 @@ export default function ProductManagementPage() {
     const filteredProducts = products || [];
 
     return (
+        <RoleGuard allowedRoles={["Editor", "Admin", "SuperAdmin"]}>
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -299,7 +318,7 @@ export default function ProductManagementPage() {
                                         <TableRow key={p.id} className="group hover:bg-primary/5 transition-colors">
                                             <TableCell>
                                                 <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-border">
-                                                    <Image src={p.image} alt={p.name} fill className="object-cover" />
+                                                    <Image src={p.image || '/placeholder.png'} alt={p.name || ''} fill className="object-cover" />
                                                 </div>
                                             </TableCell>
                                             <TableCell>
@@ -310,18 +329,25 @@ export default function ProductManagementPage() {
                                             </TableCell>
                                             <TableCell>
                                                 <Badge variant="outline" className="text-sm font-medium bg-muted/50">
-                                                    {p.category}
+                                                    {p.category || "—"}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="font-bold text-primary">${p.price}</TableCell>
+                                            <TableCell className="font-bold text-primary">${p.price ?? 0}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-1">
-                                                    <span className="text-sm font-medium">{p.rating}</span>
-                                                    <span className="text-xs text-muted-foreground">({p.reviews})</span>
+                                                    <span className="text-sm font-medium">{p.rating || "—"}</span>
+                                                    <span className="text-xs text-muted-foreground">({p.reviews ?? 0})</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <Badge className="bg-green-500/10 text-green-500 border-green-500/20 text-sm">Active</Badge>
+                                                <Badge className={cn(
+                                                    "text-sm",
+                                                    p.status === 'approved' ? "bg-green-500/10 text-green-500 border-green-500/20" :
+                                                    p.status === 'rejected' ? "bg-red-500/10 text-red-500 border-red-500/20" :
+                                                    "bg-orange-500/10 text-orange-500 border-orange-500/20"
+                                                )}>
+                                                    {p.status ? p.status.charAt(0).toUpperCase() + p.status.slice(1) : 'Pending'}
+                                                </Badge>
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <DropdownMenu>
@@ -343,6 +369,14 @@ export default function ProductManagementPage() {
                                                         <DropdownMenuItem className="flex items-center gap-2 cursor-pointer" onClick={() => window.open(`/products/${p.id}`, "_blank")}>
                                                             <ExternalLink className="w-4 h-4" /> View Live
                                                         </DropdownMenuItem>
+                                                        {isAdmin && (
+                                                        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-primary"
+                                                            onClick={() => { setVersionTarget(p); setVersionForm({ version: "", changelog: "", importance: "minor" }); }}>
+                                                            <Rocket className="w-4 h-4" /> New Version
+                                                        </DropdownMenuItem>
+                                                        )}
+                                                        {isAdmin && (
+                                                        <>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem 
                                                             className="flex items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
@@ -351,6 +385,8 @@ export default function ProductManagementPage() {
                                                         >
                                                             <Trash2 className="w-4 h-4" /> Delete
                                                         </DropdownMenuItem>
+                                                        </>
+                                                        )}
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </TableCell>
@@ -422,6 +458,61 @@ export default function ProductManagementPage() {
                 </Card>
             </div>
 
+            <Dialog open={!!versionTarget} onOpenChange={(o) => { if (!o) setVersionTarget(null); }}>
+                <DialogContent className="rounded-[2rem] border-border/50 max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                            <Rocket className="w-6 h-6 text-primary" /> Release New Version
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground">
+                            Push a new build for &quot;{versionTarget?.name}&quot;. All owners will receive an update notification.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="text-sm font-bold mb-1 block">Version Tag</label>
+                            <Input
+                                placeholder="e.g. 2.0.0"
+                                className="h-10 rounded-xl font-mono font-bold"
+                                value={versionForm.version}
+                                onChange={(e) => setVersionForm({ ...versionForm, version: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="text-sm font-bold mb-1 block">Importance</label>
+                            <select
+                                className="w-full h-10 rounded-xl border border-border/50 bg-background px-3 text-sm font-bold"
+                                value={versionForm.importance}
+                                onChange={(e) => setVersionForm({ ...versionForm, importance: e.target.value })}
+                            >
+                                <option value="minor">Minor</option>
+                                <option value="major">Major</option>
+                                <option value="security">Security</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-sm font-bold mb-1 block">Changelog</label>
+                            <textarea
+                                className="w-full min-h-[120px] rounded-xl border border-border/50 bg-background p-3 text-sm font-medium resize-y"
+                                placeholder="Describe what changed in this release..."
+                                value={versionForm.changelog}
+                                onChange={(e) => setVersionForm({ ...versionForm, changelog: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" className="rounded-xl font-bold" onClick={() => setVersionTarget(null)}>Cancel</Button>
+                        <Button className="rounded-xl font-bold gap-2"
+                            onClick={() => versionTarget && createVersionMutation.mutate({ productId: versionTarget.id, ...versionForm })}
+                            disabled={!versionForm.version || !versionForm.changelog || createVersionMutation.isPending}
+                        >
+                            <Rocket className="w-4 h-4" />
+                            {createVersionMutation.isPending ? "Releasing..." : "Release"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
                 <AlertDialogContent className="rounded-2xl border-border/50 max-w-md">
                     <AlertDialogHeader>
@@ -442,5 +533,6 @@ export default function ProductManagementPage() {
                 </AlertDialogContent>
             </AlertDialog>
         </div>
+        </RoleGuard>
     );
 }

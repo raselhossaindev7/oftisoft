@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore, getAuthCheckComplete, getIsLoggingOut } from "@/store/useAuthStore";
 import { Loader2 } from "lucide-react";
 
 export default function AuthLayout({
@@ -13,14 +13,14 @@ export default function AuthLayout({
     const router = useRouter();
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     const isLoading = useAuthStore((s) => s.isLoading);
+    const hasRedirected = useRef(false);
 
     useEffect(() => {
-        // Only redirect if we ARE definitely authenticated
-  if (!isLoading && isAuthenticated) {
+        if (!isLoading && isAuthenticated && getAuthCheckComplete() && !hasRedirected.current) {
+            hasRedirected.current = true;
             router.replace("/dashboard");
         }
     }, [isAuthenticated, isLoading, router]);
-
 
     if (isLoading) {
         return (

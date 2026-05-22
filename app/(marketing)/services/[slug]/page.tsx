@@ -37,6 +37,10 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ slug: 
     const { slug } = use(params);
     const { content } = useServicesContentStore();
 
+    const containerRef = useRef<HTMLDivElement>(null);
+    const scrollYProgress = useScrollProgress(containerRef);
+    const [activeProcessIndex, setActiveProcessIndex] = useState(0);
+
     // Service offer detail route (IDs starting with "svc-")
     if (slug.startsWith("svc-")) {
         const offer = content?.offers.find(o => o.id === slug);
@@ -56,11 +60,6 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ slug: 
 
     const service = content?.overview.find(s => s.id === slug);
     const globalProcess = content?.process || [];
-    
-    const containerRef = useRef<HTMLDivElement>(null);
-    const scrollYProgress = useScrollProgress(containerRef);
-
-    const [activeProcessIndex, setActiveProcessIndex] = useState(0);
 
     // Handle 404
   if (!service) {

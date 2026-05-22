@@ -1,11 +1,9 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
-  Bell,
   Menu,
   ChevronRight,
   Settings,
@@ -17,7 +15,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +27,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -43,7 +40,7 @@ export default function Header() {
   const pathname = usePathname();
   const { setMobileSidebarOpen } = useDashboard();
   const { user, logout } = useAuth();
-  const { items: cartItems, getTotalPrice } = useCart();
+  const { items: cartItems } = useCart();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -63,6 +60,18 @@ export default function Header() {
     : 'U';
 
   const cartItemCount = cartItems.length;
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <header className="h-16 sm:h-18 border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-40 px-4 sm:px-6 flex items-center justify-between gap-4 transition-all duration-300">
@@ -101,6 +110,11 @@ export default function Header() {
                 if (!searchQuery) setIsSearchFocused(false);
               }}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim()) {
+                  router.push(`/dashboard?q=${encodeURIComponent(searchQuery.trim())}`);
+                }
+              }}
               className="pl-9 sm:pl-11 pr-10 sm:pr-12 h-9 sm:h-10 bg-muted/30 border-border rounded-xl sm:rounded-2xl text-sm focus:bg-background"
             />
             <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">

@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import {
@@ -13,10 +12,12 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useProjects } from "@/hooks/useProjects";
+import { useRole } from "@/hooks/useRole";
 import { toast } from "sonner";
 
 import { DeleteDialog } from "@/components/projects/delete-project-dialog";
 import { EditDialog } from "@/components/projects/edit-project-dialog";
+import { RoleGuard } from "@/components/auth/role-guard";
 import { STATUS_COLORS, formatDate } from "@/lib/projects";
 
 const TABS = [
@@ -30,6 +31,7 @@ export default function ProjectDetailsPage() {
     const params = useParams();
     const router = useRouter();
     const projectId = params.id as string;
+    const { isAdmin } = useRole();
     
     const { project, isLoading, updateProject, deleteProject, isUpdating, isDeleting } = useProjects(projectId);
     
@@ -74,6 +76,7 @@ export default function ProjectDetailsPage() {
     const budgetRemaining = project.budget ? (project.budget - budgetSpent) : 0;
 
     return (
+        <RoleGuard allowedRoles={["Editor", "Admin", "SuperAdmin"]}>
         <div className="space-y-6 pb-20">
             {/* Header */}
             <div className="flex flex-col space-y-4">
@@ -87,7 +90,7 @@ export default function ProjectDetailsPage() {
                             animate={{ scale: 1, opacity: 1 }}
                             className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary font-bold text-2xl border border-primary/20 shadow-lg shadow-primary/5"
                         >
-                            {project.title.substring(0, 2).toUpperCase()}
+                            {(project.title || '??').substring(0, 2).toUpperCase()}
                         </AnimatedDiv>
                         <div>
                             <h1 className="text-2xl font-bold flex items-center gap-3">
@@ -303,22 +306,24 @@ export default function ProjectDetailsPage() {
                     {/* Tab: SETTINGS */}
                     {activeTab === "settings" && (
                         <div className="max-w-2xl space-y-10">
-                            <div className="pt-10 border-t border-border">
-                                <h3 className="text-xl font-bold text-red-500 mb-6 font-bold flex items-center gap-2">
-                                    <AlertCircle className="w-5 h-5" /> Danger Zone
-                                </h3>
-                                <div className="space-y-4">
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                        Deleting a project is irreversible. All project data will be permanently removed.
-                                    </p>
-                                    <button onClick={() => setShowDeleteDialog(true)}
-                                        disabled={isDeleting}
-                                        className="px-6 py-3 border-2 border-red-500/20 text-red-500 rounded-2xl font-bold hover:bg-red-500/10 transition-all flex items-center gap-2 disabled:opacity-50"
-                                    >
-                                        <Trash2 className="w-4 h-4" /> {isDeleting ? "Deleting..." : "Delete This Project"}
-                                    </button>
+                            {isAdmin && (
+                                <div className="pt-10 border-t border-border">
+                                    <h3 className="text-xl font-bold text-red-500 mb-6 flex items-center gap-2">
+                                        <AlertCircle className="w-5 h-5" /> Danger Zone
+                                    </h3>
+                                    <div className="space-y-4">
+                                        <p className="text-sm text-muted-foreground mb-4">
+                                            Deleting a project is irreversible. All project data will be permanently removed.
+                                        </p>
+                                        <button onClick={() => setShowDeleteDialog(true)}
+                                            disabled={isDeleting}
+                                            className="px-6 py-3 border-2 border-red-500/20 text-red-500 rounded-2xl font-bold hover:bg-red-500/10 transition-all flex items-center gap-2 disabled:opacity-50"
+                                        >
+                                            <Trash2 className="w-4 h-4" /> {isDeleting ? "Deleting..." : "Delete This Project"}
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     )}
 
@@ -344,5 +349,6 @@ export default function ProjectDetailsPage() {
                 )}
             </AnimatePresence>
         </div>
+        </RoleGuard>
     );
 }

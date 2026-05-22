@@ -1,7 +1,20 @@
 import type { NextConfig } from "next";
 
+const BACKEND_URL = process.env.API_BACKEND_URL || 'http://localhost:5500/api';
+
 const nextConfig: NextConfig = {
+  trailingSlash: false,
   output: undefined,
+
+  // Proxy API requests to NestJS backend
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${BACKEND_URL}/:path*`,
+      },
+    ];
+  },
 
   // Image optimization
   images: {

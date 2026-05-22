@@ -62,6 +62,7 @@ import { withRoleProtection } from "@/components/auth/role-guard";
 
 function UsersPage() {
     const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [activeSegment, setActiveSegment] = useState("All Users");
     const { users, isLoading, fetchUsers, toggleUserStatus, deleteUser } = useUsers();
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -83,21 +84,26 @@ function UsersPage() {
     const [emailBody, setEmailBody] = useState("");
     const [messageContent, setMessageContent] = useState("");
 
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     const handleRefresh = async () => {
         setIsRefreshing(true);
-        await fetchUsers({ search: searchQuery });
-        setTimeout(() => setIsRefreshing(false), 500);
+        await fetchUsers({ search: debouncedSearch });
+        setIsRefreshing(false);
         toast.success("User matrix synchronized");
     };
 
     useEffect(() => {
-        fetchUsers({ search: searchQuery });
-    }, [fetchUsers, searchQuery]);
+        fetchUsers({ search: debouncedSearch });
+    }, [fetchUsers, debouncedSearch]);
 
     const filteredUsers = (() => {
         switch (activeSegment) {
-            case "Active Users": return users.filter(u => u.isActive);
-            case "Deactivated": return users.filter(u => !u.isActive);
+            case "Active Users": return users.filter(u => u.isActive === true);
+            case "Deactivated": return users.filter(u => u.isActive !== true);
             case "Admins": return users.filter(u => u.role === "Admin");
             case "Support Staff": return users.filter(u => u.role === "Support");
             case "Managers": return users.filter(u => u.role === "Editor");
@@ -106,6 +112,7 @@ function UsersPage() {
     })();
 
     const newUsersLast7Days = users.filter(u => {
+        if (!u.createdAt) return false;
         const createdDate = new Date(u.createdAt);
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -178,7 +185,7 @@ function UsersPage() {
             <AddUserDialog 
                 open={isAddUserOpen} 
                 onOpenChange={setIsAddUserOpen}
-                onSuccess={() => fetchUsers({ search: searchQuery })}
+                onSuccess={() => fetchUsers({ search: debouncedSearch })}
             />
 
             {/* User Stats */}

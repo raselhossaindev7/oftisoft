@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import Link from "next/link";
@@ -372,7 +371,7 @@ export default function ReviewsPage() {
                                                     </div>
                                                     <div className="space-y-1">
                                                         <p className="text-sm uppercase font-semibold text-muted-foreground ">Impact Level</p>
-                                                        <p className="text-sm font-semibold flex items-center gap-2"><Megaphone className="w-4 h-4 text-indigo-500" /> Community Signal {(review.rating * 1.7).toFixed(1)}/10</p>
+                                                        <p className="text-sm font-semibold flex items-center gap-2"><Megaphone className="w-4 h-4 text-indigo-500" /> Community Signal {((review.rating || 0) * 1.7).toFixed(1)}/10</p>
                                                     </div>
                                                 </div>
                                             </div>

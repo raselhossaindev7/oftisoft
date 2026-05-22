@@ -7,7 +7,8 @@ import BottomNav from "@/components/dashboard/bottom-nav";
 import OnboardingTutorial from "@/components/dashboard/onboarding";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
-import { getAuthCheckComplete } from "@/store/useAuthStore";
+import { useRouteGuard } from "@/hooks/useRouteGuard";
+import { useAuthStore } from "@/store/useAuthStore";
 import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -16,11 +17,11 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     const { isAuthenticated, isLoading } = useProtectedRoute();
-    const authChecked = getAuthCheckComplete();
+    const authCheckComplete = useAuthStore((s) => s.authCheckComplete);
 
-    // Show nothing (blank screen) until auth check is complete
-    // Prevents flash of unauthenticated UI before redirect
-  if (!authChecked || isLoading) {
+    useRouteGuard();
+
+    if (!authCheckComplete || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -28,15 +29,21 @@ export default function DashboardLayout({
         );
     }
 
-  return (
+    if (!isAuthenticated) {
+        return null;
+    }
+
+    return (
         <DashboardProvider>
-        <div className="flex h-screen bg-background text-foreground font-sans">
+        <div className="flex h-dvh bg-background text-foreground font-sans">
             <Sidebar />
-            <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 <Header />
-                <main data-lenis-prevent className="flex-1 overflow-y-auto bg-muted/10 p-4 md:p-8 pb-32 md:pb-8 h-screen">
-                    <ErrorBoundary>{children}</ErrorBoundary>
-                </main>
+                <div data-lenis-prevent className="flex-1 overflow-y-auto bg-muted/10">
+                    <div className="min-h-full p-4 md:p-8 pb-32 md:pb-8">
+                        <ErrorBoundary>{children}</ErrorBoundary>
+                    </div>
+                </div>
                 <BottomNav />
             </div>
             <OnboardingTutorial />

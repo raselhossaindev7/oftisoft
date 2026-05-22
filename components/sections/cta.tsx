@@ -1,8 +1,7 @@
 "use client"
-import { Animated, AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatePresence } from "@/lib/animated";
-;
+import { Animated, AnimatedDiv, AnimatedH2, AnimatePresence } from "@/lib/animated";
 
-import { Send, CheckCircle2, ArrowRight, Mail, MapPin, Phone } from "lucide-react";
+import { CheckCircle2, ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -165,7 +164,7 @@ export default function CTA() {
 
                                         <Button type="submit"
                                             disabled={isCreating}
-                                            className="w-full h-auto py-4 bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
+                                            className="group w-full h-auto py-4 bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
                                         >
                                             {isCreating ? (
                                                 <span className="flex items-center gap-2">
@@ -194,7 +193,7 @@ export default function CTA() {
     );
 }
 
-function ContactItem({ icon: Icon, title, value, delay }: { icon: any, title: string, value: string, delay: number }) {
+function ContactItem({ icon: Icon, title, value, delay }: { icon: React.ComponentType<{ className?: string }>, title: string, value: string, delay: number }) {
     const isEmail = title.toLowerCase().includes('email');
     const isPhone = title.toLowerCase().includes('phone') || title.toLowerCase().includes('call');
     const href = isEmail ? `mailto:${value}` : isPhone ? `tel:${value.replace(/[^0-9+]/g, '')}` : undefined;

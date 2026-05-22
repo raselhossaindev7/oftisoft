@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import { 
@@ -151,9 +150,9 @@ export default function MyOrdersPage() {
     const { addItem } = useCart();
     const router = useRouter();
 
-    const filteredOrders = orders?.filter(o => {
-        const matchesSearch = o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.items.some(item => item.productName.toLowerCase().includes(searchQuery.toLowerCase()));
+    const filteredOrders = (orders || []).filter(o => {
+        const matchesSearch = (o.id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (o.items || []).some(item => (item.productName || '').toLowerCase().includes(searchQuery.toLowerCase()));
         
         const matchesStatus = statusFilter === "all" || o.status === statusFilter;
 
@@ -188,7 +187,7 @@ export default function MyOrdersPage() {
                 type: 'product'
             });
         });
-        toast.success(`Items from order #${order.id.substring(0, 8)} added to cart!`);
+        toast.success(`Items from order #${(order.id || '—').substring(0, 8)} added to cart!`);
     };
 
     const handleDownloadInvoice = (orderId: string) => {
@@ -259,7 +258,7 @@ export default function MyOrdersPage() {
                                 </div>
                                 <CardHeader className="pb-2">
                                     <CardDescription className="text-sm uppercase font-semibold text-primary/60">Active Shipment</CardDescription>
-                                    <CardTitle className="text-lg font-semibold">Order #{activeOrder.id.substring(0, 8)}</CardTitle>
+                                    <CardTitle className="text-lg font-semibold">Order #{(activeOrder.id || '—').substring(0, 8)}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="flex items-center justify-between text-xs">
@@ -349,7 +348,7 @@ export default function MyOrdersPage() {
                                 <TableRow key={o.id} className="group hover:bg-primary/[0.02] transition-colors border-border/50">
                                     <TableCell className="px-6 py-4">
                                         <div className="flex flex-col">
-                                            <span className="font-mono text-sm font-semibold text-primary/80">#{o.id.substring(0, 8)}</span>
+                                            <span className="font-mono text-sm font-semibold text-primary/80">#{(o.id || '—').substring(0, 8)}</span>
                                             <span className="text-sm text-muted-foreground uppercase">{o.items.length} Item(s)</span>
                                         </div>
                                     </TableCell>
@@ -362,7 +361,7 @@ export default function MyOrdersPage() {
                                     <TableCell className="py-4">{getStatusBadge(o.status)}</TableCell>
                                     <TableCell className="py-4">
                                         <div className="flex flex-col gap-1.5">
-                                            {o.items.slice(0, 2).map((item, idx) => (
+                                            {(o.items || []).slice(0, 2).map((item, idx) => (
                                                 <div key={idx} className="flex items-center gap-2">
                                                     <span className="text-sm font-medium line-clamp-1">{item.productName}</span>
                                                     {item.downloadUrl && o.status === "completed" && (

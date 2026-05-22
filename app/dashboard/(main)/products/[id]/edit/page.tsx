@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { ProductForm } from "@/components/dashboard/products/product-form";
 import { useProducts } from "@/hooks/useProducts";
+import { RoleGuard } from "@/components/auth/role-guard";
 
 export default function EditProductPage() {
     const params = useParams();
@@ -26,5 +27,9 @@ export default function EditProductPage() {
         );
     }
 
-    return <ProductForm isEdit={true} initialData={product} />;
+    return (
+        <RoleGuard allowedRoles={["Editor", "Admin", "SuperAdmin"]}>
+            <ProductForm isEdit={true} initialData={product} />
+        </RoleGuard>
+    );
 }

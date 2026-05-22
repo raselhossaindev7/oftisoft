@@ -7,18 +7,22 @@ export function useDownloads() {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
+    const [inventoryTotal, setInventoryTotal] = useState(0);
+    const [historyTotal, setHistoryTotal] = useState(0);
 
-    const fetchAll = useCallback(async () => {
+    const fetchAll = useCallback(async (invSkip = 0, histSkip = 0) => {
         setIsLoading(true);
         setError(null);
         try {
             const [inv, hist, notes] = await Promise.all([
-                downloadsAPI.getInventory(),
-                downloadsAPI.getHistory(),
+                downloadsAPI.getInventory(invSkip, 50),
+                downloadsAPI.getHistory(histSkip, 50),
                 downloadsAPI.getNotifications(),
             ]);
-            setInventory(inv);
-            setHistory(hist);
+            setInventory(inv.items);
+            setInventoryTotal(inv.total);
+            setHistory(hist.items);
+            setHistoryTotal(hist.total);
             setNotifications(notes);
         } catch (err: any) {
             setError(err instanceof Error ? err : new Error(String(err)));
@@ -30,9 +34,9 @@ export function useDownloads() {
     const recordDownload = async (id: string) => {
         try {
             await downloadsAPI.recordDownload(id);
-            await fetchAll(); // Refresh history
+            await fetchAll();
         } catch (err: any) {
-            throw err; // Let caller handle toast
+            throw err;
         }
     };
 
@@ -59,15 +63,8 @@ export function useDownloads() {
     }, [fetchAll]);
 
     return {
-        inventory,
-        history,
-        notifications,
-        isLoading,
-        error,
-        isError: !!error,
-        recordDownload,
-        getVersions,
-        getChangelog,
-        refresh: fetchAll,
+        inventory, history, notifications, isLoading, error, isError: !!error,
+        inventoryTotal, historyTotal,
+        recordDownload, getVersions, getChangelog, refresh: () => fetchAll(),
     };
 }

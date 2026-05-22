@@ -19,6 +19,21 @@ export interface Transaction {
     dueAt?: string;
 }
 
+export interface SubscriptionPlan {
+    id: string;
+    name: string;
+    price: number;
+    interval: string;
+    description: string;
+    features: string[];
+    buttonText: string;
+    activeSubscribers: number;
+    iconName: string;
+    color: string;
+    bgColor: string;
+    isActive: boolean;
+}
+
 export const billingAPI = {
     getPaymentMethods: async (): Promise<PaymentMethod[]> => {
         const response = await api.get('/billing/payment-methods');
@@ -43,15 +58,26 @@ export const billingAPI = {
         const response = await api.post('/billing/transactions', data);
         return response.data;
     },
-    getSubscription: async (): Promise<{ plan: string; status: string }> => {
+    getPlans: async (interval?: string): Promise<SubscriptionPlan[]> => {
+        const params = interval ? { interval } : {};
+        const response = await api.get('/billing/plans', { params });
+        return response.data;
+    },
+    getGroupedPlans: async (interval?: string): Promise<Record<string, SubscriptionPlan[]>> => {
+        const params: any = { grouped: 'true' };
+        if (interval) params.interval = interval;
+        const response = await api.get('/billing/plans', { params });
+        return response.data;
+    },
+    getSubscription: async (): Promise<{ plan: string; status: string; interval: string; nextBillingDate: string }> => {
         const response = await api.get('/billing/subscription');
         return response.data;
     },
-    updateSubscription: async (plan: string): Promise<any> => {
-        const response = await api.patch('/billing/subscription', { plan });
+    updateSubscription: async (plan: string, paymentIntentId?: string, interval?: string): Promise<{ requiresPayment?: boolean; clientSecret?: string; plan?: string; interval?: string }> => {
+        const response = await api.patch('/billing/subscription', { plan, paymentIntentId, interval });
         return response.data;
     },
-    getUsage: async (): Promise<any> => {
+    getUsage: async (): Promise<UsageData> => {
         const response = await api.get('/billing/usage');
         return response.data;
     },
@@ -59,15 +85,51 @@ export const billingAPI = {
         const response = await api.post('/billing/create-payment-intent', { amount, currency });
         return response.data;
     },
-};
-
-export const downloadsAPI = {
-    getInventory: async (): Promise<any[]> => {
-        const response = await api.get('/downloads/inventory');
+    completeCheckout: async (sessionId: string): Promise<any> => {
+      const response = await api.post('/billing/complete-checkout', { sessionId });
+      return response.data;
+    },
+    createCheckoutSession: async (amount: number, currency?: string, items?: { productId: string; productName: string; price: number; quantity: number; licenseType?: string }[]): Promise<{ url: string; sessionId: string }> => {
+        const successUrl = `${window.location.origin}/shop/success?session_id={CHECKOUT_SESSION_ID}`;
+        const cancelUrl = `${window.location.origin}/shop/checkout`;
+        const response = await api.post('/billing/create-checkout-session', { amount, currency, successUrl, cancelUrl, items });
         return response.data;
     },
-    getHistory: async (): Promise<any[]> => {
-        const response = await api.get('/downloads/history');
+    createSetupIntent: async (): Promise<{ clientSecret: string }> => {
+        const response = await api.post('/billing/create-setup-intent');
+        return response.data;
+    },
+    attachPaymentMethod: async (paymentMethodId: string): Promise<PaymentMethod> => {
+        const response = await api.post('/billing/payment-methods/attach', { paymentMethodId });
+        return response.data;
+    },
+    downloadInvoice: async (invoiceId: string): Promise<void> => {
+        const response = await api.get(`/billing/transactions/${invoiceId}/download`, {
+            responseType: 'blob',
+        });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `invoice_${invoiceId}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+    },
+};
+
+export interface UsageData {
+    storage?: { used: string; total: string; percent: number };
+    apiCalls?: { used: string; total: string; percent: number };
+}
+
+export const downloadsAPI = {
+    getInventory: async (skip = 0, take = 50): Promise<{ items: any[]; total: number; skip: number; take: number }> => {
+        const response = await api.get('/downloads/inventory', { params: { skip, take } });
+        return response.data;
+    },
+    getHistory: async (skip = 0, take = 50): Promise<{ items: any[]; total: number; skip: number; take: number }> => {
+        const response = await api.get('/downloads/history', { params: { skip, take } });
         return response.data;
     },
     getNotifications: async (): Promise<any[]> => {

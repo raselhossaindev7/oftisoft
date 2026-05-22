@@ -94,23 +94,17 @@ function TeamPage() {
         setUploadProgress(0);
         const objectUrl = URL.createObjectURL(file);
         setPreviewUrl(objectUrl);
-        const interval = setInterval(() => {
-            setUploadProgress(prev => Math.min(prev + 20, 90));
-        }, 200);
         try {
-            const result = await authAPI.uploadAvatar(file);
-            clearInterval(interval);
+            const data = await authAPI.uploadAvatar(file);
             setUploadProgress(100);
-            const avatarUrl = result?.avatar || result?.image || URL.createObjectURL(file);
-            setFormData(prev => ({ ...prev, avatar: avatarUrl }));
-            toast.success("Avatar uploaded");
-            setTimeout(() => { setUploadProgress(0); setIsUploading(false); }, 500);
+            setFormData(prev => ({ ...prev, avatar: data.avatarUrl || data.avatar || "" }));
+            toast.success("Avatar uploaded successfully");
         } catch {
-            clearInterval(interval);
-            setUploadProgress(0);
-            setIsUploading(false);
             setPreviewUrl(null);
-            toast.error("Upload failed");
+            toast.error("Failed to upload avatar");
+        } finally {
+            setIsUploading(false);
+            setUploadProgress(0);
         }
     };
 
@@ -133,7 +127,7 @@ function TeamPage() {
     const handleRefresh = async () => {
         setIsRefreshing(true);
         await fetchMembers();
-        setTimeout(() => setIsRefreshing(false), 500);
+        setIsRefreshing(false);
         toast.success("Team roster synchronized");
     };
 
@@ -142,9 +136,9 @@ function TeamPage() {
         let list = members;
         if (q) {
             list = list.filter(m =>
-                m.name.toLowerCase().includes(q) ||
+                (m.name || '').toLowerCase().includes(q) ||
                 (m.email || "").toLowerCase().includes(q) ||
-                m.role.toLowerCase().includes(q)
+                (m.role || '').toLowerCase().includes(q)
             );
         }
         switch (activeSegment) {
@@ -199,14 +193,13 @@ function TeamPage() {
             };
 
             if (editingMember) {
-                const updated = await teamMembersAPI.update(editingMember.id, payload);
-                setMembers(prev => prev.map(m => m.id === editingMember.id ? updated : m));
+                await teamMembersAPI.update(editingMember.id, payload);
                 toast.success("Team member updated");
             } else {
-                const created = await teamMembersAPI.create(payload);
-                setMembers(prev => [...prev, created]);
+                await teamMembersAPI.create(payload);
                 toast.success("Team member created");
             }
+            await fetchMembers();
             setDialogOpen(false);
         } catch (err: any) {
             toast.error(err?.response?.data?.message || "Failed to save team member");
@@ -219,8 +212,8 @@ function TeamPage() {
         if (!deleteId) return;
         try {
             await teamMembersAPI.delete(deleteId);
-            setMembers(prev => prev.filter(m => m.id !== deleteId));
             setDeleteId(null);
+            await fetchMembers();
             toast.success("Team member deleted");
         } catch (err: any) {
             toast.error(err?.response?.data?.message || "Failed to delete team member");

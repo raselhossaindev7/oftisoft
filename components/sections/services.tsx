@@ -1,5 +1,9 @@
 "use client"
-import { AnimatedDiv, useScrollProgress, useTransform } from "@/lib/animated";
+import { AnimatedDiv } from "@/lib/animated";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 import {
     Layout,
@@ -20,7 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,11 +77,29 @@ export default function Services() {
     const services = servicesContent.services;
 
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    const headerRef = useRef<HTMLDivElement>(null);
 
-    // Scroll parallax for section header
-  const scrollYProgress = useScrollProgress();
-    const headerY = useTransform(scrollYProgress, [0, 0.2], [50, 0]);
-    const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
+    useEffect(() => {
+        const el = headerRef.current;
+        if (!el) return;
+        const ctx = gsap.context(() => {
+            gsap.fromTo(el,
+                { opacity: 0, y: 50 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: el,
+                        start: "top 85%",
+                        toggleActions: "play none none none",
+                    },
+                }
+            );
+        }, el);
+        return () => ctx.revert();
+    }, []);
 
     return (
         <section className="py-24 md:py-32 bg-transparent relative overflow-visible z-10" id="services">
@@ -86,10 +108,7 @@ export default function Services() {
             
             <div className="container px-4 mx-auto">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6 md:gap-8">
-                    <AnimatedDiv 
-                        style={{ y: headerY, opacity: headerOpacity, willChange: "transform, opacity" }}
-                        className="max-w-3xl w-full md:w-auto"
-                    >
+                    <div ref={headerRef} className="max-w-3xl w-full md:w-auto">
                         <Badge variant="outline" className="mb-4 border-primary/20 text-primary tracking-wide px-4 py-1.5 backdrop-blur-sm font-semibold text-xs">
                             {servicesContent.badge}
                         </Badge>
@@ -99,7 +118,7 @@ export default function Services() {
                                 {servicesContent.subtitle}
                             </span>
                         </h3>
-                    </AnimatedDiv>
+                    </div>
 
                     <AnimatedDiv 
                         initial={{ opacity: 0, x: 20 }}
@@ -133,7 +152,7 @@ export default function Services() {
                                 onMouseEnter={() => setHoveredIndex(index)}
                                 onMouseLeave={() => setHoveredIndex(null)}
                             >
-                                <Link href="/services" passHref className="block h-full">
+                                <Link href="/services" className="block h-full">
                                 <Card className="group relative h-full min-h-[320px] border-white/5 bg-white/5 hover:bg-white/[0.07] transition-all duration-500 overflow-hidden flex flex-col justify-between backdrop-blur-sm">
                                     {/* Gradient Glow Effect */}
                                     <div className={cn(

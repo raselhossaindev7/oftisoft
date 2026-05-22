@@ -33,6 +33,8 @@ export interface Product {
     licenseExtended: number;
     lastUpdated: string;
     faqs: { question: string; answer: string }[];
+    type?: 'digital' | 'saas' | 'service';
+    downloadUrl?: string;
 }
 
 export interface Bundle {

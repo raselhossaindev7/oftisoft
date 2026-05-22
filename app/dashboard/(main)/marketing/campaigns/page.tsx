@@ -318,7 +318,8 @@ export default function PricingMarketingPage() {
         setSubInterval(plan.interval || "month");
         setSubIcon(plan.iconName || "Zap");
         setSubDescription(plan.description ?? "");
-        setSubFeatures(Array.isArray(plan.features) ? plan.features.join("\n") : "");
+        const parsedFeatures = typeof plan.features === 'string' ? (() => { try { return JSON.parse(plan.features); } catch { return plan.features.split('\n').filter(Boolean); } })() : plan.features;
+        setSubFeatures(Array.isArray(parsedFeatures) ? parsedFeatures.join("\n") : "");
         setSubButtonText(plan.buttonText ?? "Get started");
         setIsCreateSubscriptionOpen(true);
     };

@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState, useEffect } from "react";
 import { Check, Github, Slack, Database, Cloud, Trello, Mail, Blocks, ExternalLink, Zap, Braces, Link, ShieldCheck, Loader2 } from "lucide-react";

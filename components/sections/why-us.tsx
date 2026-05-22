@@ -1,12 +1,11 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
 import { Users, Workflow, Cpu, Headphones, Shield, Zap, Target, Award } from "lucide-react";
 import { useRef } from "react";
 import { cn } from "@/lib/utils";
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     Users,
     Workflow,
     Cpu,
@@ -17,10 +16,29 @@ const iconMap: Record<string, any> = {
     Award
 };
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+interface Feature {
+    icon: string;
+    title: string;
+    description: string;
+    gradient: string;
+    color: string;
+    stat: string;
+    statLabel: string;
+}
 
-const defaultWhyUsContent = {
+interface WhyUsData {
+    badge: string;
+    title: string;
+    subtitle: string;
+    description: string;
+    features: Feature[];
+    stats: { value: string; label: string }[];
+}
+
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+
+const defaultWhyUsContent: WhyUsData = {
     badge: "Why Oftisoft",
     title: "Built for",
     subtitle: "Excellence.",
@@ -38,10 +56,10 @@ const defaultWhyUsContent = {
     ]
 };
 
-export default function WhyUs({ data }: { data?: any }) {
+export default function WhyUs({ data }: { data?: { whyUs?: WhyUsData } }) {
     const whyUsContent = data?.whyUs || defaultWhyUsContent;
-    const features = whyUsContent?.features || [];
-    const stats = whyUsContent?.stats || [];
+    const features = whyUsContent.features;
+    const stats = whyUsContent.stats;
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -87,27 +105,27 @@ export default function WhyUs({ data }: { data?: any }) {
                     >
                              <Card className="bg-white/5 border-white/10 backdrop-blur-sm text-center">
                             <CardContent className="p-5 sm:p-6 xl:p-8">
-                                <h4 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-white mb-1">{stats[0]?.value ?? ""}</h4>
-                                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground tracking-wide">{stats[0]?.label ?? ""}</p>
+                                <h4 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-white mb-1">{stats[0]?.value}</h4>
+                                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground tracking-wide">{stats[0]?.label}</p>
                             </CardContent>
                              </Card>
                              <Card className="bg-primary/10 border-primary/20 backdrop-blur-sm text-center">
                             <CardContent className="p-5 sm:p-6 xl:p-8">
-                                <h4 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-primary mb-1">{stats[1]?.value ?? ""}</h4>
-                                <p className="text-[10px] sm:text-xs md:text-sm text-primary/80 tracking-wide">{stats[1]?.label ?? ""}</p>
+                                <h4 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-primary mb-1">{stats[1]?.value}</h4>
+                                <p className="text-[10px] sm:text-xs md:text-sm text-primary/80 tracking-wide">{stats[1]?.label}</p>
                             </CardContent>
                              </Card>
                              <Card className="bg-white/5 border-white/10 backdrop-blur-sm text-center col-span-2">
                             <CardContent className="p-5 sm:p-6 xl:p-8">
-                                <h4 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-white mb-1">{stats[2]?.value ?? ""}</h4>
-                                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground tracking-wide">{stats[2]?.label ?? ""}</p>
+                                <h4 className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold text-white mb-1">{stats[2]?.value}</h4>
+                                <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground tracking-wide">{stats[2]?.label}</p>
                             </CardContent>
                              </Card>
                     </AnimatedDiv>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {features.map((feature: any, index: number) => {
+                    {features.map((feature: Feature, index: number) => {
                         const Icon = iconMap[feature.icon] || Users;
                         return (
                             <AnimatedDiv key={index}

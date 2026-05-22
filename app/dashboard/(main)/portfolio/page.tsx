@@ -142,7 +142,7 @@ function PortfolioPage() {
     const handleRefresh = async () => {
         setIsRefreshing(true);
         await fetchItems();
-        setTimeout(() => setIsRefreshing(false), 500);
+        setIsRefreshing(false);
         toast.success("Portfolio matrix synchronized");
     };
 
@@ -152,9 +152,9 @@ function PortfolioPage() {
         if (q) {
             filtered = filtered.filter(
                 (i) =>
-                    i.title.toLowerCase().includes(q) ||
-                    i.category.toLowerCase().includes(q) ||
-                    i.client.toLowerCase().includes(q)
+                    (i.title || '').toLowerCase().includes(q) ||
+                    (i.category || '').toLowerCase().includes(q) ||
+                    (i.client || '').toLowerCase().includes(q)
             );
         }
         switch (activeSegment) {

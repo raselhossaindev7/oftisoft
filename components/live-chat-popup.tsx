@@ -1,6 +1,5 @@
 "use client"
 import { Animated, AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Paperclip, ChevronDown, User, Bot, Loader2 } from "lucide-react";
@@ -42,6 +41,14 @@ export default function LiveChatPopup() {
     const fallbackTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
     const { isConnected, isAuthenticatedWs, sendMessage: wsSendMessage, on, emit, joinConversation } = useSocket({ autoConnect: true });
+
+    // Cleanup fallback timers on unmount
+    useEffect(() => {
+        return () => {
+            fallbackTimersRef.current.forEach(clearTimeout);
+            fallbackTimersRef.current = [];
+        };
+    }, []);
 
     // Listen for custom event to open chat from other components
     useEffect(() => {
@@ -114,7 +121,7 @@ export default function LiveChatPopup() {
                 addMessage({
                     id: "init-1",
                     sender: "ai",
-                    text: "Hi there! 👋 I'm Alex from Ofitsoft. How can I help you today?",
+                    text: "Hi there! 👋 I'm Alex from Oftisoft. How can I help you today?",
                     timestamp: new Date()
                 });
             }, 1500);
@@ -260,7 +267,7 @@ export default function LiveChatPopup() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-sm flex items-center gap-2">
-                                        {agentState === "ai" ? "Ofitsoft Support" : "Sarah (Senior Agent)"}
+                                        {agentState === "ai" ? "Oftisoft Support" : "Sarah (Senior Agent)"}
                                         {agentState === "ai" && <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded uppercase tracking-wide">Bot</span>}
                                     </h3>
                                     {isTyping ? (
@@ -369,7 +376,7 @@ export default function LiveChatPopup() {
                                 </button>
                             </form>
                             <div className="text-center mt-2">
-                                <span className="text-[10px] text-muted-foreground">Powered by Ofitsoft AI</span>
+                                <span className="text-[10px] text-muted-foreground">Powered by Oftisoft AI</span>
                             </div>
                         </div>
 

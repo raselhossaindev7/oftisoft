@@ -6,11 +6,13 @@ import { toast } from 'sonner';
 export function useOrders(orderId?: string) {
     const queryClient = useQueryClient();
 
-    const { data: orders = [], isLoading: ordersLoading } = useQuery({
+    const { data: ordersResponse = [], isLoading: ordersLoading } = useQuery({
         queryKey: ['orders'],
         queryFn: ordersAPI.getOrders,
         enabled: !orderId
     });
+
+    const orders = Array.isArray(ordersResponse) ? ordersResponse : (ordersResponse as any)?.data ?? [];
 
     const { data: order, isLoading: orderLoading } = useQuery({
         queryKey: ['orders', orderId],

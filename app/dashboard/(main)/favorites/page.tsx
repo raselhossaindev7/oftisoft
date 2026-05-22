@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import { 
@@ -51,9 +50,9 @@ export default function FavoritesPage() {
         }
     };
 
-    const filteredWishlist = wishlist ? wishlist.filter(p => 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase())
-    ) : [];
+    const filteredWishlist = (wishlist || []).filter(p => 
+        (p.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     // Use items from wishlist for comparison source of truth
   const productsToCompare = wishlist ? wishlist.filter(p => compareList.includes(p.id)) : [];

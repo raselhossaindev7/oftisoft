@@ -1,6 +1,4 @@
-"use client"
 import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP } from "@/lib/animated";
-;
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -14,7 +12,6 @@ import {
     Scale,
     ShieldAlert
 } from "lucide-react";
-import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 const iconMap: any = {
     Globe, Scale, ShieldAlert, Clock, Lock, Eye, FileText, ShieldCheck: Shield,

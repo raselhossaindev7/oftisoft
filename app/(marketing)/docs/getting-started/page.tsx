@@ -1,4 +1,3 @@
-"use client"
 import { AnimatedDiv, AnimatedH1, AnimatedH2, Reveal } from "@/lib/animated";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

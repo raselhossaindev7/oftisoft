@@ -19,7 +19,7 @@ export default function MarketingLayout({
     return (
         <>
             <Navbar />
-     
+            <div className="h-20 lg:h-24" aria-hidden="true" />
             {children}
             <Footer />
             <LiveChatPopup />

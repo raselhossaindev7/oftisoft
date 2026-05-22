@@ -89,8 +89,8 @@ export default function LeadsDashboardPage() {
 
     const filteredLeads = leads.filter(lead => {
         const matchesSearch = !searchQuery || 
-            lead.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            lead.name?.toLowerCase().includes(searchQuery.toLowerCase());
+            (lead.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (lead.name || '').toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
         const matchesType = typeFilter === "all" || lead.type === typeFilter;
         return matchesSearch && matchesStatus && matchesType;

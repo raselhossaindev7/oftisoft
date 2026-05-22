@@ -11,10 +11,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authAPI, User } from "@/lib/api";
 import { useUserStore } from "@/lib/store";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function NotificationsSettings() {
     const queryClient = useQueryClient();
     const { setUser } = useUserStore();
+    const setAuthUser = useAuthStore((s) => s.setUser);
 
     // Fetch user profile for notification settings
   const { data: user, isLoading, error } = useQuery({
@@ -64,7 +66,7 @@ export default function NotificationsSettings() {
         mutationFn: (data: Partial<User>) => authAPI.updateProfile(data),
         onSuccess: (updatedUser) => {
             queryClient.invalidateQueries({ queryKey: ["profile"] });
-            // Update global store if needed (though store usually only keeps core info)
+            setAuthUser(updatedUser as any);
             toast.success("Signal Matrix Synchronized", {
                 description: "Your notification neural-map has been successfully committed to the edge network.",
                 icon: <CheckCircle2 className="w-4 h-4 text-green-500" />

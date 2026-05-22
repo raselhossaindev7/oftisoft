@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import { 
@@ -13,7 +12,7 @@ import {
     ChevronRight,
     FileUp,
     Download,
-    Calendar,
+    Calendar as CalendarIcon,
     Briefcase,
     Milestone,
     User,
@@ -24,6 +23,13 @@ import {
     ArrowRight,
     X
 } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { PaymentModal } from "@/components/projects/payment-modal";
 import { useProjects } from "@/hooks/useProjects";
 
 // New Project Dialog
@@ -41,9 +48,9 @@ const NewProjectDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
         title: "",
         client: "",
         description: "",
-        budget: "",
-        dueDate: ""
+        budget: ""
     });
+    const [dueDate, setDueDate] = useState<Date>();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,13 +65,14 @@ const NewProjectDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
             client: formData.client,
             description: formData.description,
             budget: formData.budget ? parseFloat(formData.budget) : 0,
-            dueDate: formData.dueDate || new Date().toISOString(),
+            dueDate: dueDate?.toISOString() || new Date().toISOString(),
             status: "Planning",
             progress: 0,
             members: 1
         }, {
             onSuccess: () => {
-                setFormData({ title: "", client: "", description: "", budget: "", dueDate: "" });
+                setFormData({ title: "", client: "", description: "", budget: "" });
+                setDueDate(undefined);
                 onClose();
             }
         });
@@ -130,13 +138,28 @@ const NewProjectDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="dueDate">Deadline</Label>
-                            <Input id="dueDate"
-                                type="date"
-                                value={formData.dueDate}
-                                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                                className="h-12 rounded-xl"
-                            />
+                            <Label>Deadline</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className={cn(
+                                            "w-full h-12 rounded-xl justify-start text-left font-normal border-border/50",
+                                            !dueDate && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {dueDate ? format(dueDate, "PPP") : "Pick a date"}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0 z-[200]" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={dueDate}
+                                        onSelect={setDueDate}
+                                    />
+                                </PopoverContent>
+                            </Popover>
                         </div>
                     </div>
                     <div className="flex gap-3 pt-4">
@@ -162,13 +185,19 @@ const NewProjectDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
 export default function MyServiceRequestsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
+    const [selectedProject, setSelectedProject] = useState<any>(null);
     
-    const { projects, isLoading } = useProjects();
+    const { projects, isLoading, updatePaymentStatus } = useProjects();
 
-    const filteredRequests = projects?.filter(req => 
-        req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        req.id.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+    const handlePaymentComplete = (projectId: string) => {
+        updatePaymentStatus(projectId, "Paid");
+        setSelectedProject(null);
+    };
+
+    const filteredRequests = (projects || []).filter(req => 
+        (req.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (req.id || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const getStatusTheme = (status: string) => {
         switch (status) {
@@ -250,16 +279,24 @@ export default function MyServiceRequestsPage() {
                                             <Badge variant="outline" className={cn("text-xs font-semibold uppercase border-none px-2 py-1", getStatusTheme(req.status))}>
                                                 {req.status}
                                             </Badge>
-                                            {req.paymentStatus === "pending" && (
-                                                <Badge className="bg-red-500 text-white border-none font-semibold text-xs px-2 py-1 flex items-center gap-1">
-                                                    <MessageSquare className="w-2.5 h-2.5" /> Payment Pending
-                                                </Badge>
+                                            {(req.paymentStatus === "Unpaid" || req.paymentStatus === "pending") && (
+                                                <>
+                                                    <Badge className="bg-red-500 text-white border-none font-semibold text-xs px-2 py-1 flex items-center gap-1">
+                                                        <MessageSquare className="w-2.5 h-2.5" /> Payment Pending
+                                                    </Badge>
+                                                    <button
+                                                        onClick={() => setSelectedProject(req)}
+                                                        className="text-xs font-bold text-white bg-primary px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors"
+                                                    >
+                                                        Pay Now
+                                                    </button>
+                                                </>
                                             )}
                                         </div>
                                         <CardTitle className="text-2xl font-semibold  group-hover:text-primary transition-colors">{req.title}</CardTitle>
                                         <CardDescription className="flex items-center gap-4 text-xs font-medium">
                                             <span className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5" /> {req.client}</span>
-                                            <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Deadline: {formatDate(req.dueDate)}</span>
+                                            <span className="flex items-center gap-1.5"><CalendarIcon className="w-3.5 h-3.5" /> Deadline: {formatDate(req.dueDate)}</span>
                                         </CardDescription>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -332,7 +369,7 @@ export default function MyServiceRequestsPage() {
                                                 A
                                             </div>
                                         </div>
-                                        <p className="text-sm font-bold text-muted-foreground ">Project ID: {req.id.substring(0, 8)}</p>
+                                        <p className="text-sm font-bold text-muted-foreground ">Project ID: {(req.id || '—').substring(0, 8)}</p>
                                     </div>
                                     <Button 
                                         className="rounded-xl font-bold h-10 gap-2 bg-background border-border shadow-sm group hover:bg-primary hover:text-white transition-all"
@@ -425,6 +462,14 @@ export default function MyServiceRequestsPage() {
                     />
                 )}
             </AnimatePresence>
+
+            {selectedProject && (
+                <PaymentModal
+                    project={selectedProject}
+                    onClose={() => setSelectedProject(null)}
+                    onPaymentComplete={handlePaymentComplete}
+                />
+            )}
         </div>
     );
 }

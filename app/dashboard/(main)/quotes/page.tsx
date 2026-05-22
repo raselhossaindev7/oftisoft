@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -135,17 +134,17 @@ function QuotesPageContent() {
     const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
 
     useEffect(() => {
-        const quoteId = searchParams.get("quote");
+        const quoteId = searchParams.get('quote');
         if (quoteId && quotes?.length) {
-            const found = quotes.find((q: { id: string }) => q.id === quoteId);
+            const found = (quotes || []).find((q: { id: string }) => q.id === quoteId);
             if (found) setSelectedQuote(found);
         }
     }, [searchParams, quotes]);
 
-    const filteredQuotes = quotes?.filter(q => 
-        q.serviceType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        q.id.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+    const filteredQuotes = (quotes || []).filter(q => 
+        (q.serviceType || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (q.id || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const handleAction = (id: string, action: "accepted" | "rejected") => {
         updateStatus(id, action);
@@ -214,7 +213,7 @@ function QuotesPageContent() {
                                 <CardContent className="p-6">
                                     <div className="flex justify-between items-start mb-4">
                                         <Badge variant="outline" className="text-xs font-semibold uppercase">
-                                            #{quote.id.substring(0, 8)}
+                                            #{quote.id?.substring(0, 8) || "—"}
                                         </Badge>
                                         <Badge className={cn("text-xs font-semibold uppercase px-2", 
                                             quote.status === "responded" ? "bg-primary text-white" : 
@@ -257,7 +256,7 @@ function QuotesPageContent() {
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                             <div className="space-y-2">
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-semibold text-primary uppercase">#{selectedQuote.id.substring(0, 8)}</span>
+                                                    <span className="text-xs font-semibold text-primary uppercase">#{(selectedQuote.id || '—').substring(0, 8)}</span>
                                                     <Badge variant="outline" className="rounded-lg h-5 text-xs font-semibold uppercase">Service Request</Badge>
                                                 </div>
                                                 <h2 className="text-3xl font-semibold">{selectedQuote.serviceType}</h2>
@@ -305,11 +304,11 @@ function QuotesPageContent() {
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                     <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10 space-y-1">
                                                         <p className="text-sm font-semibold text-primary uppercase">Estimated Investment</p>
-                                                        <p className="text-2xl font-semibold">${selectedQuote.proposal.price.toLocaleString()}</p>
+                                                        <p className="text-2xl font-semibold">${selectedQuote.proposal?.price?.toLocaleString() || "—"}</p>
                                                     </div>
                                                     <div className="p-6 rounded-3xl bg-orange-500/5 border border-orange-500/10 space-y-1">
                                                         <p className="text-sm font-semibold text-orange-500 uppercase">Deployment Time</p>
-                                                        <p className="text-2xl font-semibold">{selectedQuote.proposal.estimatedDays} Days</p>
+                                                        <p className="text-2xl font-semibold">{selectedQuote.proposal?.estimatedDays || "—"} Days</p>
                                                     </div>
                                                     <div className="p-6 rounded-3xl bg-blue-500/5 border border-blue-500/10 space-y-1">
                                                         <p className="text-sm font-semibold text-blue-500 uppercase">Proposal Validity</p>

@@ -1,5 +1,13 @@
 import { api } from "@/lib/api";
 export const messagesAPI = {
+    getOrderConversation: async (orderId: string): Promise<any> => {
+        const response = await api.post('/messages/order-conversation', { orderId });
+        return response.data;
+    },
+    getSeller: async (): Promise<any> => {
+        const response = await api.get('/messages/seller');
+        return response.data;
+    },
     getConversations: async (): Promise<any[]> => {
         const response = await api.get('/messages/conversations');
         return response.data;
@@ -8,12 +16,12 @@ export const messagesAPI = {
         const response = await api.get('/messages/available-users');
         return response.data;
     },
-    getMessages: async (conversationId: string): Promise<any[]> => {
+    getMessages: async (conversationId: string): Promise<any> => {
         const response = await api.get(`/messages/${conversationId}`);
         return response.data;
     },
     markAsRead: async (conversationId: string): Promise<void> => {
-        await api.patch(`/messages/${conversationId}/read`);
+        await api.get(`/messages/${conversationId}/read`);
     },
     sendMessage: async (
         conversationId: string, 
@@ -69,15 +77,15 @@ export const messagesAPI = {
     removeReaction: async (messageId: string, emoji: string): Promise<void> => {
         await api.delete(`/messages/message/${messageId}/reaction/${encodeURIComponent(emoji)}`);
     },
+    searchMessages: async (conversationId: string, query: string): Promise<any[]> => {
+        const response = await api.get(`/messages/${conversationId}/search`, { params: { query } });
+        return response.data;
+    },
     sendTypingIndicator: async (conversationId: string): Promise<void> => {
         await api.post(`/messages/${conversationId}/typing`);
     },
     getTypingUsers: async (conversationId: string): Promise<string[]> => {
         const response = await api.get(`/messages/${conversationId}/typing`);
-        return response.data;
-    },
-    searchMessages: async (conversationId: string, query: string): Promise<any[]> => {
-        const response = await api.get(`/messages/${conversationId}/search`, { params: { query } });
         return response.data;
     }
 };

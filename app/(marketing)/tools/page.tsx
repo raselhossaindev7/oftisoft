@@ -1,4 +1,3 @@
-"use client"
 import { AnimatedDiv, AnimatedH1, AnimatedP } from "@/lib/animated";
 import { Badge } from "@/components/ui/badge";
 import AffiliateTools from "@/components/affiliate-tools";

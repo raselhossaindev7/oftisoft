@@ -16,11 +16,14 @@ import { api, endpoints } from './client';
 export const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes - data stays fresh, gcTime: 1000 * 60 * 30, // 30 minutes - cache retention (formerly cacheTime)
-            refetchOnWindowFocus: false, // Disable refetch on window focus for better UX, refetchOnReconnect: true, // Refetch when internet reconnects, retry: 1, // Retry failed requests once
+            staleTime: 1000 * 60 * 5,
+            gcTime: 1000 * 60 * 30,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: true,
+            retry: 1,
         },
         mutations: {
-            retry: 0, // Don't retry mutations
+            retry: 0,
         },
     },
 });
@@ -122,14 +125,6 @@ export function useCreateOrder() {
     });
 }
 
-export function useOrderStats() {
-    return useQuery({
-        queryKey: ['order-stats'],
-        queryFn: () => api.get(endpoints.orders.stats),
-        staleTime: 1000 * 60 * 2, // 2 minutes
-    });
-}
-
 // ============= USERS =============
 
 export function useUsers(filters?: any) {
@@ -183,8 +178,9 @@ export function useRevenueAnalytics(period?: string) {
 export function useCurrentUser() {
     return useQuery({
         queryKey: ['current-user'],
-        queryFn: () => api.get(endpoints.auth.me),
-        staleTime: Infinity, // User data rarely changes during session, retry: false, // Don't retry if unauthorized
+        queryFn: () => api.get(endpoints.auth.profile),
+        staleTime: Infinity,
+        retry: false,
     });
 }
 
@@ -208,6 +204,205 @@ export function useLogout() {
         onSuccess: () => {
             queryClient.clear();
         },
+    });
+}
+
+// ============= TEAM =============
+
+export function useTeamMembers(filters?: { search?: string; isActive?: boolean }) {
+    return useQuery({
+        queryKey: ['team-members', filters],
+        queryFn: () => api.get(endpoints.team.list, { searchParams: filters }),
+        staleTime: 1000 * 60 * 5,
+    });
+}
+
+export function useCreateTeamMember() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: any) => api.post(endpoints.team.create, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['team-members'] });
+        },
+    });
+}
+
+export function useUpdateTeamMember() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: any }) =>
+            api.patch(endpoints.team.update(id), data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['team-members'] });
+        },
+    });
+}
+
+export function useDeleteTeamMember() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => api.delete(endpoints.team.delete(id)),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['team-members'] });
+        },
+    });
+}
+
+// ============= TESTIMONIALS =============
+
+export function useTestimonials() {
+    return useQuery({
+        queryKey: ['testimonials'],
+        queryFn: () => api.get(endpoints.testimonials.list),
+        staleTime: 1000 * 60 * 5,
+    });
+}
+
+export function useTestimonial(id: string) {
+    return useQuery({
+        queryKey: ['testimonial', id],
+        queryFn: () => api.get(endpoints.testimonials.detail(id)),
+        enabled: !!id,
+    });
+}
+
+export function useCreateTestimonial() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: any) => api.post(endpoints.testimonials.create, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['testimonials'] });
+        },
+    });
+}
+
+export function useUpdateTestimonial() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: any }) =>
+            api.patch(endpoints.testimonials.update(id), data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['testimonials'] });
+        },
+    });
+}
+
+export function useDeleteTestimonial() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => api.delete(endpoints.testimonials.delete(id)),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['testimonials'] });
+        },
+    });
+}
+
+// ============= PORTFOLIO =============
+
+export function usePortfolioItems(status?: string) {
+    return useQuery({
+        queryKey: ['portfolio', status],
+        queryFn: () => api.get(endpoints.portfolio.list, { searchParams: { status } }),
+        staleTime: 1000 * 60 * 5,
+    });
+}
+
+export function usePortfolioItem(id: string) {
+    return useQuery({
+        queryKey: ['portfolio-item', id],
+        queryFn: () => api.get(endpoints.portfolio.detail(id)),
+        enabled: !!id,
+    });
+}
+
+export function useCreatePortfolioItem() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: any) => api.post(endpoints.portfolio.create, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['portfolio'] });
+        },
+    });
+}
+
+export function useUpdatePortfolioItem() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: any }) =>
+            api.patch(endpoints.portfolio.update(id), data),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['portfolio'] });
+            queryClient.invalidateQueries({ queryKey: ['portfolio-item', variables.id] });
+        },
+    });
+}
+
+export function useDeletePortfolioItem() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => api.delete(endpoints.portfolio.delete(id)),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['portfolio'] });
+        },
+    });
+}
+
+// ============= TICKETS / SUPPORT =============
+
+export function useTickets(status?: string) {
+    return useQuery({
+        queryKey: ['tickets', status],
+        queryFn: () => api.get(endpoints.tickets.list, { searchParams: { status } }),
+        staleTime: 1000 * 60 * 2,
+    });
+}
+
+export function useTicket(id: string) {
+    return useQuery({
+        queryKey: ['ticket', id],
+        queryFn: () => api.get(endpoints.tickets.detail(id)),
+        enabled: !!id,
+    });
+}
+
+export function useCreateTicket() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: any) => api.post(endpoints.tickets.create, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tickets'] });
+        },
+    });
+}
+
+export function useUpdateTicketStatus() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, status }: { id: string; status: string }) =>
+            api.patch(endpoints.tickets.updateStatus(id), { status }),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['ticket', variables.id] });
+            queryClient.invalidateQueries({ queryKey: ['tickets'] });
+        },
+    });
+}
+
+export function useAddTicketMessage() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, content }: { id: string; content: string }) =>
+            api.post(endpoints.tickets.addMessage(id), { content }),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['ticket', variables.id] });
+        },
+    });
+}
+
+export function useTicketStats() {
+    return useQuery({
+        queryKey: ['ticket-stats'],
+        queryFn: () => api.get(endpoints.tickets.stats),
+        staleTime: 1000 * 60 * 5,
     });
 }
 

@@ -128,8 +128,8 @@ const DATE_PRESETS: { value: DatePreset; label: string }[] = [
 
 const LOGS_PER_PAGE = 25;
 
-function getActionBadge(action: string) {
-    const actionLower = action.toLowerCase().replace(/\s+/g, "_");
+function getActionBadge(action: string | undefined) {
+    const actionLower = (action || '').toLowerCase().replace(/\s+/g, "_");
     const configs: Record<string, { className: string; icon: typeof ShieldCheck }> = {
         create: { className: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", icon: FileEdit },
         update: { className: "bg-sky-500/10 text-sky-500 border-sky-500/20", icon: FileEdit },
@@ -384,7 +384,7 @@ function AuditLogPage() {
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
         await Promise.all([fetchLogs(1, false), fetchStats()]);
-        setTimeout(() => setIsRefreshing(false), 500);
+        setIsRefreshing(false);
         toast.success("Audit trail synced");
     }, [fetchLogs, fetchStats]);
 

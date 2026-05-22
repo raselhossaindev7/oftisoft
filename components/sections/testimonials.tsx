@@ -13,7 +13,16 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const defaultTestimonials = [
+interface TestimonialData {
+    id?: string;
+    name: string;
+    role: string;
+    quote: string;
+    avatar: string;
+    gradient: string;
+}
+
+const defaultTestimonials: TestimonialData[] = [
     { id: "1", name: "Alex Thompson", role: "CTO, Finova Labs", quote: "Oftisoft transformed our monolithic banking system into a microservices architecture. 99.9% uptime, 60% reduced latency, and their team was a true partner throughout.", avatar: "", gradient: "from-blue-500 to-cyan-500" },
     { id: "2", name: "Sarah Chen", role: "CEO, HealthBridge AI", quote: "The AI-powered diagnostics module they built for us is incredible. Approval workflows automated, accuracy improved by 40%, and their team delivered 2 weeks early.", avatar: "", gradient: "from-purple-500 to-pink-500" },
     { id: "3", name: "Michael Rodriguez", role: "VP Eng, MarketPro", quote: "They built our entire multi-vendor marketplace from scratch. 5,000 vendors onboarded in the first quarter. The automated payout system alone saved us 200 engineering hours monthly.", avatar: "", gradient: "from-green-500 to-teal-500" },
@@ -35,7 +44,7 @@ export default function Testimonials() {
         testimonials: defaultTestimonials
     };
 
-    const testimonialsList = Array.isArray(testimonialsContent.testimonials)
+    const testimonialsList: TestimonialData[] = Array.isArray(testimonialsContent.testimonials)
         ? testimonialsContent.testimonials
         : [];
 
@@ -123,7 +132,7 @@ export default function Testimonials() {
 
             <div className="relative w-full overflow-hidden mask-gradient-x">
                 <div ref={marqueeRef} className="flex items-stretch gap-6 whitespace-nowrap py-10">
-                    {loopTestimonials.map((t: any, i: number) => (
+                    {loopTestimonials.map((t: TestimonialData, i: number) => (
                         <TestimonialCard key={i} data={t} index={i} />
                     ))}
                 </div>
@@ -143,7 +152,7 @@ export default function Testimonials() {
     );
 }
 
-function TestimonialCard({ data, index }: { data: any, index: number }) {
+function TestimonialCard({ data, index }: { data: TestimonialData, index: number }) {
     return (
         <div className="w-[280px] sm:w-[320px] md:w-[420px] lg:w-[450px] xl:w-[500px] shrink-0 p-[1px] relative group h-full flex">
             <div className={cn(

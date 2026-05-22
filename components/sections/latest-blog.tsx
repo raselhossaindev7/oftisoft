@@ -1,5 +1,5 @@
 "use client"
-import { AnimatedDiv, useScrollY, useScrollProgress, useTransform, useSpring, useMotionValue } from "@/lib/animated";
+import { AnimatedDiv, useScrollProgress, useTransform } from "@/lib/animated";
 
 import Link from "next/link";
 import {
@@ -82,9 +82,6 @@ export default function LatestBlog() {
 
   const swiperRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollYProgress = useScrollProgress(containerRef);
-  const y = useTransform(scrollYProgress, [0, 1], [100, -50]);
-
   const prevSlide = () => swiperRef.current?.slidePrev();
   const nextSlide = () => swiperRef.current?.slideNext();
 

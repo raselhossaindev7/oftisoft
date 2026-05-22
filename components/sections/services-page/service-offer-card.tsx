@@ -9,6 +9,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCart } from "@/hooks/use-cart";
 import { ServiceOffer } from "@/lib/store/services-content";
 
 interface ServiceOfferCardProps {
@@ -18,9 +19,18 @@ interface ServiceOfferCardProps {
 
 export function ServiceOfferCard({ offer, index = 0 }: ServiceOfferCardProps) {
     const [isWishlisted, setIsWishlisted] = useState(false);
+    const { addItem } = useCart();
 
     const handleAddToCart = () => {
-        toast.success(`"${offer.title}" added to cart!`);
+        const tier = offer.tiers?.[0];
+        addItem({
+            id: offer.id,
+            name: offer.title,
+            price: tier?.price ?? 0,
+            image: offer.image || "",
+            slug: offer.id,
+            type: "service",
+        });
     };
 
     const toggleWishlist = () => {
@@ -38,7 +48,7 @@ export function ServiceOfferCard({ offer, index = 0 }: ServiceOfferCardProps) {
             viewport={{ once: true }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
         >
-            <Card className="h-full group relative overflow-hidden bg-card/50 backdrop-blur-sm border-white/5 hover:border-primary/40 transition-all duration-300 pt-0 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1">
+            <Card className="h-full group relative overflow-hidden bg-card/50 backdrop-blur-sm border-white/5 hover:border-primary/40 transition-all duration-300 pt-0 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 pb-0">
                 {/* Thumbnail */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-muted via-background to-muted">
                     <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-transparent" />

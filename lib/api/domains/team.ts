@@ -16,18 +16,22 @@ export interface TeamMember {
 
 export const teamMembersAPI = {
     getAll: async (params?: { search?: string; isActive?: boolean }): Promise<TeamMember[]> => {
-        const response = await api.get('/team', { params });
+        const response = await api.get('/team-members', { params });
+        return response.data;
+    },
+    getActive: async (): Promise<TeamMember[]> => {
+        const response = await api.get('/team-members/active');
         return response.data;
     },
     create: async (data: Partial<TeamMember>): Promise<TeamMember> => {
-        const response = await api.post('/team', data);
+        const response = await api.post('/team-members', data);
         return response.data;
     },
     update: async (id: string, data: Partial<TeamMember>): Promise<TeamMember> => {
-        const response = await api.patch(`/team/${id}`, data);
+        const response = await api.patch(`/team-members/${id}`, data);
         return response.data;
     },
     delete: async (id: string): Promise<void> => {
-        await api.delete(`/team/${id}`);
+        await api.delete(`/team-members/${id}`);
     },
 };

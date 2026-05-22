@@ -268,7 +268,7 @@ function AdminEventsPage() {
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
         await fetchEvents();
-        setTimeout(() => setIsRefreshing(false), 500);
+        setIsRefreshing(false);
         toast.success('Events synced');
     }, [fetchEvents]);
 
@@ -278,8 +278,8 @@ function AdminEventsPage() {
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
         return (
-            e.title.toLowerCase().includes(q) ||
-            e.slug.toLowerCase().includes(q)
+            (e.title || '').toLowerCase().includes(q) ||
+            (e.slug || '').toLowerCase().includes(q)
         );
     });
 

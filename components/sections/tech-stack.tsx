@@ -15,7 +15,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const iconMap: Record<string, any> = {
+interface Tech {
+    name: string;
+    icon: string;
+    color: string;
+}
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     Code2,
     Database,
     Globe,
@@ -32,7 +38,12 @@ const iconMap: Record<string, any> = {
 import { Badge } from "@/components/ui/badge";
 
 export default function TechStack() {
-    const techStackContent = {
+    const techStackContent: {
+        title: string;
+        subtitle: string;
+        badge: string;
+        technologies: Tech[];
+    } = {
         title: "Powered By Modern Tech",
         subtitle: "Tech Stack",
         badge: "Powered By Modern Tech",
@@ -65,19 +76,25 @@ export default function TechStack() {
                  <Badge variant="outline" className="text-sm py-2 px-6 border-white/10 text-white/80 tracking-wide bg-white/5 backdrop-blur-sm font-semibold">
                     {techStackContent.badge}
                 </Badge>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mt-6">
+                    {techStackContent.title}{' '}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                        {techStackContent.subtitle}
+                    </span>
+                </h2>
             </div>
             
             <div className="relative flex flex-col gap-8 mask-gradient-x">
                 {/* Row 1: Left Scroll */}
                 <div className="flex gap-4 animate-scroll-left min-w-full hover:pause">
-                    {[...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies].map((tech: any, i: number) => (
+                    {[...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies].map((tech: Tech, i: number) => (
                         <TechPill key={`r1-${i}`} tech={tech} />
                     ))}
                 </div>
 
                 {/* Row 2: Right Scroll (Slower) */}
                  <div className="flex gap-4 animate-scroll-right min-w-full hover:pause">
-                    {[...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies].map((tech: any, i: number) => (
+                    {[...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies].map((tech: Tech, i: number) => (
                         <TechPill key={`r2-${i}`} tech={tech} />
                     ))}
                 </div>
@@ -109,7 +126,7 @@ export default function TechStack() {
     );
 }
 
-function TechPill({ tech }: { tech: any }) {
+function TechPill({ tech }: { tech: Tech }) {
     const Icon = iconMap[tech.icon] || Globe;
     return (
         <Badge 

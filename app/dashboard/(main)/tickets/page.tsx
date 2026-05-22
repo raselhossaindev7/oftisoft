@@ -118,7 +118,7 @@ function TicketsPage() {
     const handleRefresh = async () => {
         setIsRefreshing(true);
         await fetchTickets();
-        setTimeout(() => setIsRefreshing(false), 500);
+        setIsRefreshing(false);
         toast.success("Ticket matrix synchronized");
     };
 
@@ -130,7 +130,7 @@ function TicketsPage() {
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
             result = result.filter(t =>
-                t.subject.toLowerCase().includes(q) ||
+                (t.subject || '').toLowerCase().includes(q) ||
                 t.customer?.name?.toLowerCase().includes(q) ||
                 t.customer?.email?.toLowerCase().includes(q)
             );
@@ -208,6 +208,7 @@ function TicketsPage() {
             setReplyContent("");
             const updated = await supportAPI.getTicket(selectedTicket.id);
             setSelectedTicket(updated);
+            fetchTickets();
         } catch {
             toast.error("Failed to send reply");
         } finally {
@@ -460,7 +461,7 @@ function TicketsPage() {
                                                 <TableCell className="px-6 py-5">
                                                     <div className="flex flex-col">
                                                         <span className="font-semibold text-sm">{t.subject}</span>
-                                                        <span className="text-sm text-muted-foreground font-semibold uppercase opacity-60">{t.id.slice(0, 8)}...</span>
+                                                        <span className="text-sm text-muted-foreground font-semibold uppercase opacity-60">{t.id?.slice(0, 8) || "—"}...</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
@@ -553,7 +554,7 @@ function TicketsPage() {
                                             {getPriorityBadge(selectedTicket.priority)}
                                         </div>
                                         <DialogDescription className="font-medium text-sm">
-                                            Ticket #{selectedTicket.id.slice(0, 12)} — opened by <span className="text-primary font-semibold">{selectedTicket.customer?.name || "Unknown"}</span>
+                                            Ticket #{selectedTicket.id?.slice(0, 12) || "—"} — opened by <span className="text-primary font-semibold">{selectedTicket.customer?.name || "Unknown"}</span>
                                             {selectedTicket.customer?.email && (
                                                 <> &lt;{selectedTicket.customer.email}&gt;</>
                                             )}

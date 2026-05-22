@@ -17,7 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import CTA from "@/components/sections/cta";
 
 export default function PricingPage() {
-    const { data: apiPlans = [] } = usePublicSubscriptionPlans();
+    const { data: apiPlans = [] } = usePublicSubscriptionPlans('month');
     const { content } = usePricingContentStore();
     const cart = useCart();
 
@@ -99,7 +99,7 @@ export default function PricingPage() {
                                 </CardHeader>
                                 <CardContent className="p-10 md:p-12 space-y-8 flex-1">
                                     <ul className="space-y-5">
-                                        {plan.features.map((feature, i) => (
+                                        {(Array.isArray(plan.features) ? plan.features : []).map((feature: string, i: number) => (
                                             <li key={i} className="flex items-start gap-4 text-white/70 group/item">
                                                 <div className="mt-1 w-5 h-5 rounded-lg bg-primary/10 flex items-center justify-center group-hover/item:bg-primary group-hover/item:text-white transition-all duration-300">
                                                     <Check className="w-3 h-3 text-primary group-hover/item:text-white" />

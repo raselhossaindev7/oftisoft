@@ -13,7 +13,7 @@ const CTA = dynamic(() => import("@/components/sections/cta"), { ssr: true });
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen flex flex-col md:pt-20 text-foreground overflow-hidden selection:bg-primary/30">
+    <div className="relative min-h-screen flex flex-col text-foreground overflow-hidden selection:bg-primary/30">
       <div className="fixed inset-0 z-[-1] pointer-events-none">
           <div className="absolute inset-0 bg-[#030014]" />
           <div className="absolute top-[-10%] left-[-20%] w-[80vw] h-[80vw] bg-purple-900/20 rounded-full blur-[80px] mix-blend-screen opacity-50 animate-blob transform-gpu will-change-transform" />
@@ -31,7 +31,7 @@ export default function Home() {
       <TechStack />
       <LatestBlog />
       <CTA />
-    </main>
+    </div>
   );
 }
 

@@ -34,6 +34,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { useProducts } from "@/hooks/useProducts";
+import { RoleGuard } from "@/components/auth/role-guard";
+import { downloadsAPI } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export default function InventoryPage() {
@@ -51,19 +54,22 @@ export default function InventoryPage() {
     const [retentionCount, setRetentionCount] = useState("30");
     const [isSavingBackup, setIsSavingBackup] = useState(false);
 
-    // Mock update log entries
-    const updateLog = [
-        { date: "2026-05-14", action: "Asset sync completed", details: "47 files synchronized" },
-        { date: "2026-05-13", action: "Version v2.1.0 released", details: "Product assets updated" },
-        { date: "2026-05-12", action: "Backup completed", details: "Automated backup stored" },
-    ];
+    const { data: updateLogData } = useQuery({
+        queryKey: ['downloads', 'history'],
+        queryFn: () => downloadsAPI.getHistory(),
+    });
+    const updateLog = updateLogData?.items ?? [];
 
-    const handleSync = () => {
+    const handleSync = async () => {
         setIsSyncing(true);
-        setTimeout(() => {
-            setIsSyncing(false);
+        try {
+            await downloadsAPI.getInventory();
             toast.success("Assets synced successfully");
-        }, 2000);
+        } catch {
+            toast.error("Failed to sync assets");
+        } finally {
+            setIsSyncing(false);
+        }
     };
 
     const handleSaveVersion = () => {
@@ -88,11 +94,12 @@ export default function InventoryPage() {
     const stockWarnings = stats?.stockWarnings ?? 0;
 
     const filteredProducts = products?.filter(p => 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+                (p.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (p.category || '').toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
     return (
+        <RoleGuard allowedRoles={["Editor", "Admin", "SuperAdmin"]}>
         <div className="space-y-8">
              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -375,5 +382,6 @@ export default function InventoryPage() {
                 </DialogContent>
             </Dialog>
         </div>
+        </RoleGuard>
     );
 }

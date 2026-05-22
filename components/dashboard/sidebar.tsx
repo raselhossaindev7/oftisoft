@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatedSpan, AnimatedAside } from "@/lib/animated";
-;
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -42,8 +41,10 @@ import {
   ScrollText,
   Store,
   Ticket,
+  Flag,
+  Key,
+  Download,
 } from "lucide-react";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -58,12 +59,13 @@ import {
 import { useDashboard } from "@/lib/dashboard-context";
 import { useAuth } from "@/hooks/useAuth";
 import { useBadgeCounts } from "@/hooks/useBadgeCounts";
+import { useUIStore } from "@/lib/store";
 
 const NAV_GROUPS = [
   {
     label: "Overview",
     items: [
-    { icon: HomeIcon, label: "Home", href: "/", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
+      { icon: HomeIcon, label: "Home", href: "/dashboard", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
       { icon: PieChart, label: "Analytics", href: "/dashboard/analytics", roles: ["Editor", "Admin", "SuperAdmin"] },
       { icon: MessageSquare, label: "Messages", href: "/dashboard/messages", badgeKey: "messages", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
@@ -75,9 +77,11 @@ const NAV_GROUPS = [
     items: [
       { icon: ShoppingCart, label: "Orders", href: "/dashboard/orders", badgeKey: "orders", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
       { icon: Package, label: "Products", href: "/dashboard/products", roles: ["Admin", "Editor", "SuperAdmin"] },
+      { icon: ClipboardCheck, label: "Service Queue", href: "/dashboard/service-orders", roles: ["Admin", "Editor", "SuperAdmin"] },
       { icon: Briefcase, label: "Services", href: "/dashboard/services", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
       { icon: FileText, label: "Quotes", href: "/dashboard/quotes", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
       { icon: ShoppingBag, label: "Purchases", href: "/dashboard/purchases", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
+      { icon: Flag, label: "Disputes", href: "/dashboard/disputes", roles: ["Admin", "SuperAdmin"] },
     ]
 
   },
@@ -112,11 +116,13 @@ const NAV_GROUPS = [
       { icon: CreditCard, label: "Billing", href: "/dashboard/billing", roles: ["Editor", "Admin", "SuperAdmin"] },
       { icon: Settings, label: "Settings", href: "/dashboard/settings", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
       { icon: MessageCircle, label: "Support", href: "/dashboard/support", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
+      { icon: Key, label: "Licenses", href: "/dashboard/licenses", roles: ["Admin", "SuperAdmin"] },
     ]
   },
   {
     label: "Admin",
     items: [
+      { icon: Download, label: "Download Analytics", href: "/dashboard/analytics/downloads", roles: ["Admin", "SuperAdmin"] },
       { icon: GalleryVerticalEnd, label: "Portfolio", href: "/dashboard/portfolio", roles: ["Admin", "SuperAdmin"] },
       { icon: UserCircle, label: "Team", href: "/dashboard/team", roles: ["Admin", "SuperAdmin"] },
       { icon: Star, label: "Testimonials", href: "/dashboard/testimonials", roles: ["Admin", "SuperAdmin"] },
@@ -136,9 +142,7 @@ type SidebarContentProps = {
 function SidebarContent({ collapsed = false, onNavClick }: SidebarContentProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const role = useAuth((s) => s.user?.role);
 
-  // Hierarchy-based permission check
   const ROLE_HIERARCHY: Record<string, number> = {
     SuperAdmin: 5,
     Admin: 4,
@@ -146,13 +150,12 @@ function SidebarContent({ collapsed = false, onNavClick }: SidebarContentProps) 
     Support: 2,
     Viewer: 1,
   };
-  const userRoleLevel = ROLE_HIERARCHY[role || "Viewer"] || 1;
+  const activeRole = user?.role || "Viewer";
+  const userRoleLevel = ROLE_HIERARCHY[activeRole] || 1;
   const hasAccess = (requiredRoles: string[]) =>
     requiredRoles.some((r) => ROLE_HIERARCHY[r] <= userRoleLevel);
 
   const badgeCounts = useBadgeCounts();
-
-  const activeRole = user?.role || "Viewer";
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -176,7 +179,7 @@ function SidebarContent({ collapsed = false, onNavClick }: SidebarContentProps) 
                     const hasBadge = badgeCount > 0;
 
                     return (
-                      <Link key={item.href}
+                      <Link key={item.href + item.label}
                         href={item.href}
                         onClick={onNavClick}
                         className={cn(
@@ -225,8 +228,8 @@ function SidebarContent({ collapsed = false, onNavClick }: SidebarContentProps) 
       </div>
 
       <div className="shrink-0 p-4 border-t border-border/40 bg-muted/5 space-y-2">
-        {/* Show upgrade banner for non-admin roles only */}
-        {!collapsed && !["Admin", "SuperAdmin", "Super Admin"].includes(activeRole) && (
+        {/* Show upgrade banner only for users on the free/Starter plan */}
+        {!collapsed && (!user?.subscriptionPlan || user?.subscriptionPlan === "Starter") && (
           <div className="mb-4 p-5 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/10 relative overflow-hidden group">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 blur-[40px] rounded-full group-hover:bg-primary/20 transition-colors" />
             <p className="font-semibold text-sm mb-1">Upgrade Plan</p>
@@ -273,7 +276,8 @@ function SidebarContent({ collapsed = false, onNavClick }: SidebarContentProps) 
 }
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsed = !useUIStore((s) => s.sidebarOpen);
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const { mobileSidebarOpen, setMobileSidebarOpen } = useDashboard();
 
   return (
@@ -301,7 +305,7 @@ export default function Sidebar() {
 
           <Button variant="ghost"
             size="icon"
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={toggleSidebar}
             className="absolute -right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full border border-white/10 bg-[#0A0A0A] shadow-xl text-muted-foreground hover:text-white transition-all z-50 invisible lg:visible"
           >
             {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}

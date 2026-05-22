@@ -21,7 +21,11 @@ export function useSocket(options: UseSocketOptions = {}) {
   useEffect(() => {
     if (!autoConnect || !isAuthenticated) return;
 
-    const socketUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/api$/, "");
+    const overrideUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+    const socketUrl =
+      overrideUrl ||
+      (apiUrl.startsWith("/") ? "http://localhost:5500" : apiUrl.replace(/\/api$/, ""));
 
     socketRef.current = io(socketUrl, {
       withCredentials: true,

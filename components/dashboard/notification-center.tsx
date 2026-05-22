@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState, useEffect, useCallback } from "react";
 import { useSocket } from "@/hooks/useSocket";

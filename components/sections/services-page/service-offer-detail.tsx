@@ -31,6 +31,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCart } from "@/hooks/use-cart";
 import type { ServiceOffer } from "@/lib/store/services-content";
 
 interface ServiceOfferDetailProps {
@@ -48,13 +49,17 @@ export default function ServiceOfferDetail({ offer }: ServiceOfferDetailProps) {
     offer.tiers[0];
   const tierIndex = offer.tiers.findIndex((t) => t.name === selectedTier);
 
+  const { addItem } = useCart();
+
   const handleOrder = () => {
-    toast.success(
-      `"${tierData.name}" package ordered for $${tierData.price.toLocaleString()}!`,
-      {
-        description: `${offer.title} — Delivery in ${tierData.deliveryTime}`,
-      },
-    );
+    addItem({
+      id: `${offer.id}-${selectedTier}`,
+      name: `${offer.title} (${selectedTier})`,
+      price: tierData.price,
+      image: offer.image || "",
+      slug: offer.id,
+      type: "service",
+    });
   };
 
   const handleContact = () => {

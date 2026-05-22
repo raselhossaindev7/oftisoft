@@ -45,23 +45,43 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useOrders } from "@/hooks/useOrders";
+import { useRole } from "@/hooks/useRole";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { adminAPI } from "@/lib/api";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/orders/status-badge";
 
 const OrdersPage = () => {
+    const { hasRole } = useRole();
+    const canManage = hasRole(["SuperAdmin", "Admin", "Editor"]);
+    const canExport = hasRole(["SuperAdmin", "Admin"]);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [cancelTarget, setCancelTarget] = useState<{ id: string } | null>(null);
+    const [refundTarget, setRefundTarget] = useState<{ id: string } | null>(null);
+    const queryClient = useQueryClient();
     const { orders = [], isLoading, exportReport, isExportingReport, downloadInvoice, isDownloadingInvoice, updateStatus, isUpdatingStatus } = useOrders();
 
+    const refundMutation = useMutation({
+        mutationFn: adminAPI.refundOrder,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['orders'] });
+            toast.success("Order refunded and assets revoked");
+            setRefundTarget(null);
+        },
+        onError: (err: any) => toast.error(err?.response?.data?.message || "Refund failed"),
+    });
+
     const filteredOrders = orders.filter(o => {
-        const matchesStatus = statusFilter === "all" || o.status.toLowerCase() === statusFilter.toLowerCase();
+        if (!o) return false;
+        const matchesStatus = statusFilter === "all" || (o.status && o.status.toLowerCase() === statusFilter.toLowerCase());
         const matchesSearch =
             !searchQuery ||
-            o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.status.toLowerCase().includes(searchQuery.toLowerCase());
+            (o.id && o.id.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (o.status && o.status.toLowerCase().includes(searchQuery.toLowerCase()));
         return matchesStatus && matchesSearch;
     });
 
@@ -89,6 +109,7 @@ const OrdersPage = () => {
                     <h1 className="text-3xl font-bold">Orders</h1>
                     <p className="text-muted-foreground">Monitor customer transactions, track fulfillment, and manage refunds.</p>
                 </div>
+                {canExport && (
                 <div className="flex gap-2">
                     <Button 
                         variant="outline" 
@@ -100,6 +121,7 @@ const OrdersPage = () => {
                         {isExportingReport ? "Exporting..." : "Export Report"}
                     </Button>
                 </div>
+                )}
             </div>
 
             {/* Order Stats */}
@@ -178,7 +200,7 @@ const OrdersPage = () => {
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="p-0 overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-muted/5 hover:bg-transparent">
@@ -223,7 +245,7 @@ const OrdersPage = () => {
                                     <TableRow key={o.id} className="group hover:bg-primary/5 transition-colors">
                                         <TableCell className="font-mono text-xs font-bold">
                                             <Link href={`/dashboard/orders/${o.id}`} className="hover:text-primary underline decoration-primary/30 underline-offset-4">
-                                                {o.id.substring(0, 8)}...
+                                                {(o.id || '—').substring(0, 8)}...
                                             </Link>
                                         </TableCell>
                                         <TableCell>
@@ -237,11 +259,11 @@ const OrdersPage = () => {
                                         <TableCell>
                                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                 <Calendar className="w-3 h-3" />
-                                                {format(new Date(o.createdAt), 'MMM d, yyyy')}
+                                                {o.createdAt ? format(new Date(o.createdAt), 'MMM d, yyyy') : 'N/A'}
                                             </div>
                                         </TableCell>
                                         <TableCell><StatusBadge status={o.status} /></TableCell>
-                                        <TableCell className="font-semibold text-primary">${Number(o.total).toFixed(2)}</TableCell>
+                                        <TableCell className="font-semibold text-primary">${(Number(o.total) || 0).toFixed(2)}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
@@ -262,7 +284,7 @@ const OrdersPage = () => {
                                                     >
                                                         <Download className="w-4 h-4" /> {isDownloadingInvoice ? "Downloading..." : "Download Invoice"}
                                                     </DropdownMenuItem>
-                                                    {o.status !== "cancelled" && o.status !== "refunded" && (
+                                                    {o.status !== "cancelled" && o.status !== "refunded" && canManage && (
                                                         <>
                                                             <DropdownMenuSeparator />
                                                             <DropdownMenuItem className="flex items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
@@ -271,6 +293,13 @@ const OrdersPage = () => {
                                                                 <XCircle className="w-4 h-4" /> Cancel order
                                                             </DropdownMenuItem>
                                                         </>
+                                                    )}
+                                                    {o.status === "completed" && hasRole(["SuperAdmin", "Admin"]) && (
+                                                        <DropdownMenuItem className="flex items-center gap-2 text-orange-500 focus:bg-orange-500/10 focus:text-orange-500 cursor-pointer"
+                                                            onClick={() => setRefundTarget({ id: o.id })}
+                                                        >
+                                                            <XCircle className="w-4 h-4" /> Refund & Revoke
+                                                        </DropdownMenuItem>
                                                     )}
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
@@ -301,6 +330,29 @@ const OrdersPage = () => {
                             disabled={isUpdatingStatus}
                         >
                             {isUpdatingStatus ? "Cancelling..." : "Cancel order"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={!!refundTarget} onOpenChange={(open) => !open && setRefundTarget(null)}>
+                <AlertDialogContent className="rounded-2xl border-border/50 max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2 text-orange-500">
+                            <XCircle className="w-5 h-5" /> Refund & Revoke Access?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will process a Stripe refund, revoke all licenses for this order, 
+                            and remove the customer&apos;s access to the purchased products. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="gap-2 sm:gap-0">
+                        <AlertDialogCancel className="rounded-xl font-bold">Keep order</AlertDialogCancel>
+                        <AlertDialogAction className="rounded-xl font-bold bg-orange-500 text-white hover:bg-orange-600"
+                            onClick={() => refundTarget && refundMutation.mutate(refundTarget.id)}
+                            disabled={refundMutation.isPending}
+                        >
+                            {refundMutation.isPending ? "Processing..." : "Refund & Revoke"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

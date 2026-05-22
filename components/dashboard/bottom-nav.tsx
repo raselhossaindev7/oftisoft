@@ -1,96 +1,97 @@
 "use client"
-import { AnimatedDiv, AnimatedSpan, AnimatePresence } from "@/lib/animated";
-;
+import { AnimatedDiv } from "@/lib/animated";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Folder, MessageSquare, Bell, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { useRole, type UserRole } from "@/hooks/useRole";
 
-const LINKS = [
-  { href: "/dashboard", icon: Home, label: "Home" },
-  { href: "/dashboard/projects", icon: Folder, label: "Projects" },
-  { href: "/dashboard/messages", icon: MessageSquare, label: "Chat" },
-  { href: "/dashboard/notifications", icon: Bell, label: "Alerts" },
-  { href: "/dashboard/settings", icon: Settings, label: "Menu" },
+interface NavLink {
+  href: string;
+  icon: any;
+  label: string;
+  roles: UserRole[];
+}
+
+const ALL_LINKS: NavLink[] = [
+  { href: "/dashboard", icon: Home, label: "Home", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
+  { href: "/dashboard/projects", icon: Folder, label: "Projects", roles: ["Editor", "Admin", "SuperAdmin"] },
+  { href: "/dashboard/messages", icon: MessageSquare, label: "Chat", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
+  { href: "/dashboard/notifications", icon: Bell, label: "Alerts", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
+  { href: "/dashboard/settings", icon: Settings, label: "Menu", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { hasRole } = useRole();
+  const LINKS = ALL_LINKS.filter((link) => hasRole(link.roles));
+
+  const activeIndex = LINKS.findIndex(
+    (link) =>
+      pathname === link.href ||
+      (link.href !== "/dashboard" && pathname.startsWith(link.href)),
+  );
 
   return (
-    <div className="lg:hidden fixed bottom-6 left-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-10 duration-1000">
-      <Card className="border-white/5 bg-[#050505]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-2 rounded-[32px] overflow-hidden relative">
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        
-        <nav className="relative flex justify-around items-center h-14">
-          {LINKS.map((link) => {
-            const isActive =
-              pathname === link.href ||
-              (link.href !== "/dashboard" && pathname.startsWith(link.href));
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom,0px)]">
+      <nav className="relative flex items-center justify-around h-[72px] bg-[#050505] border-t border-white/[0.06] shadow-[0_-8px_30px_rgba(0,0,0,0.5)] px-2">
+        {LINKS.map((link, i) => {
+          const isActive = i === activeIndex;
 
-            return (
-              <Button key={link.href}
-                variant="ghost"
-                size="sm"
-                asChild className={cn(
-                  "relative flex flex-col items-center justify-center p-0 h-12 w-12 rounded-2xl transition-all duration-500",
-                  isActive
-                    ? "text-primary basis-1/4"
-                    : "text-muted-foreground/60 hover:text-white basis-1/5"
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="relative flex items-center justify-center flex-1 h-full"
+            >
+              <div className="relative flex items-center justify-center w-full max-w-[72px]">
+                {isActive && (
+                  <AnimatedDiv
+                    layoutId="nav-pill"
+                    className="absolute inset-0 h-11 rounded-2xl bg-primary/15 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.2),0_0_20px_rgba(99,102,241,0.08)]"
+                    transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
+                  />
                 )}
-              >
-                <Link href={link.href} className="flex flex-col items-center gap-1">
-                  {isActive && (
-                    <AnimatedDiv layoutId="nav-pill"
-                      className="absolute inset-0 bg-primary/10 rounded-2xl border border-primary/20"
-                      transition={{
-                        type: "spring",
-                        bounce: 0.2,
-                        duration: 0.6,
-                      }}
-                    />
-                  )}
 
-                  <div className={cn(
-                      "relative z-10 flex flex-col items-center justify-center transition-all duration-500",
-                      isActive ? "text-primary scale-110" : "text-muted-foreground/60"
+                <div
+                  className={cn(
+                    "relative z-10 flex flex-col items-center justify-center gap-[3px] transition-all duration-200",
+                    isActive ? "scale-100" : "scale-100",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex items-center justify-center transition-all duration-200",
+                      isActive
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-muted-foreground/80",
                     )}
                   >
-                    <AnimatedDiv whileTap={{ scale: 0.8 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 15,
-                      }}
-                    >
-                      <link.icon className={cn(
-                          "w-6 h-6 transition-all duration-500",
-                          isActive ? "stroke-[2.5px] drop-shadow-[0_0_8px_rgba(37,99,235,0.4)]" : "stroke-2"
-                        )}
-                      />
-                    </AnimatedDiv>
-                    
-                    <AnimatePresence>
-                      {isActive && (
-                        <AnimatedSpan initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 5 }}
-                          className="text-[8px] font-black uppercase tracking-[0.2em] mt-1"
-                        >
-                          {link.label}
-                        </AnimatedSpan>
+                    <link.icon
+                      className={cn(
+                        "transition-all duration-200",
+                        isActive ? "w-[22px] h-[22px] stroke-[2.5px]" : "w-[22px] h-[22px] stroke-[1.5px]",
                       )}
-                    </AnimatePresence>
+                    />
                   </div>
-                </Link>
-              </Button>
-            );
-          })}
-        </nav>
-      </Card>
+
+                  <span
+                    className={cn(
+                      "text-[10px] font-medium leading-none transition-all duration-200",
+                      isActive
+                        ? "text-primary/90"
+                        : "text-muted-foreground/60",
+                    )}
+                  >
+                    {link.label}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

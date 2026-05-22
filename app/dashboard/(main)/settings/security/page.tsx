@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import { Check, Shield, Smartphone, Key, LogOut, Lock, AlertTriangle, Fingerprint, ShieldCheck, Clock, ShieldAlert, Loader2, Server, Globe, Monitor } from "lucide-react";

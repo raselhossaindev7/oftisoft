@@ -28,26 +28,35 @@ export interface Order {
     updatedAt: string;
 }
 
+function transformOrder(raw: any): Order {
+    const { order_items, users, ...rest } = raw || {};
+    return {
+        ...rest,
+        items: order_items || [],
+        user: users || rest.user,
+    } as Order;
+}
+
 export const ordersAPI = {
     getOrders: async (): Promise<Order[]> => {
         const response = await api.get('/orders');
-        return response.data;
+        return (response.data || []).map(transformOrder);
     },
     getOrder: async (id: string): Promise<Order> => {
         const response = await api.get(`/orders/${id}`);
-        return response.data;
+        return transformOrder(response.data);
     },
     createOrder: async (data: any): Promise<Order> => {
         const response = await api.post('/orders', data);
-        return response.data;
+        return transformOrder(response.data);
     },
     updateStatus: async (id: string, status: string): Promise<Order> => {
         const response = await api.patch(`/orders/${id}/status`, { status });
-        return response.data;
+        return transformOrder(response.data);
     },
     updateOrder: async (id: string, data: { internalNotes?: string; trackingNumber?: string }): Promise<Order> => {
         const response = await api.patch(`/orders/${id}`, data);
-        return response.data;
+        return transformOrder(response.data);
     },
     downloadInvoice: async (id: string): Promise<void> => {
         const response = await api.get(`/orders/${id}/invoice`, {

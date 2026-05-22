@@ -130,7 +130,7 @@ function TestimonialsPage() {
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
         await fetchTestimonials();
-        setTimeout(() => setIsRefreshing(false), 500);
+        setIsRefreshing(false);
         toast.success("Testimonial matrix synchronized");
     }, [fetchTestimonials]);
 
@@ -142,9 +142,9 @@ function TestimonialsPage() {
             const q = searchQuery.toLowerCase();
             list = list.filter(
                 (t) =>
-                    t.name.toLowerCase().includes(q) ||
+                    (t.name || '').toLowerCase().includes(q) ||
                     (t.company || "").toLowerCase().includes(q) ||
-                    t.quote.toLowerCase().includes(q)
+                    (t.quote || '').toLowerCase().includes(q)
             );
         }
         return list;

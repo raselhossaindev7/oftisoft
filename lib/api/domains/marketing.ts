@@ -37,8 +37,9 @@ export const marketingAPI = {
         const response = await api.put(`/marketing/bundles/${id}`, data);
         return response.data;
     },
-    getSubscriptionPlans: async (): Promise<any[]> => {
-        const response = await api.get('/marketing/subscription-plans');
+    getSubscriptionPlans: async (interval?: string): Promise<any[]> => {
+        const params = interval ? { interval } : {};
+        const response = await api.get('/marketing/subscription-plans', { params });
         return response.data;
     },
     createSubscriptionPlan: async (data: any): Promise<any> => {

@@ -24,6 +24,34 @@ export function getAuthCheckComplete() {
   return authCheckComplete;
 }
 
+const SESSION_CACHE_KEY = 'auth_user_cache';
+
+function clearAuthCookies() {
+  try {
+    const cookieOptions = 'Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+    document.cookie = `access_token=; ${cookieOptions}`;
+    document.cookie = `refresh_token=; ${cookieOptions}`;
+  } catch {}
+}
+
+function cacheUserData(user: User | null) {
+  try {
+    if (user) {
+      sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify({ user, isAuthenticated: true }));
+    } else {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
+    }
+  } catch {}
+}
+
+function getCachedUserData(): { user: User; isAuthenticated: boolean } | null {
+  try {
+    const cached = sessionStorage.getItem(SESSION_CACHE_KEY);
+    if (cached) return JSON.parse(cached);
+  } catch {}
+  return null;
+}
+
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
@@ -89,11 +117,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return { requires2FA: true, tempToken: result.tempToken, user: result.user };
       }
       
+      cacheUserData(result.user);
       set({
         user: result.user,
         isAuthenticated: true,
         isLoading: false,
         error: null,
+        authCheckComplete: true,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Login failed";
@@ -111,11 +141,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { user } = await authService.verify2FALogin(tempToken, code, remember);
+      cacheUserData(user);
       set({
         user,
         isAuthenticated: true,
         isLoading: false,
         error: null,
+        authCheckComplete: true,
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "2FA verification failed";
@@ -133,6 +165,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const result = await authService.register(name, email, phone, password);
       // If auto-login is enabled, set user and authenticated state
       if (result.isAutoLogin && result.user) {
+        cacheUserData(result.user);
         set({
           user: result.user,
           isAuthenticated: true,
@@ -163,14 +196,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       queryClient.clear(); // Clear all query caches
 
       await authService.logout();
+      clearAuthCookies();
+      cacheUserData(null);
+      setAuthCheckComplete(false);
       set({
         user: null,
         isAuthenticated: false,
         isLoading: false,
         error: null,
-        authCheckComplete: false, // Reset auth check for next login
+        authCheckComplete: false,
       });
     } catch {
+      clearAuthCookies();
+      cacheUserData(null);
+      setAuthCheckComplete(false);
       set({
         user: null,
         isAuthenticated: false,
@@ -187,13 +226,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { isLoading, isAuthenticated } = get();
     if (isLoading) return;
 
-    // Only show loading spinner if we aren't already authenticated
+    const cached = getCachedUserData();
+    if (cached) {
+      set({
+        user: cached.user,
+        isAuthenticated: cached.isAuthenticated,
+        isLoading: false,
+        authCheckComplete: true,
+      });
+      setAuthCheckComplete(true);
+      return;
+    }
+
     if (!isAuthenticated) {
       set({ isLoading: true });
     }
     try {
       const { authenticated, user } = await authService.checkAuth();
       if (authenticated && user) {
+        cacheUserData(user);
+        setAuthCheckComplete(true);
         set({
           user,
           isAuthenticated: true,
@@ -202,6 +254,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           authCheckComplete: true,
         });
       } else {
+        cacheUserData(null);
+        setAuthCheckComplete(true);
         set({
           user: null,
           isAuthenticated: false,
@@ -210,12 +264,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
       }
     } catch {
+      cacheUserData(null);
       set({
         user: null,
         isAuthenticated: false,
         isLoading: false,
         authCheckComplete: true,
       });
+      setAuthCheckComplete(true);
     }
   },
 

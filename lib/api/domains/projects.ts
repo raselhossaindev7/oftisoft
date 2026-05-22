@@ -1,4 +1,18 @@
 import { api } from "@/lib/api";
+
+export interface Milestone {
+    id: string;
+    title: string;
+    description?: string;
+    status: 'pending' | 'in_progress' | 'review' | 'completed';
+    dueDate?: string;
+    deliverables?: any;
+    sortOrder: number;
+    projectId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface Project {
     id: string;
     title: string;
@@ -13,6 +27,16 @@ export interface Project {
     userId?: string;
     notes?: string;
     tags?: string[];
+    orderId?: string;
+    deliveryFiles?: string[];
+    requirements?: any;
+    revisionCount?: number;
+    maxRevisions?: number;
+    completedAt?: string;
+    cancelledAt?: string;
+    cancelReason?: string;
+    milestones?: Milestone[];
+    orders?: any;
     createdAt: string;
     updatedAt: string;
 }
@@ -46,7 +70,44 @@ export const projectsAPI = {
     updatePaymentStatus: async (id: string, paymentStatus: string): Promise<Project> => {
         const response = await api.patch(`/projects/${id}/payment-status`, { paymentStatus });
         return response.data;
-    }
+    },
+    deliverProject: async (id: string, files: string[], message?: string): Promise<Project> => {
+        const response = await api.post(`/projects/${id}/deliver`, { files, message });
+        return response.data;
+    },
+    acceptDelivery: async (id: string): Promise<Project> => {
+        const response = await api.post(`/projects/${id}/accept-delivery`);
+        return response.data;
+    },
+    requestRevision: async (id: string, reason: string): Promise<Project> => {
+        const response = await api.post(`/projects/${id}/request-revision`, { reason });
+        return response.data;
+    },
+    getServiceOrders: async (): Promise<any[]> => {
+        const response = await api.get('/projects/service-orders');
+        return response.data;
+    },
+    acceptOrderAsProject: async (orderId: string): Promise<Project> => {
+        const response = await api.post(`/projects/service-orders/${orderId}/accept`);
+        return response.data;
+    },
+    cancelProject: async (id: string, reason: string): Promise<Project> => {
+        const response = await api.post(`/projects/${id}/cancel`, { reason });
+        return response.data;
+    },
+    setRequirements: async (id: string, requirements: any): Promise<Project> => {
+        const response = await api.patch(`/projects/${id}/requirements`, { requirements });
+        return response.data;
+    },
+};
+
+export const uploadFile = async (file: File): Promise<{ url: string; key: string }> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await api.post("/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
 };
 
 // Quotes API

@@ -32,11 +32,15 @@ export function AdSlot({ position, className }: AdSlotProps) {
         return <Skeleton className={cn("w-full bg-muted/20 rounded-xl", className)} style={{ minHeight: '100px' }} />;
     }
 
-    if (!ads || ads.length === 0) return null;
+    if (!ads) return null;
+
+    const adList = Array.isArray(ads) ? ads : (ads as any).data || [];
+    if (adList.length === 0) return null;
 
     // For now, we show the first active ad for the position
     // We can implement rotation or specific logic later
-  const ad = ads[0];
+  const ad = adList[0];
+    if (!ad || !ad.type) return null;
 
     const renderAdContent = (ad: Ad) => {
         switch (ad.type) {

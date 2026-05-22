@@ -183,7 +183,7 @@ export default function ServicesPage() {
                     </div>
 
                     {/* Category Pills */}
-                    {!searchQuery && (
+                    {/* {!searchQuery && (
                         <div className="flex flex-wrap justify-center gap-2 mt-8">
                             {categories.map((cat) => {
                                 const Icon = cat.icon;
@@ -205,7 +205,7 @@ export default function ServicesPage() {
                                 );
                             })}
                         </div>
-                    )}
+                    )} */}
                 </div>
             </section>
 

@@ -12,10 +12,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { authAPI, User, UpdateProfileData } from "@/lib/api";
 import { useForm } from "react-hook-form";
 import { useUserStore } from "@/lib/store";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function ProfileSettings() {
     const queryClient = useQueryClient();
     const { setUser } = useUserStore();
+    const setAuthUser = useAuthStore((s) => s.setUser);
     const fileInputRef = useRef<HTMLInputElement>(null);
     
     // Fetch user profile
@@ -40,13 +42,13 @@ export default function ProfileSettings() {
         mutationFn: (data: Partial<User>) => authAPI.updateProfile(data),
         onSuccess: (updatedUser) => {
             queryClient.invalidateQueries({ queryKey: ["profile"] });
-            // Update global store
             setUser({
                 id: updatedUser.id,
                 name: updatedUser.name,
                 email: updatedUser.email,
                 role: (updatedUser.role as 'admin' | 'user') || 'user',
             });
+            setAuthUser(updatedUser as any);
             toast.success("Profile information updated successfully!", {
                 description: "Your digital identity has been synchronized across all nodes.",
                 icon: <ShieldCheck className="w-4 h-4 text-green-500" />
@@ -64,6 +66,7 @@ export default function ProfileSettings() {
         mutationFn: (file: File) => authAPI.uploadAvatar(file),
         onSuccess: (updatedUser) => {
             queryClient.invalidateQueries({ queryKey: ["profile"] });
+            setAuthUser(updatedUser as any);
             toast.success("Avatar Synchronization Complete", {
                 description: "Your new visual identity has been encoded.",
                 icon: <ShieldCheck className="w-4 h-4 text-green-500" />

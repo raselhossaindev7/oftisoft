@@ -1,6 +1,5 @@
 "use client"
 import { Animated, AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import {
@@ -16,8 +15,11 @@ import { toast } from "sonner";
 
 import { PaymentModal } from "@/components/projects/payment-modal";
 import { STATUS_COLORS, PAYMENT_STATUS_COLORS } from "@/lib/projects";
+import { RoleGuard } from "@/components/auth/role-guard";
+import { useRole } from "@/hooks/useRole";
 
 export default function ProjectsOverview() {
+    const { isAdmin } = useRole();
     const [view, setView] = useState<"grid" | "table">("grid");
     const [filter, setFilter] = useState("All");
     const [search, setSearch] = useState("");
@@ -30,7 +32,7 @@ export default function ProjectsOverview() {
     };
 
     const filteredProjects = projects?.filter(p =>
-        (p.title.toLowerCase().includes(search.toLowerCase()) || p.client.toLowerCase().includes(search.toLowerCase()))
+        ((p.title || '').toLowerCase().includes(search.toLowerCase()) || (p.client || '').toLowerCase().includes(search.toLowerCase()))
     ) || [];
 
     const urgentProjects = projects?.filter(p => p.progress < 50 && p.status === 'In Progress') || [];
@@ -42,6 +44,7 @@ export default function ProjectsOverview() {
     };
 
     return (
+        <RoleGuard allowedRoles={["Editor", "Admin", "SuperAdmin"]}>
         <div className="space-y-8 relative">
 
             {/* Header & Controls */}
@@ -211,12 +214,14 @@ export default function ProjectsOverview() {
                                                 <span className="text-xs font-bold text-red-500 flex items-center gap-1">
                                                     <AlertCircle size={12} /> Unpaid Invoice
                                                 </span>
-                                                <button 
-                                                    onClick={() => setSelectedProject(project)}
-                                                    className="text-xs font-bold bg-white text-black px-3 py-1.5 rounded-lg hover:alpha-90 transition-opacity"
-                                                >
-                                                    Pay Now
-                                                </button>
+                                                {isAdmin && (
+                                                    <button 
+                                                        onClick={() => setSelectedProject(project)}
+                                                        className="text-xs font-bold bg-white text-black px-3 py-1.5 rounded-lg hover:alpha-90 transition-opacity"
+                                                    >
+                                                        Pay Now
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
 
@@ -298,7 +303,7 @@ export default function ProjectsOverview() {
                                                     <span className={cn("px-2 py-0.5 rounded text-sm font-bold uppercase border", PAYMENT_STATUS_COLORS[project.paymentStatus as keyof typeof PAYMENT_STATUS_COLORS])}>
                                                         {project.paymentStatus}
                                                     </span>
-                                                    {project.paymentStatus === "Unpaid" && (
+                                                    {project.paymentStatus === "Unpaid" && isAdmin && (
                                                         <button 
                                                             onClick={() => setSelectedProject(project)}
                                                             className="text-xs text-primary font-bold hover:underline"
@@ -356,5 +361,6 @@ export default function ProjectsOverview() {
             )}
 
         </div>
+        </RoleGuard>
     );
 }

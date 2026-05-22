@@ -5,6 +5,7 @@ export const STATUS_COLORS: Record<string, string> = {
     "Delayed": "bg-red-500/10 text-red-500 border-red-500/20",
     "Planning": "bg-orange-500/10 text-orange-500 border-orange-500/20",
     "On Hold": "bg-gray-500/10 text-gray-500 border-gray-500/20",
+    "Cancelled": "bg-red-500/10 text-red-500 border-red-500/20",
 };
 
 export const PAYMENT_STATUS_COLORS: Record<string, string> = {
@@ -14,7 +15,7 @@ export const PAYMENT_STATUS_COLORS: Record<string, string> = {
     "Partial": "text-blue-500 bg-blue-500/10 border-blue-500/20",
 };
 
-export const STATUS_OPTIONS = ["Planning", "In Progress", "Review", "Completed", "Delayed", "On Hold"];
+export const STATUS_OPTIONS = ["Planning", "In Progress", "Review", "Completed", "Delayed", "On Hold", "Cancelled"];
 
 export const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';

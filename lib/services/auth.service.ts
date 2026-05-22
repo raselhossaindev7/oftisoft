@@ -1,7 +1,12 @@
 /**
  * Auth Service - API layer for authentication
- * Uses httpOnly cookies (tokens never touch JS)
+ * Uses httpOnly cookies (tokens never touch JS) via raw fetch
  * All requests include credentials for cookie transmission
+ * 
+ * LAYER NOTE: This handles login/register/checkAuth/logout/refresh/2FA only.
+ * For profile/settings management, see lib/api/domains/auth.ts (authAPI via axios).
+ * The separation exists because auth ops need fine-grained control over
+ * refresh logic and timeout handling, while profile APIs use standard axios.
  */
 
 import { getIsLoggingOut } from "@/store/useAuthStore";
@@ -13,12 +18,27 @@ export interface User {
   email: string;
   name: string;
   avatarUrl?: string;
+  avatar?: string;
+  image?: string;
   phone: string;
+  jobTitle?: string;
+  bio?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  unit?: string;
   isEmailVerified: boolean;
   isActive: boolean;
   isTwoFactorEnabled: boolean;
   role: string;
   tokenVersion: number;
+  subscriptionPlan?: string;
+  subscriptionStatus?: string;
+  emailNotifications?: boolean;
+  pushNotifications?: boolean;
+  smsNotifications?: boolean;
+  marketingNotifications?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +54,8 @@ export interface LoginResponse {
 export interface RegisterResponse {
   message: string;
   user: User;
+  accessToken?: string;
+  isAutoLogin?: boolean;
 }
 
 export interface AuthCheckResponse {
@@ -55,21 +77,15 @@ function getErrorMessage(error: ApiError | unknown): string {
   return "Something went wrong";
 }
 
-function hasAuthCookies(): boolean {
-  if (typeof document === 'undefined') return false;
-  return document.cookie.includes('access_token=') || document.cookie.includes('refresh_token=');
-}
-
 async function authFetch<T>(
   endpoint: string,
   options: RequestInit = {},
   isRetry = false
 ): Promise<T> {
-  if (!hasAuthCookies() && endpoint === "/auth/check") {
-    return { authenticated: false, user: null } as T;
-  }
+  // No early return — httpOnly cookies aren't readable by JS,
+  // so we must let the actual fetch determine auth status.
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(`${API_URL}${endpoint}`, {
       ...options,
@@ -83,7 +99,7 @@ async function authFetch<T>(
 
     clearTimeout(timeout);
 
-    if (res.status === 401 && !isRetry && endpoint !== "/auth/login" && endpoint !== "/auth/refresh" && endpoint !== "/auth/check" && !getIsLoggingOut()) {
+    if (res.status === 401 && !isRetry && endpoint !== "/auth/login" && endpoint !== "/auth/refresh" && endpoint !== "/auth/check" && (!getIsLoggingOut() || endpoint === "/auth/logout")) {
       try {
         const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
           method: "POST",
@@ -139,9 +155,23 @@ export const authService = {
   },
 
   async logout(): Promise<{ message: string }> {
-    return authFetch<{ message: string }>("/auth/logout", {
-      method: "POST",
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    try {
+      const res = await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(getErrorMessage(data));
+      }
+      return data as { message: string };
+    } finally {
+      clearTimeout(timeout);
+    }
   },
 
   async checkAuth(): Promise<AuthCheckResponse> {
@@ -192,17 +222,30 @@ export const authService = {
     return authFetch("/auth/2fa/setup", { method: "POST" });
   },
 
-  async verify2FA(code: string): Promise<{ message: string }> {
-    return authFetch("/auth/2fa/verify", {
+  async verify2FA(code: string): Promise<{ message: string; enabled: boolean }> {
+    return authFetch<{ message: string; enabled: boolean }>("/auth/2fa/verify", {
       method: "POST",
       body: JSON.stringify({ code }),
     });
   },
 
-  async disable2FA(code: string): Promise<{ message: string }> {
-    return authFetch("/auth/2fa/disable", {
+  async disable2FA(code: string): Promise<{ message: string; enabled: boolean }> {
+    return authFetch<{ message: string; enabled: boolean }>("/auth/2fa/disable", {
       method: "POST",
       body: JSON.stringify({ code }),
+    });
+  },
+
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    return authFetch<{ message: string }>(
+      `/auth/verify-email?token=${encodeURIComponent(token)}`,
+      { method: "GET" }
+    );
+  },
+
+  async resendVerification(): Promise<{ message: string }> {
+    return authFetch<{ message: string }>("/auth/resend-verification", {
+      method: "POST",
     });
   },
 };

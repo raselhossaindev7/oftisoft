@@ -21,6 +21,10 @@ export interface Product {
     licenseRegular: number;
     licenseExtended: number;
     lastUpdated?: string;
+    status: string;
+    vendorId?: string;
+    rejectionReason?: string | null;
+    approvedAt?: string;
     createdAt: string;
     updatedAt: string;
 }

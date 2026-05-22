@@ -47,7 +47,7 @@ const defaultContent: NavbarContent = {
     ],
     showCart: true,
     ctaText: 'Get Started',
-    ctaHref: '/dashboard/register',
+    ctaHref: '/register',
     lastUpdated: new Date().toISOString(),
 };
 

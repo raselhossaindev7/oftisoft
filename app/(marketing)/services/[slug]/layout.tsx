@@ -74,7 +74,6 @@ export default async function ServiceDetailLayout({
           __html: JSON.stringify(jsonLdSchemas.breadcrumb(breadcrumbData)),
         }}
       />
-      <div className="pt-18"></div>
       {children}
     </>
   );

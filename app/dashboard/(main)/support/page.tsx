@@ -1,6 +1,5 @@
 "use client"
 import { Animated, AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import { 
@@ -115,6 +114,7 @@ export default function SupportHubPage() {
     const [selectedEmail, setSelectedEmail] = useState<any | null>(null);
     const [selectedTicketIds, setSelectedTicketIds] = useState<string[]>([]);
     const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [kbArticles] = useState<any[]>([]);
     
     const queryClient = useQueryClient();
 
@@ -224,16 +224,16 @@ export default function SupportHubPage() {
         addMessageMutation.mutate({ id: selectedTicketId, content: replyContent });
     };
 
-    const getStatusBadge = (status: string) => {
-        switch (status.toLowerCase()) {
+    const getStatusBadge = (status: string | undefined) => {
+        switch ((status || '').toLowerCase()) {
             case "open":
             case "active":
             case "published":
-                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1.5 font-bold"><CheckCircle2 className="w-3 h-3" /> {status}</Badge>;
+                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1.5 font-bold"><CheckCircle2 className="w-3 h-3" /> {status || "—"}</Badge>;
             case "resolved":
             case "ended":
             case "closed":
-                return <Badge variant="secondary" className="bg-muted text-muted-foreground gap-1.5 font-bold"><CheckCircle2 className="w-3 h-3" /> {status}</Badge>;
+                return <Badge variant="secondary" className="bg-muted text-muted-foreground gap-1.5 font-bold"><CheckCircle2 className="w-3 h-3" /> {status || "—"}</Badge>;
             case "pending":
             case "queued":
             case "draft":
@@ -260,8 +260,8 @@ export default function SupportHubPage() {
         </TableRow>
     );
 
-    const getPriorityBadge = (prio: string) => {
-        switch (prio.toLowerCase()) {
+    const getPriorityBadge = (prio: string | undefined) => {
+        switch ((prio || '').toLowerCase()) {
             case "urgent":
                 return <Badge className="bg-red-600 text-white border-none text-sm uppercase font-semibold px-1.5 h-5">Urgent</Badge>;
             case "high":
@@ -272,9 +272,9 @@ export default function SupportHubPage() {
     };
 
     const filteredTickets = tickets.filter(t => 
-        t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.customer?.name.toLowerCase().includes(searchQuery.toLowerCase())
+        (t.subject || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (t.id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (t.customer?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -682,7 +682,7 @@ export default function SupportHubPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {[].length === 0 ? (
+                                        {kbArticles.length === 0 ? (
                                             <TableRow>
                                                 <TableCell colSpan={5} className="h-40 text-center text-muted-foreground">
                                                     <div className="flex flex-col items-center justify-center gap-2">
@@ -800,7 +800,7 @@ export default function SupportHubPage() {
                                             msg.sender?.id === selectedTicket.customer?.id ? "flex-row" : "flex-row-reverse ml-auto"
                                         )}>
                                             <Avatar className="h-8 w-8 shrink-0">
-                                                <AvatarFallback>{msg.sender?.name.charAt(0)}</AvatarFallback>
+                                                <AvatarFallback>{(msg.sender?.name || '?').charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div className={cn(
                                                 "p-3 md:p-4 rounded-2xl text-[13px] md:text-sm",
@@ -810,7 +810,7 @@ export default function SupportHubPage() {
                                             )}>
                                                 <div className="flex items-center justify-between gap-4 md:gap-8 mb-1">
                                                     <Label className="font-bold text-xs md:text-sm opacity-70 truncate max-w-[80px] md:max-w-none">{msg.sender?.name}</Label>
-                                                    <Label className="text-xs md:text-sm opacity-50 font-medium whitespace-nowrap">{formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}</Label>
+                                                    <Label className="text-xs md:text-sm opacity-50 font-medium whitespace-nowrap">{msg.createdAt ? formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true }) : "—"}</Label>
                                                 </div>
                                                 <CardDescription className={cn(
                                                     "leading-relaxed whitespace-pre-wrap text-[13px] md:text-sm",
@@ -910,7 +910,7 @@ export default function SupportHubPage() {
                             <DialogHeader className="p-6 md:p-8 border-b bg-muted/10">
                                 <div className="flex items-center gap-4 mb-4">
                                     <Avatar className="h-10 w-10">
-                                        <AvatarFallback>{selectedEmail.from.charAt(0)}</AvatarFallback>
+                                        <AvatarFallback>{(selectedEmail.from || '?').charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <DialogTitle className="text-lg font-bold">{selectedEmail.from}</DialogTitle>

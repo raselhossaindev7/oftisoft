@@ -6,7 +6,7 @@ import CTA from "@/components/sections/cta";
 
 export default function PortfolioPage() {
     return (
-        <main className="flex min-h-screen flex-col bg-background text-foreground overflow-hidden pt-20">
+        <main className="flex min-h-screen flex-col bg-background text-foreground overflow-hidden">
             <PortfolioMain />
             <SuccessStories />
             <TechBreakdown />

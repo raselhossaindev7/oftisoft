@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import {
@@ -11,6 +10,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useProjects } from "@/hooks/useProjects";
+import { RoleGuard } from "@/components/auth/role-guard";
 import { toast } from "sonner";
 
 const PROJECT_TYPES = [
@@ -79,6 +79,7 @@ export default function CreateProjectPage() {
     };
 
     return (
+        <RoleGuard allowedRoles={["Editor", "Admin", "SuperAdmin"]}>
         <div className=" mx-auto py-8">
             {/* Step Indicator */}
             <div className="mb-12">
@@ -377,5 +378,6 @@ export default function CreateProjectPage() {
                 )}
             </div>
         </div>
+        </RoleGuard>
     );
 }

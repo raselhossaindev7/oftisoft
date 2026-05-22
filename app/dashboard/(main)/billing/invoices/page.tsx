@@ -1,6 +1,5 @@
 "use client"
 import { Animated } from "@/lib/animated";
-;
 
 import Link from "next/link";
 import {
@@ -10,6 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
 import { useInvoices } from "@/hooks/useInvoices";
+import { useRole } from "@/hooks/useRole";
 import { billingAPI, Transaction } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -39,37 +39,43 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-const STATUS_STYLES = {
+const STATUS_STYLES: Record<string, string> = {
     "completed": "bg-green-500/10 text-green-500 border-green-500/20",
     "pending": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
     "failed": "bg-red-500/10 text-red-500 border-red-500/20",
     "paid": "bg-green-500/10 text-green-500 border-green-500/20",
 };
 
+function escapeCSV(value: string): string {
+    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+        return `"${value.replace(/"/g, '""')}"`;
+    }
+    return value;
+}
+
 export default function InvoicesPage() {
     const { invoices, isLoading, isError, refetch } = useInvoices();
+    const { hasPermission } = useRole();
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("all");
 
-    // Create Dialog State
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [newInvoice, setNewInvoice] = useState({
-        invoiceId: `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
         amount: "",
-        type: "Professional Services",
-        status: "pending"
+        type: "Professional Services"
     });
 
-    // Detail Dialog State
-  const [selectedInvoice, setSelectedInvoice] = useState<Transaction | null>(null);
+    const [selectedInvoice, setSelectedInvoice] = useState<Transaction | null>(null);
+
+    const canCreateInvoice = hasPermission("billing.manage");
 
     const filteredInvoices = useMemo(() => {
         return invoices.filter(inv => {
             const matchesSearch =
-                inv.invoiceId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                inv.type.toLowerCase().includes(searchQuery.toLowerCase());
+                (inv.invoiceId || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (inv.type || '').toLowerCase().includes(searchQuery.toLowerCase());
             const matchesStatus = statusFilter === "all" || inv.status?.toLowerCase() === statusFilter.toLowerCase();
             return matchesSearch && matchesStatus;
         });
@@ -93,27 +99,31 @@ export default function InvoicesPage() {
         setIsCreating(true);
         try {
             await billingAPI.createTransaction({
-                invoiceId: newInvoice.invoiceId,
                 amount: `$${amount.toFixed(2)}`,
                 type: newInvoice.type,
-                status: newInvoice.status
+                status: "pending"
             });
             toast.success("Ledger entry created");
             setIsCreateOpen(false);
-            setNewInvoice({ ...newInvoice, invoiceId: `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`, amount: "" });
+            setNewInvoice({ amount: "", type: "Professional Services" });
             refetch();
-        } catch (err: any) {
-            toast.error(err?.response?.data?.message || "Failed to create invoice");
+        } catch {
+            toast.error("Failed to create invoice. Please try again.");
         } finally {
             setIsCreating(false);
         }
     };
 
-    const handleDownload = (id: string) => {
-        toast.info("Invoice PDF download coming soon. View details or export to CSV.");
+    const handleDownload = async (id: string) => {
+        try {
+            await billingAPI.downloadInvoice(id);
+            toast.success("Invoice downloaded");
+        } catch {
+            toast.error("Failed to download invoice. Please try again.");
+        }
     };
 
-    const handlePrint = (id: string) => {
+    const handlePrint = () => {
         window.print();
     };
 
@@ -134,8 +144,8 @@ export default function InvoicesPage() {
             inv.amount,
             inv.status
         ]);
-        const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-        const blob = new Blob([csv], { type: "text/csv" });
+        const csv = [headers.join(","), ...rows.map(r => r.map(escapeCSV).join(","))].join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;header=present" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -179,57 +189,55 @@ export default function InvoicesPage() {
                         <Button variant="ghost" className="rounded-xl font-bold">Back to Billing</Button>
                     </Link>
                 </div>
-                <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="rounded-xl h-auto gap-2 font-bold shadow-lg shadow-primary/20">
-                            <Plus className="w-5 h-5" /> Generate Invoice
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="w-[95vw] max-w-lg sm:max-w-[425px] rounded-3xl border-border/50">
-                        <DialogHeader>
-                            <DialogTitle className="text-2xl font-semibold">Create New Invoice</DialogTitle>
-                            <DialogDescription>
-                                Set up a manual billing entry for your ledger.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="inv-id" className="font-bold">Invoice Reference</Label>
-                                <Input id="inv-id" value={newInvoice.invoiceId} readOnly className="rounded-xl h-11 bg-muted/50" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="type" className="font-bold">Billing Category</Label>
-                                <Input 
-                                    id="type" 
-                                    placeholder="e.g. Consultation Asset Purchase" 
-                                    className="rounded-xl h-11"
-                                    value={newInvoice.type}
-                                    onChange={(e) => setNewInvoice({...newInvoice, type: e.target.value})}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="amount" className="font-bold">Total Amount (USD)</Label>
-                                <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">$</span>
+                {canCreateInvoice && (
+                    <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="rounded-xl h-auto gap-2 font-bold shadow-lg shadow-primary/20">
+                                <Plus className="w-5 h-5" /> Generate Invoice
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="w-[95vw] max-w-lg sm:max-w-[425px] rounded-3xl border-border/50">
+                            <DialogHeader>
+                                <DialogTitle className="text-2xl font-semibold">Create New Invoice</DialogTitle>
+                                <DialogDescription>
+                                    Set up a manual billing entry for your ledger.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="type" className="font-bold">Billing Category</Label>
                                     <Input 
-                                        id="amount" 
-                                        type="number" 
-                                        placeholder="0.00" 
-                                        className="rounded-xl h-11 pl-8"
-                                        value={newInvoice.amount}
-                                        onChange={(e) => setNewInvoice({...newInvoice, amount: e.target.value})}
+                                        id="type" 
+                                        placeholder="e.g. Consultation Asset Purchase" 
+                                        className="rounded-xl h-11"
+                                        value={newInvoice.type}
+                                        onChange={(e) => setNewInvoice({...newInvoice, type: e.target.value})}
                                     />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="amount" className="font-bold">Total Amount (USD)</Label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">$</span>
+                                        <Input 
+                                            id="amount" 
+                                            type="number" 
+                                            placeholder="0.00" 
+                                            className="rounded-xl h-11 pl-8"
+                                            value={newInvoice.amount}
+                                            onChange={(e) => setNewInvoice({...newInvoice, amount: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <DialogFooter>
-                            <Button variant="ghost" className="rounded-xl h-11" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-                            <Button className="rounded-xl h-11 px-8 font-bold shadow-lg shadow-primary/20" onClick={handleCreateInvoice} disabled={isCreating}>
-                                {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Ledger Entry"}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                            <DialogFooter>
+                                <Button variant="ghost" className="rounded-xl h-11" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                                <Button className="rounded-xl h-11 px-8 font-bold shadow-lg shadow-primary/20" onClick={handleCreateInvoice} disabled={isCreating}>
+                                    {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Ledger Entry"}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                )}
             </div>
 
             {/* Toolbar */}
@@ -273,6 +281,7 @@ export default function InvoicesPage() {
                                         type="checkbox" 
                                         className="rounded-md w-5 h-5 border-border/50 bg-background text-primary focus:ring-primary/20" 
                                         onChange={(e) => setSelectedIds(e.target.checked ? filteredInvoices.map(i => i.id) : [])} 
+                                        checked={selectedIds.length === filteredInvoices.length && filteredInvoices.length > 0}
                                     />
                                 </th>
                                 <th className="p-6 whitespace-nowrap">Reference #</th>
@@ -287,7 +296,12 @@ export default function InvoicesPage() {
                             {isLoading ? (
                                 Array(5).fill(0).map((_, i) => (
                                     <tr key={i} className="animate-pulse">
-                                        <td colSpan={7} className="p-10 text-center text-muted-foreground">Loading system ledger...</td>
+                                        <td colSpan={7} className="p-10 text-center text-muted-foreground">
+                                            <div className="flex items-center justify-center gap-3">
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                <span>Loading system ledger...</span>
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))
                             ) : filteredInvoices.length === 0 ? (
@@ -340,16 +354,16 @@ export default function InvoicesPage() {
                                     <td className="p-6 text-muted-foreground font-medium">
                                         {new Date(inv.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
                                     </td>
-                                    <td className="p-6 font-semibold text-primary text-base">{inv.amount}</td>
+                                    <td className="p-6 font-semibold text-primary text-base">{inv.amount ?? '—'}</td>
                                     <td className="p-6">
                                         <span className={cn(
                                             "px-4 py-1.5 rounded-full text-sm font-semibold uppercase border-2 flex items-center gap-2 w-fit",
-                                            STATUS_STYLES[inv.status.toLowerCase() as keyof typeof STATUS_STYLES] || "border-border text-muted-foreground bg-muted/20"
+                                            STATUS_STYLES[(inv.status || '').toLowerCase()] || "border-border text-muted-foreground bg-muted/20"
                                         )}>
                                             {(inv.status === 'Paid' || inv.status === 'completed') && <CheckCircle2 className="w-3.5 h-3.5" />}
                                             {inv.status === 'Pending' && <Clock className="w-3.5 h-3.5" />}
                                             {inv.status === 'failed' && <AlertCircle className="w-3.5 h-3.5" />}
-                                            {inv.status}
+                                            {inv.status || '—'}
                                         </span>
                                     </td>
                                     <td className="p-6">
@@ -366,7 +380,7 @@ export default function InvoicesPage() {
                                                 <DropdownMenuItem className="rounded-xl gap-3 cursor-pointer py-2.5" onClick={() => handleDownload(inv.invoiceId)}>
                                                     <Download className="w-4 h-4" /> Download PDF
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem className="rounded-xl gap-3 cursor-pointer py-2.5" onClick={() => handlePrint(inv.invoiceId)}>
+                                                <DropdownMenuItem className="rounded-xl gap-3 cursor-pointer py-2.5" onClick={handlePrint}>
                                                     <Printer className="w-4 h-4" /> Print Receipt
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator className="my-2 bg-border/50" />
@@ -395,7 +409,7 @@ export default function InvoicesPage() {
                                     </div>
                                     <span className={cn(
                                         "px-5 py-2 rounded-full text-xs font-semibold uppercase border-2",
-                                        STATUS_STYLES[selectedInvoice.status.toLowerCase() as keyof typeof STATUS_STYLES]
+                                        STATUS_STYLES[(selectedInvoice.status || '').toLowerCase()]
                                     )}>
                                         {selectedInvoice.status}
                                     </span>
@@ -440,7 +454,7 @@ export default function InvoicesPage() {
                                     <Button className="flex-1 rounded-2xl h-14 font-semibold text-sm uppercase" onClick={() => handleDownload(selectedInvoice.invoiceId)}>
                                         <Download className="w-5 h-5 mr-3" /> Get PDF
                                     </Button>
-                                    <Button variant="outline" className="flex-1 rounded-2xl h-14 font-semibold text-sm uppercase border-border/50" onClick={() => handlePrint(selectedInvoice.invoiceId)}>
+                                    <Button variant="outline" className="flex-1 rounded-2xl h-14 font-semibold text-sm uppercase border-border/50" onClick={handlePrint}>
                                         <Printer className="w-5 h-5 mr-3" /> Print
                                     </Button>
                                 </div>

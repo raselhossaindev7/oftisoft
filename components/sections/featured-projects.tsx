@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Autoplay } from "swiper/modules";
@@ -13,8 +12,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import "swiper/css";
 
+interface Project {
+    id: string;
+    title: string;
+    category: string;
+    description: string;
+    image: string;
+    imageGradient: string;
+    tech: string[];
+    stats: { label: string; value: string }[];
+    year: string;
+}
+
 export default function FeaturedProjects() {
-    const projectsContent = {
+    const projectsContent: {
+        title: string;
+        subtitle: string;
+        badge: string;
+        projects: Project[];
+    } = {
         title: "Building the",
         subtitle: "Impossible.",
         badge: "Selected Work",
@@ -114,7 +130,7 @@ export default function FeaturedProjects() {
                     className="!overflow-visible"
                     centeredSlides={false} 
                 >
-                    {projects.map((project: any, index: number) => (
+                    {projects.map((project: Project, index: number) => (
                         <SwiperSlide key={project.id} className="group cursor-grab active:cursor-grabbing">
                             {/* Card Image Container */}
                             <div className="relative aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden mb-6 md:mb-8 border border-white/10 bg-card">
@@ -143,7 +159,7 @@ export default function FeaturedProjects() {
 
                                                         <Link href="/portfolio" className="contents">
                                         <div className="flex flex-wrap gap-2 mb-0 md:mb-4 opacity-100 md:opacity-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-500 delay-100">
-                                            {(project.tech || []).map((t: string, i: number) => (
+                                            {project.tech.map((t: string, i: number) => (
                                                 <Badge key={i} variant="secondary" className="bg-white/10 backdrop-blur-md text-white/90 font-medium hover:bg-white/20">
                                                     {t}
                                                 </Badge>
@@ -168,7 +184,7 @@ export default function FeaturedProjects() {
                                         
                                         {/* Stats - Row on all screens for better density */}
                                         <div className="flex gap-6 md:gap-8 text-left md:text-right shrink-0">
-                                            {(project.stats || []).map((stat: any, i: number) => (
+                                            {project.stats.map((stat: { label: string; value: string }, i: number) => (
                                                 <div key={i}>
                                                     <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">{stat.value}</div>
                                                     <div className="text-[10px] md:text-xs text-muted-foreground tracking-wide">{stat.label}</div>

@@ -55,7 +55,7 @@ export default function TagsPage() {
     const [form, setForm] = useState({ name: "", description: "", color: "" });
 
     const filtered = tags.filter((t: Tag) =>
-        t.name.toLowerCase().includes(search.toLowerCase())
+        (t.name || '').toLowerCase().includes(search.toLowerCase())
     );
 
     const handleCreate = () => {

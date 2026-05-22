@@ -1,6 +1,4 @@
 "use client"
-import { AnimatedDiv, AnimatedSpan, AnimatePresence } from "@/lib/animated";
-;
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -10,6 +8,7 @@ import { useCart } from "@/hooks/use-cart";
 import { ShoppingCart, Trash2, Plus, Minus, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
 export function CartDrawer({ children }: { children?: React.ReactNode }) {
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCart();
   const totalItems = getTotalItems();
@@ -22,12 +21,9 @@ export function CartDrawer({ children }: { children?: React.ReactNode }) {
           <Button variant="ghost" size="icon" className="relative">
             <ShoppingCart className="h-5 w-5" />
             {totalItems > 0 && (
-              <AnimatedSpan initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold"
-              >
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold">
                 {totalItems}
-              </AnimatedSpan>
+              </span>
             )}
           </Button>
         )}
@@ -55,66 +51,42 @@ export function CartDrawer({ children }: { children?: React.ReactNode }) {
           <>
             <ScrollArea className="flex-1 -mx-6 px-6">
               <div className="space-y-4 py-4">
-                <AnimatePresence mode="popLayout">
-                  {items.map((item) => (
-                    <AnimatedDiv key={item.id}
-                      layout initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className="flex gap-4 p-3 rounded-lg border bg-card"
-                    >
-                      <div className="w-20 h-20 relative rounded-md overflow-hidden bg-muted shrink-0">
-                        {item.image ? (
-                          <Image src={item.image}
-                            alt={item.name}
-                            fill className="object-cover"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 bg-gradient-to-br from-muted via-background to-muted" />
-                        )}
-                      </div>
+                {items.map((item) => (
+                  <div key={item.id} className="flex gap-4 p-3 rounded-lg border bg-card">
+                    <div className="w-20 h-20 relative rounded-md overflow-hidden bg-muted shrink-0">
+                      {item.image ? (
+                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-muted via-background to-muted" />
+                      )}
+                    </div>
 
-                      <div className="flex-1 min-w-0">
-                        <Link href={`/shop/${item.slug}`}>
-                          <p className="font-medium truncate hover:text-primary">{item.name}</p>
-                        </Link>
-                        <p className="text-sm text-muted-foreground">
-                          ${item.price.toFixed(2)} × {item.quantity}
-                        </p>                        
-                        <div className="flex items-center gap-2 mt-2">
-                          <Button variant="outline"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="w-8 text-center font-medium">{item.quantity}</span>
-                          <Button variant="outline"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="font-bold">
-                          ${(item.price * item.quantity).toFixed(2)}
-                        </p>
-                        <Button variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-destructive"
-                          onClick={() => removeItem(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/shop/${item.slug}`}>
+                        <p className="font-medium truncate hover:text-primary">{item.name}</p>
+                      </Link>
+                      <p className="text-sm text-muted-foreground">
+                        ${item.price.toFixed(2)} &times; {item.quantity}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="w-8 text-center font-medium">{item.quantity}</span>
+                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                          <Plus className="h-3 w-3" />
                         </Button>
                       </div>
-                    </AnimatedDiv>
-                  ))}
-                </AnimatePresence>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="font-bold">${(item.price * item.quantity).toFixed(2)}</p>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeItem(item.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </ScrollArea>
 
@@ -123,25 +95,17 @@ export function CartDrawer({ children }: { children?: React.ReactNode }) {
                 <span>Subtotal</span>
                 <span>${totalPrice.toFixed(2)}</span>
               </div>
-              
               <Separator />
-              
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
                 <span>${totalPrice.toFixed(2)}</span>
               </div>
-
               <div className="flex gap-2">
-                <Button variant="outline"
-                  className="flex-1"
-                  onClick={clearCart}
-                >
-                  Clear
-                </Button>
+                <Button variant="outline" className="flex-1" onClick={clearCart}>Clear</Button>
                 <Button className="flex-1" asChild>
                   <Link href="/shop/checkout">Checkout</Link>
                 </Button>
-              </div>            
+              </div>
             </div>
           </>
         )}

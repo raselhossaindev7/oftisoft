@@ -1,52 +1,42 @@
-import { useState, useCallback, useEffect } from "react";
-import { billingAPI } from "@/lib/api";
-import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { billingAPI } from '@/lib/api';
+import { toast } from 'sonner';
 
 export function useSubscription() {
-    const [subscription, setSubscription] = useState<{ plan: string; status: string; nextBillingDate?: string } | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const queryClient = useQueryClient();
 
-    const fetchSubscription = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const data = await billingAPI.getSubscription();
-            setSubscription(data);
-        } catch (err: any) {
-            setError(err?.response?.data?.message || "Failed to load subscription");
-            console.error("Failed to fetch subscription", err);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+    const { data: subscription, isLoading, isError } = useQuery({
+        queryKey: ['subscription'],
+        queryFn: billingAPI.getSubscription,
+        staleTime: 1000 * 60 * 5,
+        retry: 1,
+    });
 
-    const updateSubscription = async (plan: string) => {
-        setIsLoading(true);
-        try {
-            await billingAPI.updateSubscription(plan);
-            toast.success(`Upgraded to ${plan} Plan!`, {
-                description: "Your new features are now unlocked."
-            });
-            await fetchSubscription();
-        } catch (err: any) {
-            const message = err.response?.data?.message || "Failed to upgrade subscription";
+    const updateMutation = useMutation({
+        mutationFn: async ({ plan, paymentIntentId, interval }: { plan: string; paymentIntentId?: string; interval?: string }) => {
+            return billingAPI.updateSubscription(plan, paymentIntentId, interval);
+        },
+        onSuccess: (data, variables) => {
+            if (!data.requiresPayment) {
+                toast.success(`Switched to ${variables.plan} Plan!`);
+                queryClient.invalidateQueries({ queryKey: ['subscription'] });
+                queryClient.invalidateQueries({ queryKey: ['plans'] });
+            }
+        },
+        onError: (err: any) => {
+            const message = err.response?.data?.message || "Failed to update subscription";
             toast.error(message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchSubscription();
-    }, [fetchSubscription]);
+        },
+    });
 
     return {
-        subscription,
+        subscription: subscription ?? null,
         isLoading,
-        error,
-        isError: !!error,
-        updateSubscription,
-        refetch: fetchSubscription,
+        isError,
+        error: isError ? "Failed to load subscription" : null,
+        updateSubscription: (plan: string, paymentIntentId?: string, interval?: string) =>
+            updateMutation.mutateAsync({ plan, paymentIntentId, interval }),
+        isUpdating: updateMutation.isPending,
+        refetch: () => queryClient.refetchQueries({ queryKey: ['subscription'] }),
     };
 }

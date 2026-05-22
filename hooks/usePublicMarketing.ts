@@ -6,10 +6,10 @@ import type { PricingPlan } from "@/lib/store/pricing-content";
 import type { Product as ShopProduct, Bundle as ShopBundle } from "@/lib/store/shop-content";
 import type { ProjectItem } from "@/lib/store/portfolio-content";
 
-export function usePublicSubscriptionPlans() {
+export function usePublicSubscriptionPlans(interval?: string) {
     return useQuery({
-        queryKey: ["public", "subscription-plans"],
-        queryFn: () => marketingAPI.getSubscriptionPlans(),
+        queryKey: ["public", "subscription-plans", interval],
+        queryFn: () => marketingAPI.getSubscriptionPlans(interval),
         staleTime: 1000 * 60 * 5,
     });
 }
@@ -74,6 +74,8 @@ export function mapApiProductsToShop(products: any[]): ShopProduct[] {
         licenseExtended: Number(p.licenseExtended) ?? 0,
         lastUpdated: p.lastUpdated ? new Date(p.lastUpdated).toISOString().slice(0, 10) : "",
         faqs: Array.isArray(p.faqs) ? p.faqs : [],
+        type: p.type ?? 'digital',
+        downloadUrl: p.downloadUrl ?? undefined,
     }));
 }
 
@@ -112,6 +114,18 @@ export function mapApiPortfolioToProject(item: any): ProjectItem {
 export function mapApiPortfolioToProjects(items: any[]): ProjectItem[] {
     if (!Array.isArray(items) || items.length === 0) return [];
     return items.map(mapApiPortfolioToProject);
+}
+
+export function useProductReviews(productId: string) {
+    return useQuery({
+        queryKey: ["public", "product-reviews", productId],
+        queryFn: async () => {
+            const { reviewsAPI } = await import("@/lib/api");
+            return reviewsAPI.getByProduct(productId);
+        },
+        enabled: !!productId,
+        staleTime: 1000 * 60 * 2,
+    });
 }
 
 /** Map backend Bundle (with products relation) to shop Bundle shape */

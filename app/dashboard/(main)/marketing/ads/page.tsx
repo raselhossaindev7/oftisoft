@@ -72,8 +72,8 @@ export default function AdsDashboardPage() {
 
     const filteredAds = ads.filter(ad => {
         const matchesSearch = !searchQuery ||
-            ad.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            ad.position?.toLowerCase().includes(searchQuery.toLowerCase());
+            (ad.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (ad.position || '').toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = statusFilter === "all" || (statusFilter === "active" && ad.isActive) || (statusFilter === "paused" && !ad.isActive);
         const matchesType = typeFilter === "all" || ad.type === typeFilter;
         return matchesSearch && matchesStatus && matchesType;

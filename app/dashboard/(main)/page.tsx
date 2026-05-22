@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
 import {
   Activity,
@@ -34,6 +33,7 @@ import {
   Headphones,
   LifeBuoy,
   Inbox,
+  DollarSign,
 } from "lucide-react";
 import {
   AreaChart,
@@ -243,7 +243,7 @@ function UserDashboard() {
           color="primary"
         />
         <StatCard title="Active Services"
-          value={String(projects.filter(p => p.status === 'in_progress').length)}
+          value={String(projects.filter(p => p.status === 'In Progress').length)}
           change="In Progress"
           trend="neutral"
           href="/dashboard/projects"
@@ -365,7 +365,7 @@ function SupportDashboard() {
           value={String(openTickets)}
           change={`${pendingTickets} pending`}
           trend={openTickets > 5 ? "up" : "neutral"}
-          href="/dashboard/support/tickets"
+          href="/dashboard/tickets"
           icon={Inbox}
           color="primary"
         />
@@ -373,7 +373,7 @@ function SupportDashboard() {
           value={String(resolvedToday)}
           change="Tickets"
           trend="up"
-          href="/dashboard/support/tickets"
+          href="/dashboard/tickets"
           icon={CheckCircle2}
           color="success"
         />
@@ -389,7 +389,7 @@ function SupportDashboard() {
           value="94%"
           change="+2%"
           trend="up"
-          href="/dashboard/support/reviews"
+          href="/dashboard/reviews"
           icon={UserCheck}
           color="success"
         />
@@ -438,7 +438,7 @@ function SupportDashboard() {
                         {ticket.status}
                       </Badge>
                       <Button size="sm" asChild>
-                        <Link href={`/dashboard/support/tickets/${ticket.id}`}>
+                        <Link href={`/dashboard/tickets/${ticket.id}`}>
                           Respond
                         </Link>
                       </Button>
@@ -462,25 +462,25 @@ function SupportDashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/support/tickets/new">
+              <Link href="/dashboard/tickets">
                 <Ticket className="w-4 h-4 mr-2" />
                 Create Ticket
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/admin/users">
+              <Link href="/dashboard/users">
                 <Users className="w-4 h-4 mr-2" />
                 Find Customer
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/support/knowledge-base">
+              <Link href="/dashboard/support">
                 <FileText className="w-4 h-4 mr-2" />
                 Knowledge Base
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/support/analytics">
+              <Link href="/dashboard/analytics">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 View Analytics
               </Link>
@@ -504,7 +504,7 @@ function StaffDashboard() {
   
   const myProjects = projects.filter(p => p.userId === user?.id);
   const pendingApprovals = projects.filter(p => p.status === 'pending_review').length;
-  const contentUpdates = 12; // This would come from API
+  const contentUpdates = myProjects.length;
 
   return (
     <div className="space-y-8">
@@ -549,7 +549,7 @@ function StaffDashboard() {
           value={String(contentUpdates)}
           change="This week"
           trend="up"
-          href="/dashboard/content"
+          href="/dashboard/posts"
           icon={Edit3}
           color="success"
         />
@@ -557,7 +557,7 @@ function StaffDashboard() {
           value={String(users.filter(u => u.isActive).length)}
           change="Total"
           trend="neutral"
-          href="/dashboard/admin/users"
+          href="/dashboard/users"
           icon={Users}
           color="primary"
         />
@@ -589,7 +589,7 @@ function StaffDashboard() {
                     <div>
                       <p className="font-bold text-sm">Order #{order.id?.slice(-6)}</p>
                       <p className="text-xs text-muted-foreground">
-                        {order.user?.name || 'Guest'} • ${order.total}
+                        {order.user?.name || 'Guest'} • ${Number(order.total || 0).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -611,13 +611,13 @@ function StaffDashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/content/pages">
+              <Link href="/dashboard/posts">
                 <FileText className="w-4 h-4 mr-2" />
                 Manage Pages
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/content/products">
+              <Link href="/dashboard/products">
                 <Package className="w-4 h-4 mr-2" />
                 Edit Products
               </Link>
@@ -629,7 +629,7 @@ function StaffDashboard() {
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/admin/users">
+              <Link href="/dashboard/users">
                 <Users className="w-4 h-4 mr-2" />
                 Customer Lookup
               </Link>
@@ -707,12 +707,12 @@ function AdminDashboard() {
           value={`$${financeStats?.totalRevenue?.toLocaleString() || '0'}`}
           change="+12%"
           trend="up"
-          href="/dashboard/admin/finance"
+          href="/dashboard/finance"
           icon={TrendingUp}
           color="success"
         />
         <StatCard title="Active Projects"
-          value={String(projects.filter(p => p.status === 'in_progress').length)}
+          value={String(projects.filter(p => p.status === 'In Progress').length)}
           change="On Track"
           trend="up"
           href="/dashboard/projects"
@@ -731,7 +731,7 @@ function AdminDashboard() {
           value={String(users.length)}
           change="+5 new"
           trend="up"
-          href="/dashboard/admin/users"
+          href="/dashboard/users"
           icon={Users}
           color="primary"
         />
@@ -784,7 +784,7 @@ function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full justify-start" asChild>
-              <Link href="/dashboard/admin/users">
+              <Link href="/dashboard/users">
                 <Users className="w-4 h-4 mr-2" />
                 Manage Users
               </Link>
@@ -796,9 +796,9 @@ function AdminDashboard() {
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/admin/finance">
-                <CreditCard className="w-4 h-4 mr-2" />
-                Financial Reports
+              <Link href="/dashboard/finance">
+                <DollarSign className="w-4 h-4 mr-2" />
+                Finance Overview
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>

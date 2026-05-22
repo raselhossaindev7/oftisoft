@@ -16,8 +16,11 @@ import {
     LayoutGrid,
     List,
     Loader2,
-    RefreshCw
+    RefreshCw,
+    CalendarIcon,
+    Filter
 } from "lucide-react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -38,7 +41,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { PaymentModal } from "@/components/projects/payment-modal";
+import type { Project } from "@/lib/api";
 import { useProjects } from "@/hooks/useProjects";
 import { useQuotes } from "@/hooks/useQuotes";
 
@@ -58,9 +70,13 @@ export default function ServicesManagementPage() {
     const [view, setView] = useState<"list" | "grid">("list");
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("All");
+    const [dateFrom, setDateFrom] = useState<Date | undefined>();
+    const [dateTo, setDateTo] = useState<Date | undefined>();
+    const [selectedScheduleDate, setSelectedScheduleDate] = useState<Date>(new Date());
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
     // Fetch data from backend (status filter for projects)
-    const { projects, isLoading: isProjectsLoading, isError: isProjectsError, refetch: refetchProjects } = useProjects(undefined, statusFilter === "All" ? undefined : statusFilter);
+    const { projects, isLoading: isProjectsLoading, isError: isProjectsError, refetch: refetchProjects, updatePaymentStatus } = useProjects(undefined, statusFilter === "All" ? undefined : statusFilter);
     const { quotes, isLoading: isQuotesLoading, isError: isQuotesError, refetch: refetchQuotes } = useQuotes();
     
     const isLoading = isProjectsLoading || isQuotesLoading;
@@ -71,10 +87,15 @@ export default function ServicesManagementPage() {
         refetchQuotes();
     };
 
+    const handlePaymentComplete = (projectId: string) => {
+        updatePaymentStatus(projectId, "Paid");
+        setSelectedProject(null);
+    };
+
     // Calculate stats (backend status: "In Progress", "Planning", etc.)
     const activeProjectsCount = projects?.filter(p => ACTIVE_STATUSES.includes(p.status)).length || 0;
-    const totalBudget = projects?.reduce((sum, p) => sum + (p.budget || 0), 0) || 0;
-    const avgProgress = projects?.length > 0 ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length) : 0;
+    const totalBudget = projects?.reduce((sum, p) => sum + Number(p.budget || 0), 0) || 0;
+    const avgProgress = projects?.length > 0 ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length) : 0;
     const totalMembers = projects?.reduce((sum, p) => sum + (p.members || 0), 0) || 0;
 
     const getStatusBadge = (status: string) => {
@@ -193,6 +214,10 @@ export default function ServicesManagementPage() {
                     <TabsTrigger value="orders" className="rounded-xl h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md font-bold px-8">
                         Service Orders
                     </TabsTrigger>
+                    <TabsTrigger value="schedule" className="rounded-xl h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md font-bold px-8">
+                        <CalendarIcon className="w-4 h-4" />
+                        Schedule
+                    </TabsTrigger>
                     <TabsTrigger value="quotes" className="rounded-xl h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md font-bold px-8">
                         Quote Requests <Badge variant="secondary" className="ml-2 bg-primary/20 text-primary border-none">{quotes?.length || 0}</Badge>
                     </TabsTrigger>
@@ -221,6 +246,39 @@ export default function ServicesManagementPage() {
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" className={cn("h-10 rounded-xl gap-2", (dateFrom || dateTo) && "text-primary border-primary/50")}>
+                                            <Filter className="w-4 h-4" />
+                                            {dateFrom ? format(dateFrom, "MMM d") : "From"} {dateTo ? `- ${format(dateTo, "MMM d")}` : ""}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <div className="p-3 border-b border-border/50 flex items-center gap-1">
+                                            <Button variant="ghost" size="sm" className="h-7 text-xs rounded-lg" onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}>
+                                                Clear
+                                            </Button>
+                                        </div>
+                                        <div className="flex">
+                                            <div className="p-2">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={dateFrom}
+                                                    onSelect={setDateFrom}
+                                                    autoFocus
+                                                />
+                                            </div>
+                                            <div className="p-2 border-l border-border/50">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={dateTo}
+                                                    onSelect={setDateTo}
+                                                    autoFocus
+                                                />
+                                            </div>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                             <div className="flex gap-2 shrink-0">
                                 <Button variant="outline" size="icon" onClick={() => setView("list")} className={view === "list" ? "bg-muted" : ""}><List className="w-4 h-4" /></Button>
@@ -231,12 +289,14 @@ export default function ServicesManagementPage() {
                             {(() => {
                             const filtered = (projects ?? []).filter(p => {
                                 const q = searchQuery.toLowerCase().trim();
-                                if (!q) return true;
-                                return (
-                                    (p.title?.toLowerCase() || "").includes(q) ||
-                                    (p.client?.toLowerCase() || "").includes(q) ||
-                                    (p.id?.toLowerCase() || "").includes(q)
-                                );
+                                if (q && !(p.title?.toLowerCase() || "").includes(q) && !(p.client?.toLowerCase() || "").includes(q) && !(p.id?.toLowerCase() || "").includes(q)) return false;
+                                if (dateFrom && p.createdAt && new Date(p.createdAt) < dateFrom) return false;
+                                if (dateTo && p.createdAt) {
+                                    const endOfDay = new Date(dateTo);
+                                    endOfDay.setHours(23, 59, 59, 999);
+                                    if (new Date(p.createdAt) > endOfDay) return false;
+                                }
+                                return true;
                             });
                             return filtered.length > 0 ? (
                                 view === "grid" ? (
@@ -247,9 +307,9 @@ export default function ServicesManagementPage() {
                                                     <CardHeader className="p-4 pb-2 flex flex-row items-start justify-between">
                                                         <div className="min-w-0 flex-1">
                                                             <CardTitle className="text-base truncate">{project.title}</CardTitle>
-                                                            <CardDescription className="text-xs font-mono">{project.id.substring(0, 8)}</CardDescription>
-                                                        </div>
-                                                        {getStatusBadge(project.status)}
+                                                            <CardDescription className="text-xs font-mono">{project.id?.substring(0, 8) || "—"}</CardDescription>
+                                                    </div>
+                                                    {getStatusBadge(project.status)}
                                                     </CardHeader>
                                                     <CardContent className="p-4 pt-0 space-y-3">
                                                         <p className="text-sm font-medium">{project.client}</p>
@@ -260,6 +320,17 @@ export default function ServicesManagementPage() {
                                                             </div>
                                                             <span className="text-sm font-bold shrink-0">{project.progress}%</span>
                                                         </div>
+                                                        {(project.paymentStatus === "Unpaid" || project.paymentStatus === "pending") && (
+                                                            <div className="pt-2 border-t border-red-500/10 flex items-center justify-between">
+                                                                <span className="text-xs text-red-500 font-medium">Payment Required</span>
+                                                                <button
+                                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedProject(project); }}
+                                                                    className="text-xs font-bold text-white bg-primary px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors"
+                                                                >
+                                                                    Pay Now
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                         <div className="flex items-center justify-between pt-2">
                                                             <span className="text-xs text-muted-foreground flex items-center gap-1">
                                                                 <Users className="w-3 h-3" /> {project.members || 1} members
@@ -289,7 +360,7 @@ export default function ServicesManagementPage() {
                                                 <TableCell>
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-sm">{project.title}</span>
-                                                        <span className="text-sm text-muted-foreground font-mono">{project.id.substring(0, 8)}</span>
+                                                        <span className="text-sm text-muted-foreground font-mono">{project.id?.substring(0, 8) || "—"}</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="text-sm font-medium">
@@ -316,11 +387,18 @@ export default function ServicesManagementPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    <Button asChild variant="ghost" size="sm" className="h-8 rounded-lg gap-1 text-primary">
-                                                        <Link href={`/dashboard/services/${project.id}`}>
-                                                            Track <ChevronRight className="w-4 h-4" />
-                                                        </Link>
-                                                    </Button>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        {(project.paymentStatus === "Unpaid" || project.paymentStatus === "pending") && (
+                                                            <Button size="sm" className="h-8 rounded-lg text-xs" onClick={() => setSelectedProject(project)}>
+                                                                Pay Now
+                                                            </Button>
+                                                        )}
+                                                        <Button asChild variant="ghost" size="sm" className="h-8 rounded-lg gap-1 text-primary">
+                                                            <Link href={`/dashboard/services/${project.id}`}>
+                                                                Track <ChevronRight className="w-4 h-4" />
+                                                            </Link>
+                                                        </Button>
+                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -333,6 +411,81 @@ export default function ServicesManagementPage() {
                                 </div>
                             );
                             })()}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="schedule" className="space-y-4">
+                    <Card className="border-border/50">
+                        <CardHeader className="p-4 border-b border-border/50 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <CalendarIcon className="w-5 h-5 text-primary" />
+                                <div>
+                                    <CardTitle className="text-lg">Project Schedule</CardTitle>
+                                    <CardDescription>View milestones and deadlines on the calendar</CardDescription>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary" /> Due date</span>
+                                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Completed</span>
+                                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500" /> In progress</span>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <Calendar
+                                mode="single"
+                                selected={selectedScheduleDate}
+                                onSelect={(d) => d && setSelectedScheduleDate(d)}
+                                className="rounded-md border border-border/50 mx-auto"
+                                classNames={{
+                                    months: "flex flex-col sm:flex-row gap-4",
+                                    month: "flex flex-col gap-4 w-full",
+                                }}
+                                modifiers={{
+                                    hasDueDate: (projects ?? []).filter(p => p.dueDate).map(p => new Date(p.dueDate!)),
+                                    completed: (projects ?? []).filter(p => p.status === "Completed" && p.dueDate).map(p => new Date(p.dueDate!)),
+                                    inProgress: (projects ?? []).filter(p => ACTIVE_STATUSES.includes(p.status) && p.dueDate).map(p => new Date(p.dueDate!)),
+                                }}
+                                modifiersStyles={{
+                                    hasDueDate: { backgroundColor: "var(--primary)", color: "white", borderRadius: "999px" },
+                                    completed: { backgroundColor: "rgb(34 197 94 / 0.2)", color: "rgb(34 197 94)", borderRadius: "999px" },
+                                    inProgress: { backgroundColor: "rgb(249 115 22 / 0.2)", color: "rgb(249 115 22)", borderRadius: "999px" },
+                                }}
+                            />
+                            <div className="mt-6 space-y-3">
+                                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide">
+                                    Projects due on {format(selectedScheduleDate, "MMMM d, yyyy")}
+                                </h4>
+                                {(() => {
+                                    const dayStr = format(selectedScheduleDate, "yyyy-MM-dd");
+                                    const dueOnDay = (projects ?? []).filter(p => p.dueDate && format(new Date(p.dueDate), "yyyy-MM-dd") === dayStr);
+                                    return dueOnDay.length > 0 ? (
+                                        <div className="grid gap-2">
+                                            {dueOnDay.map((p) => (
+                                                <Link key={p.id} href={`/dashboard/services/${p.id}`}>
+                                                    <Card className="border-border/50 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer">
+                                                        <CardContent className="p-3 flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={cn("w-2 h-2 rounded-full", p.status === "Completed" ? "bg-green-500" : ACTIVE_STATUSES.includes(p.status) ? "bg-orange-500" : "bg-muted")} />
+                                                                <div>
+                                                                    <p className="text-sm font-bold">{p.title}</p>
+                                                                    <p className="text-xs text-muted-foreground">{p.client}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                {getStatusBadge(p.status)}
+                                                                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">No projects due on this date.</p>
+                                    );
+                                })()}
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -351,7 +504,7 @@ export default function ServicesManagementPage() {
                                             <CardTitle className="text-xl font-bold truncate pr-4">{quote.description?.length > 50 ? `${quote.description.substring(0, 50)}...` : (quote.description || "Quote")}</CardTitle>
                                         </div>
                                         <Badge className={["requested", "responded"].includes(quote.status) ? "bg-orange-500/10 text-orange-500 border-orange-500/20" : quote.status === "accepted" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-muted text-muted-foreground border-muted"}>
-                                            {quote.status.charAt(0).toUpperCase() + quote.status.slice(1)}
+                                            {((quote.status || '') ? (quote.status.charAt(0).toUpperCase() + quote.status.slice(1)) : 'Unknown')}
                                         </Badge>
                                     </CardHeader>
                                     <CardContent>
@@ -385,6 +538,13 @@ export default function ServicesManagementPage() {
                     )}
                 </TabsContent>
             </Tabs>
+            {selectedProject && (
+                <PaymentModal
+                    project={selectedProject}
+                    onClose={() => setSelectedProject(null)}
+                    onPaymentComplete={handlePaymentComplete}
+                />
+            )}
         </div>
     );
 }

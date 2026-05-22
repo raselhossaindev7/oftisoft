@@ -80,7 +80,7 @@ export function useAuth<T>(selector?: AuthSelector<T>): UseAuthReturn | T {
     } catch {
       toast.error("Sign out failed");
     }
-    router.push("/dashboard/login");
+    router.push("/login");
   };
 
   return {

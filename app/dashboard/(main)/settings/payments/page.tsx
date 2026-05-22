@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";

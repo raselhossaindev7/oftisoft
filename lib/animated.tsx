@@ -1,95 +1,12 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, createContext, useContext, type ReactNode, type HTMLAttributes } from "react";
+import { useRef, useEffect, useMemo, useState, type ReactNode, type HTMLAttributes } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// ─── Global CSS injection ───
+gsap.registerPlugin(ScrollTrigger);
 
-let injected = false;
-const keyframeCache = new Map<string, true>();
-
-const BASE_CSS = `\
-[data-oa]{will-change:transform,opacity;backface-visibility:hidden}\
-@keyframes oa-gen{from{opacity:var(--oa-fo,0);transform:translateY(var(--oa-fy,0px))translateX(var(--oa-fx,0px))scale(var(--oa-fs,1))}to{opacity:var(--oa-to,1);transform:translateY(var(--oa-ty,0px))translateX(var(--oa-tx,0px))scale(var(--oa-ts,1))}}\
-@keyframes oa-spin{to{transform:rotate(360deg)}}\
-@keyframes oa-spin-r{to{transform:rotate(-360deg)}}\
-@keyframes oa-bounce-y{0%,100%{transform:translateY(0)}50%{transform:translateY(var(--oa-by,-15px))}}\
-@keyframes oa-bounce-x{0%,100%{transform:translateX(0)}50%{transform:translateX(var(--oa-bx,15px))}}\
-@keyframes oa-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:var(--oa-po,1);transform:scale(var(--oa-ps,1.03))}}\
-[data-oa-hov]{transition:transform var(--oa-ht,.2s)var(--oa-he,ease-out),opacity var(--oa-ht,.2s)var(--oa-he,ease-out)}\
-[data-oa-hov]:hover{transform:translateY(var(--oa-hy,0px))translateX(var(--oa-hx,0px))scale(var(--oa-hs,1));opacity:var(--oa-ho,1)}\
-`;
-
-function injectCSS() {
-  if (injected || typeof document === "undefined") return;
-  injected = true;
-  const el = document.createElement("style");
-  el.id = "__oa";
-  el.textContent = BASE_CSS;
-  document.head.appendChild(el);
-}
-
-function addKeyframe(name: string, css: string) {
-  if (typeof document === "undefined") return;
-  if (keyframeCache.has(name)) return;
-  keyframeCache.set(name, true);
-  const el = document.createElement("style");
-  el.textContent = `@keyframes ${name}{${css}}`;
-  document.head.appendChild(el);
-}
-
-// ─── Spring → CSS cubic-bezier approximation ───
-
-function springBezier(stiffness: number, damping: number): string {
-  const s = Math.max(0.1, stiffness / 300);
-  const d = Math.max(0.1, damping / 30);
-  const x1 = Math.min(1, 0.5 / s);
-  const y1 = Math.min(1, 1.2 / d);
-  const x2 = Math.min(1, 2 / s);
-  const y2 = Math.min(1, 3 / d);
-  return `${x1},${y1},${x2},${y2}`;
-}
-
-function springDuration(stiffness: number, damping: number): number {
-  return Math.min(Math.sqrt(1 / Math.max(stiffness, 1)) * 3, 1);
-}
-
-// ─── Utility ───
-
-type AnimValue = number | number[] | string | undefined;
 const isNum = (v: any): v is number => typeof v === "number" && !isNaN(v);
-const last = (v: AnimValue): number | string | undefined => Array.isArray(v) ? v[v.length - 1] : v;
-const first = (v: AnimValue): number | string | undefined => Array.isArray(v) ? v[0] : v;
-
-// ─── Intersection Observer hook ───
-
-export function useInView(options?: IntersectionObserverInit & { once?: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
-  const { once = true, ...observerOptions } = options || {};
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (once && inView) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          if (once) observer.unobserve(el);
-        } else if (!once) {
-          setInView(false);
-        }
-      },
-      { threshold: 0.1, ...observerOptions }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [once, inView]);
-
-  return { ref, inView };
-}
-
-// ─── Props type ───
 
 type AnimProps = {
   initial?: Record<string, any> | false;
@@ -112,174 +29,31 @@ type AnimProps = {
   as?: React.ElementType;
 } & HTMLAttributes<HTMLElement>;
 
-// ─── Build CSS animation from props ───
-
-function buildAnim(
-  initial: Record<string, any> | false | undefined,
-  animate: Record<string, any> | undefined,
-  whileInView: Record<string, any> | undefined,
-  transition: Record<string, any> | undefined,
-  inView: boolean
-): {
-  cssVars: Record<string, string>;
-  animStyle: Record<string, string>;
-  hiddenStyle: Record<string, string>;
-  isHidden: boolean;
-} {
-  const cssVars: Record<string, string> = {};
-  const hiddenStyle: Record<string, string> = {};
-  const animStyle: Record<string, string> = {};
-  const hasMount = animate != null;
-  const hasScroll = whileInView != null;
-  const triggerAnim = hasMount || (hasScroll && inView);
-  const noInit = initial === false;
-
-  // Determine from/to states
-  let from: Record<string, any> = {};
-  let to: Record<string, any> = {};
-
-  if (hasMount) {
-    from = (initial && typeof initial === "object") ? { ...initial } : {};
-    to = { ...animate };
-  } else if (hasScroll) {
-    to = { ...whileInView };
-    if (inView) {
-      from = (initial && typeof initial === "object") ? { ...initial } : {};
-      if (!initial || typeof initial !== "object") {
-        if (isNum(to.opacity)) from.opacity = 0;
-        if (isNum(to.y)) from.y = -(to.y as number) || 24;
-        if (isNum(to.x)) from.x = -(to.x as number) || 24;
-        if (isNum(to.scale)) from.scale = (to.scale as number) * 0.9;
-      }
-    }
-  }
-
-  // ── Handle rotate ──
-  if (isNum(to.rotate)) {
-    const r = to.rotate as number;
-    const isRev = r < 0;
-    const dur = transition?.duration ?? 4;
-    const del = transition?.delay ?? 0;
-    const ease = transition?.ease ?? "linear";
-    const cnt = transition?.repeat === Infinity ? "infinite" : "1";
-    const name = isRev ? "oa-spin-r" : "oa-spin";
-    animStyle.animation = `${name} ${dur}s ${ease} ${del}s ${cnt}`;
-    return { cssVars: {}, animStyle, hiddenStyle: {}, isHidden: false };
-  }
-
-  // ── Handle bounce/pulse array patterns ──
-  const checkArray = (key: string, singleKeyframe: string, varName: string) => {
-    const v = to[key];
-    if (Array.isArray(v) && v.length === 3 && v[0] === v[2] && transition?.repeat === Infinity) {
-      cssVars[varName] = String(v[1]);
-      const dur = transition?.duration ?? 4;
-      const del = transition?.delay ?? 0;
-      const ease = transition?.ease ?? "ease-in-out";
-      animStyle.animation = `${singleKeyframe} ${dur}s ${ease} ${del}s infinite`;
-      return true;
-    }
-    return false;
-  };
-
-  if (checkArray("y", "oa-bounce-y", "--oa-by")) return { cssVars, animStyle, hiddenStyle: {}, isHidden: false };
-  if (checkArray("x", "oa-bounce-x", "--oa-bx")) return { cssVars, animStyle, hiddenStyle: {}, isHidden: false };
-  if (checkArray("scale", "oa-pulse", "--oa-ps")) return { cssVars, animStyle, hiddenStyle: {}, isHidden: false };
-
-  // ── Handle arbitrary array values (e.g., y: ['-100%', '200%']) ──
-  for (const key of ["y", "x"] as const) {
-    const v = to[key];
-    if (Array.isArray(v) && v.length >= 2) {
-      const fromVal = v[0];
-      const toVal = v[v.length - 1];
-      const hash = `${key}:${fromVal}-${toVal}`;
-      addKeyframe(`oa-arr-${hash}`, `from{transform:${key === "y" ? "translateY" : "translateX"}(${fromVal})}to{transform:${key === "y" ? "translateY" : "translateX"}(${toVal})}`);
-      const dur = transition?.duration ?? 0.5;
-      const del = transition?.delay ?? 0;
-      const ease = transition?.ease ?? "linear";
-      const cnt = transition?.repeat === Infinity ? "infinite" : "1";
-      animStyle.animation = `oa-arr-${hash} ${dur}s ${ease} ${del}s ${cnt}`;
-      return { cssVars: {}, animStyle, hiddenStyle: {}, isHidden: false };
-    }
-  }
-
-  // ── Handle scroll-hidden state (not in view) ──
-  if (hasScroll && !inView && !hasMount) {
-    if (isNum(from.opacity)) hiddenStyle.opacity = String(from.opacity);
-    const parts: string[] = [];
-    if (isNum(from.y)) parts.push(`translateY(${from.y}px)`);
-    if (isNum(from.x)) parts.push(`translateX(${from.x}px)`);
-    if (isNum(from.scale)) parts.push(`scale(${from.scale})`);
-    if (parts.length) hiddenStyle.transform = parts.join(" ");
-    return { cssVars: {}, animStyle, hiddenStyle, isHidden: true };
-  }
-
-  // ── Handle hidden state for mount (initial without animate yet) ──
-  if (hasMount && !triggerAnim && !noInit) {
-    if (isNum(from.opacity)) hiddenStyle.opacity = String(from.opacity);
-    const parts: string[] = [];
-    if (isNum(from.y)) parts.push(`translateY(${from.y}px)`);
-    if (isNum(from.x)) parts.push(`translateX(${from.x}px)`);
-    if (isNum(from.scale)) parts.push(`scale(${from.scale})`);
-    if (parts.length) hiddenStyle.transform = parts.join(" ");
-    return { cssVars: {}, animStyle, hiddenStyle, isHidden: true };
-  }
-
-  // ── Handle no animation at all (initial={false} or no anim props) ──
-  if (noInit || (!triggerAnim && !hasScroll)) {
-    return { cssVars: {}, animStyle, hiddenStyle: {}, isHidden: false };
-  }
-
-  // ── Default: use generic keyframe ──
-  if (isNum(from.opacity)) cssVars["--oa-fo"] = String(from.opacity);
-  if (isNum(to.opacity)) cssVars["--oa-to"] = String(to.opacity);
-  if (isNum(from.y)) cssVars["--oa-fy"] = from.y + "px";
-  if (isNum(to.y)) cssVars["--oa-ty"] = to.y + "px";
-  if (isNum(from.x)) cssVars["--oa-fx"] = from.x + "px";
-  if (isNum(to.x)) cssVars["--oa-tx"] = to.x + "px";
-  if (isNum(from.scale)) cssVars["--oa-fs"] = String(from.scale);
-  if (isNum(to.scale)) cssVars["--oa-ts"] = String(to.scale);
-
-  let easing = "ease-out";
-  if (transition?.ease) {
-    easing = transition.ease;
-  } else if (transition?.type === "spring") {
-    easing = `cubic-bezier(${springBezier(transition.stiffness ?? 300, transition.damping ?? 30)})`;
-  }
-
-  const dur = transition?.type === "spring"
-    ? springDuration(transition.stiffness ?? 300, transition.damping ?? 30)
-    : (transition?.duration ?? 0.35);
-  const del = transition?.delay ?? 0;
-  const cnt = transition?.repeat === Infinity ? "infinite" : "1";
-  const dir = transition?.repeat === Infinity ? "alternate" : "normal";
-
-  animStyle.animation = `oa-gen ${dur}s ${easing} ${del}s ${cnt} ${dir} both`;
-
-  return { cssVars, animStyle, hiddenStyle, isHidden: false };
-}
-
-// ─── Build hover CSS vars ───
-
-function buildHover(whileHover?: Record<string, any>, transition?: Record<string, any>): Record<string, string> {
-  if (!whileHover) return {};
-  const vars: Record<string, string> = {};
-  if (isNum(whileHover.y)) vars["--oa-hy"] = whileHover.y + "px";
-  if (isNum(whileHover.x)) vars["--oa-hx"] = whileHover.x + "px";
-  if (isNum(whileHover.scale)) vars["--oa-hs"] = String(whileHover.scale);
-  if (isNum(whileHover.opacity)) vars["--oa-ho"] = String(whileHover.opacity);
-  if (transition?.duration) vars["--oa-ht"] = transition.duration + "s";
-  if (transition?.ease) vars["--oa-he"] = transition.ease;
-  return vars;
-}
-
-// ─── Animated component ───
-
 const MOTION_PROPS = new Set([
   "layoutId", "whileFocus", "whileDrag",
   "whileTap", "exit", "variants", "layout", "positionTransition",
   "onAnimationStart", "onAnimationComplete",
   "onViewportEnter", "onViewportLeave",
 ]);
+
+function toGsapEase(ease?: string): string {
+  if (!ease) return "power2.out";
+  if (ease === "spring" || ease === "spring.soft") return "back.out(1.7)";
+  if (ease.startsWith("spring")) return "back.out(1.7)";
+  return ease;
+}
+
+function toGsapTransition(t: Record<string, any> = {}): gsap.TweenVars {
+  const vars: gsap.TweenVars = {};
+  if (isNum(t.duration)) vars.duration = t.duration;
+  if (isNum(t.delay)) vars.delay = t.delay;
+  if (t.ease) vars.ease = toGsapEase(t.ease);
+  if (t.repeat === Infinity || t.repeat === -1) {
+    vars.repeat = -1;
+    vars.yoyo = true;
+  }
+  return vars;
+}
 
 export function Animated({
   as = "div",
@@ -294,31 +68,143 @@ export function Animated({
   children,
   ...rest
 }: AnimProps) {
-  injectCSS();
-
   const Tag = as;
-  const { ref: viewRef, inView } = useInView({
-    once: viewport?.once !== false,
-    threshold: viewport?.amount || 0.1,
-    rootMargin: (viewport as any)?.margin || "0px",
-  });
+  const ref = useRef<HTMLElement>(null);
+  const animRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
+  const hoverEnterRef = useRef<gsap.core.Tween | null>(null);
+  const hoverLeaveRef = useRef<gsap.core.Tween | null>(null);
 
-  const { cssVars, animStyle, hiddenStyle, isHidden } = buildAnim(
-    _initial, animate, whileInView, transition, inView
-  );
+  const hasMount = animate != null;
+  const hasScroll = whileInView != null;
+  const noInit = _initial === false;
 
-  const hoverVars = buildHover(whileHover, transition);
+  const fromState = useMemo(() => {
+    if (hasMount) {
+      return (_initial && typeof _initial === "object") ? { ..._initial } : {};
+    }
+    if (hasScroll) {
+      if (_initial && typeof _initial === "object") return { ..._initial };
+      const f: Record<string, any> = {};
+      if (whileInView && isNum(whileInView.opacity)) f.opacity = 0;
+      if (whileInView && isNum(whileInView.y)) f.y = -(whileInView.y as number) || 24;
+      if (whileInView && isNum(whileInView.x)) f.x = -(whileInView.x as number) || 24;
+      if (whileInView && isNum(whileInView.scale)) f.scale = (whileInView.scale as number) * 0.9;
+      return f;
+    }
+    return {};
+  }, [hasMount, hasScroll, _initial, whileInView]);
 
-  const combinedStyle = {
-    ...(isHidden ? hiddenStyle : animStyle),
-    ...cssVars,
-    ...hoverVars,
-    ...extStyle,
-  } as React.CSSProperties;
+  const shouldHide = (hasScroll || hasMount) && !noInit && Object.keys(fromState).length > 0;
 
-  const attrs: Record<string, any> = {};
-  attrs["data-oa"] = "";
-  if (whileHover) attrs["data-oa-hov"] = "";
+  const initialStyle = useMemo(() => {
+    if (!shouldHide) return undefined;
+    const s: Record<string, string> = {};
+    const parts: string[] = [];
+    if (isNum(fromState.opacity)) s.opacity = String(fromState.opacity);
+    if (isNum(fromState.y)) parts.push(`translateY(${fromState.y}px)`);
+    if (isNum(fromState.x)) parts.push(`translateX(${fromState.x}px)`);
+    if (isNum(fromState.scale)) parts.push(`scale(${fromState.scale})`);
+    if (parts.length) s.transform = parts.join(" ");
+    return s as React.CSSProperties;
+  }, [shouldHide, fromState]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+
+    const ctx = gsap.context(() => {
+      if (hasScroll && !hasMount) {
+        const toVars: gsap.TweenVars = {};
+        if (whileInView && isNum(whileInView.opacity)) toVars.opacity = whileInView.opacity;
+        if (whileInView && isNum(whileInView.y)) toVars.y = whileInView.y;
+        if (whileInView && isNum(whileInView.x)) toVars.x = whileInView.x;
+        if (whileInView && isNum(whileInView.scale)) toVars.scale = whileInView.scale;
+
+        const fromVars: gsap.TweenVars = {};
+        if (isNum(fromState.opacity)) fromVars.opacity = fromState.opacity;
+        if (isNum(fromState.y)) fromVars.y = fromState.y;
+        if (isNum(fromState.x)) fromVars.x = fromState.x;
+        if (isNum(fromState.scale)) fromVars.scale = fromState.scale;
+
+        const margin = parseInt(String((viewport as any)?.margin)) || 0;
+        const triggerStart = margin < 0
+          ? `top bottom-=${Math.abs(margin)}px`
+          : margin > 0
+            ? `top bottom+=${margin}px`
+            : "top 85%";
+
+        gsap.fromTo(el, fromVars, {
+          ...toVars,
+          ...toGsapTransition(transition),
+          scrollTrigger: {
+            trigger: el,
+            start: triggerStart,
+            toggleActions: viewport?.once !== false ? "play none none none" : "play reverse play reverse",
+          },
+        });
+      }
+
+      if (hasMount) {
+        const to: gsap.TweenVars = {};
+        if (animate && isNum(animate.opacity)) to.opacity = animate.opacity;
+        if (animate && isNum(animate.y)) to.y = animate.y;
+        if (animate && isNum(animate.x)) to.x = animate.x;
+        if (animate && isNum(animate.scale)) to.scale = animate.scale;
+        if (animate && isNum(animate.rotate)) to.rotate = animate.rotate;
+
+        if (Array.isArray(animate?.scale) && animate.scale.length === 3) {
+          to.scale = animate.scale[1];
+          animRef.current = gsap.to(el, { ...to, ...toGsapTransition(transition) });
+        } else if (Object.keys(fromState).length > 0 || Object.keys(to).length > 0) {
+          const gsapFrom: gsap.TweenVars = {};
+          if (isNum(fromState.y)) gsapFrom.y = fromState.y;
+          if (isNum(fromState.x)) gsapFrom.x = fromState.x;
+          if (isNum(fromState.opacity)) gsapFrom.opacity = fromState.opacity;
+          if (isNum(fromState.scale)) gsapFrom.scale = fromState.scale;
+          if (isNum(fromState.rotate)) gsapFrom.rotate = fromState.rotate;
+          animRef.current = gsap.fromTo(el, gsapFrom, { ...to, ...toGsapTransition(transition) });
+        }
+      }
+
+      if (whileHover) {
+        const hoverVars: gsap.TweenVars = {};
+        if (isNum(whileHover.scale)) hoverVars.scale = whileHover.scale;
+        if (isNum(whileHover.y)) hoverVars.y = whileHover.y;
+        if (isNum(whileHover.x)) hoverVars.x = whileHover.x;
+        if (isNum(whileHover.opacity)) hoverVars.opacity = whileHover.opacity;
+
+        const dur = transition?.duration ?? 0.2;
+        const ease = toGsapEase(transition?.ease ?? "power2.out");
+
+        el.addEventListener("mouseenter", () => {
+          hoverLeaveRef.current?.kill();
+          hoverEnterRef.current = gsap.to(el, { ...hoverVars, duration: dur, ease, overwrite: "auto" });
+        });
+        el.addEventListener("mouseleave", () => {
+          hoverEnterRef.current?.kill();
+          const returnVars: gsap.TweenVars = {};
+          if (isNum(fromState.y)) returnVars.y = fromState.y;
+          if (isNum(fromState.x)) returnVars.x = fromState.x;
+          if (isNum(fromState.scale)) returnVars.scale = fromState.scale;
+          hoverLeaveRef.current = gsap.to(el, { ...returnVars, duration: dur, ease, overwrite: "auto" });
+        });
+      }
+    }, el);
+
+    return () => {
+      ctx.revert();
+      animRef.current = null;
+      hoverEnterRef.current = null;
+      hoverLeaveRef.current = null;
+    };
+  }, [hasMount, hasScroll, noInit, !!whileHover]);
+
+  const combinedStyle = (initialStyle || extStyle)
+    ? { ...(initialStyle || {}), ...extStyle } as React.CSSProperties
+    : undefined;
 
   const domProps = Object.fromEntries(
     Object.entries(rest).filter(([k]) => !MOTION_PROPS.has(k))
@@ -326,20 +212,15 @@ export function Animated({
 
   return (
     <Tag
-      ref={viewRef as any}
+      ref={ref as any}
       className={className}
       style={combinedStyle}
-      {...attrs}
       {...(domProps as any)}
     >
       {children}
     </Tag>
   );
 }
-
-// ─── AnimatePresence ───
-
-const PresenceContext = createContext<{ isVisible: boolean }>({ isVisible: true });
 
 type AnimatePresenceProps = {
   children: ReactNode;
@@ -349,11 +230,9 @@ type AnimatePresenceProps = {
   onExitComplete?: () => void;
 };
 
-export function AnimatePresence({ children, mode, custom, initial, onExitComplete }: AnimatePresenceProps) {
+export function AnimatePresence({ children }: AnimatePresenceProps) {
   return <>{children}</>;
 }
-
-// ─── Tag-specific convenience wrappers ───
 
 export const AnimatedDiv = (props: Omit<AnimProps, "as">) => <Animated as="div" {...props} />;
 export const AnimatedSpan = (props: Omit<AnimProps, "as">) => <Animated as="span" {...props} />;
@@ -363,8 +242,6 @@ export const AnimatedH3 = (props: Omit<AnimProps, "as">) => <Animated as="h3" {.
 export const AnimatedP = (props: Omit<AnimProps, "as">) => <Animated as="p" {...props} />;
 export const AnimatedSection = (props: Omit<AnimProps, "as">) => <Animated as="section" {...props} />;
 export const AnimatedAside = (props: Omit<AnimProps, "as">) => <Animated as="aside" {...props} />;
-
-// ─── Convenience animation components ───
 
 export function SlideUp({ children, delay = 0, duration = 0.35, className = "", ...rest }: { children: ReactNode; delay?: number; duration?: number; className?: string; [key: string]: any }) {
   return (
@@ -398,44 +275,82 @@ export function Reveal({ children, className = "", delay = 0, duration = 0.4, on
   );
 }
 
-// ─── Scroll position hooks ───
+export function useInView(options?: IntersectionObserverInit & { once?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { once = true, ...observerOptions } = options || {};
 
-export function useScrollY() {
-  const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && once) observer.unobserve(el);
+      },
+      { threshold: 0.1, ...observerOptions }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [once]);
+
+  return { ref };
+}
+
+export function useScrollY(): number {
+  const [scrollY, setScrollY] = useState(0);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (rafRef.current !== null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        setScrollY(window.scrollY);
+        rafRef.current = null;
+      });
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
+
   return scrollY;
 }
 
 export function useScrollProgress(ref?: React.RefObject<HTMLElement | null>): number {
   const [progress, setProgress] = useState(0);
+  const rafRef = useRef<number | null>(null);
+
   useEffect(() => {
     const onScroll = () => {
-      if (ref?.current) {
-        const rect = ref.current.getBoundingClientRect();
-        const wh = window.innerHeight;
-        setProgress(Math.max(0, Math.min(1, (wh - rect.top) / (wh + rect.height))));
-      } else {
-        const doc = document.documentElement;
-        const total = doc.scrollHeight - window.innerHeight;
-        setProgress(total > 0 ? window.scrollY / total : 0);
-      }
+      if (rafRef.current !== null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        if (ref?.current) {
+          const rect = ref.current.getBoundingClientRect();
+          const wh = window.innerHeight;
+          setProgress(Math.max(0, Math.min(1, (wh - rect.top) / (wh + rect.height))));
+        } else {
+          const doc = document.documentElement;
+          const total = doc.scrollHeight - window.innerHeight;
+          setProgress(total > 0 ? window.scrollY / total : 0);
+        }
+        rafRef.current = null;
+      });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, [ref]);
+
   return progress;
 }
 
 export function useScrollOffset(ref: React.RefObject<HTMLElement | null>) {
   return useScrollProgress(ref);
 }
-
-// ─── useTransform ───
 
 export function useTransform(value: number, input: readonly number[], output: readonly number[]): number;
 export function useTransform(value: number, input: readonly number[], output: readonly (number | string)[]): number | string;
@@ -446,7 +361,8 @@ export function useTransform(value: number, input: readonly number[], output: re
     for (let i = 0; i < input.length - 1; i++) {
       if (clamped >= input[i] && clamped <= input[i + 1]) {
         const t = (clamped - input[i]) / (input[i + 1] - input[i] || 1);
-        const a = output[i], b = output[i + 1];
+        const a = output[i];
+        const b = output[i + 1];
         if (typeof a === "string" || typeof b === "string") {
           return t < 0.5 ? String(a) : String(b);
         }
@@ -457,28 +373,25 @@ export function useTransform(value: number, input: readonly number[], output: re
   }, [value, ...input, ...output]);
 }
 
-// ─── Spring smoothing (for mouse-driven values) ───
-
-export function useSpring(value: number, config?: { stiffness?: number; damping?: number; restDelta?: number; mass?: number; velocity?: number }) {
+export function useSpring(value: number, config?: { stiffness?: number; damping?: number; restDelta?: number; mass?: number; velocity?: number }): number {
   const [smoothed, setSmoothed] = useState(value);
-  const ref = useRef(value);
-  ref.current = value;
+  const valRef = useRef(value);
+  const smoothRef = useRef(value);
+  valRef.current = value;
   const stiffness = config?.stiffness ?? 100;
   const damping = config?.damping ?? 20;
 
   useEffect(() => {
     let frame: number;
-    let current = smoothed;
     const animate = () => {
-      const target = ref.current;
-      const diff = target - current;
+      const diff = valRef.current - smoothRef.current;
       if (Math.abs(diff) < 0.001) {
-        current = target;
-        setSmoothed(target);
+        smoothRef.current = valRef.current;
+        setSmoothed(valRef.current);
         return;
       }
-      current += diff * (stiffness / 100) * (1 / (1 + damping / 20));
-      setSmoothed(current);
+      smoothRef.current += diff * (stiffness / 100) * (1 / (1 + damping / 20));
+      setSmoothed(smoothRef.current);
       frame = requestAnimationFrame(animate);
     };
     frame = requestAnimationFrame(animate);
@@ -487,8 +400,6 @@ export function useSpring(value: number, config?: { stiffness?: number; damping?
 
   return smoothed;
 }
-
-// ─── useReducedMotion ───
 
 export function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -502,23 +413,29 @@ export function useReducedMotion(): boolean {
   return reduced;
 }
 
-// ─── useMotionValue ───
-
 export function useMotionValue(initial: number) {
   const ref = useRef(initial);
   const [state, setState] = useState(initial);
   return {
     get: () => ref.current,
     set: (v: number) => { ref.current = v; setState(v); },
-    value: state,
   };
 }
 
-// ─── Parallax ───
-
-export function useParallax(ref: React.RefObject<HTMLElement | null>, factor = 0.5) {
+export function useParallax(elRef: React.RefObject<HTMLElement | null>, factor = 0.5) {
   const scrollY = useScrollY();
-  if (!ref.current) return 0;
-  const rect = ref.current.getBoundingClientRect();
-  return (rect.top - scrollY) * factor;
+  const [offset, setOffset] = useState(0);
+  const rectRef = useRef({ top: 0 });
+
+  useEffect(() => {
+    if (elRef.current) {
+      rectRef.current = elRef.current.getBoundingClientRect();
+    }
+  }, [elRef]);
+
+  useEffect(() => {
+    setOffset((rectRef.current.top - scrollY) * factor);
+  }, [scrollY, factor]);
+
+  return offset;
 }

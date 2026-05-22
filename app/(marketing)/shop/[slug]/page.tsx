@@ -13,23 +13,22 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { 
     Check, 
     ShieldCheck, 
-    Zap, 
     Star, 
     ShoppingCart, 
     ExternalLink, 
     BookOpen, 
-    Download, 
-    Clock, 
     Award, 
     Info, 
     MessageSquare,
     ChevronRight,
-    Play
+    Play,
+    Clock
 } from "lucide-react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { useShopContentStore } from "@/lib/store/shop-content";
 import { usePublicProducts, mapApiProductsToShop } from "@/hooks/usePublicMarketing";
+import { useProductReviews } from "@/hooks/usePublicMarketing";
 import Link from 'next/link';
 
 export default function ProductDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -39,6 +38,24 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ slug:
     const apiMapped = useMemo(() => mapApiProductsToShop(apiProducts), [apiProducts]);
     const products = apiMapped.length > 0 ? apiMapped : (content?.products || []);
     const product = products.find(p => p.slug === slug);
+    const productId = product?.id ?? "";
+    const { data: productReviews = [] } = useProductReviews(productId);
+
+    const reviewDistribution = useMemo(() => {
+        const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        productReviews.forEach((r: { rating: number }) => {
+            const star = Math.round(r.rating);
+            if (star >= 1 && star <= 5) dist[star as keyof typeof dist]++;
+        });
+        const total = productReviews.length;
+        if (total === 0) return dist;
+        const percentages: Record<number, number> = {};
+        for (const key of Object.keys(dist)) {
+            const k = Number(key) as keyof typeof dist;
+            percentages[k] = Math.round((dist[k] / total) * 100);
+        }
+        return percentages;
+    }, [productReviews]);
     const [selectedLicense, setSelectedLicense] = useState<'regular' | 'extended'>('regular');
     const [activeScreenshot, setActiveScreenshot] = useState(0);
 
@@ -213,18 +230,18 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ slug:
                                             <Star key={i} className={`w-5 h-5 ${i < Math.floor(product.rating) ? "fill-current" : ""}`} />
                                         ))}
                                     </div>
-                                    <p className="text-sm text-muted-foreground">Based on {product.reviews} reviews</p>
+                                    <p className="text-sm text-muted-foreground">Based on {productReviews.length || product.reviews} reviews</p>
                                 </div>
                                 <div className="flex-1 space-y-2 w-full">
                                     {[5, 4, 3, 2, 1].map((stars) => {
-                                        const percentage = stars === 5 ? 85 : stars === 4 ? 12 : 3;
+                                        const pct = reviewDistribution[stars as keyof typeof reviewDistribution] || 0;
                                         return (
                                             <div key={stars} className="flex items-center gap-4 text-sm">
                                                 <span className="w-12 font-medium">{stars} Star</span>
                                                 <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                                                    <div className="h-full bg-yellow-500 rounded-full" style={{ width: `${percentage}%` }} />
+                                                    <div className="h-full bg-yellow-500 rounded-full" style={{ width: `${pct}%` }} />
                                                 </div>
-                                                <span className="w-10 text-right text-muted-foreground">{percentage}%</span>
+                                                <span className="w-10 text-right text-muted-foreground">{pct}%</span>
                                             </div>
                                         );
                                     })}

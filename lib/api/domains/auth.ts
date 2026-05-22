@@ -1,4 +1,15 @@
 import { api } from "@/lib/api";
+
+/**
+ * Auth API - Profile & Settings Management (axios)
+ *
+ * LAYER NOTE: Core auth ops (login/register/logout/checkAuth/refresh/2FA/forgotPassword/resetPassword)
+ * go through auth.service.ts (raw fetch with custom auto-refresh logic).
+ * Those endpoints are duplicated here but SHOULD NOT be used for auth flow -
+ * they're included for completeness but bypass the auth store.
+ * Use this module for: getProfile, updateProfile, uploadAvatar, changePassword, getSessions,
+ * revokeSession, exportData, deleteAccount, cancelDeletion, OAuth URLs.
+ */
 export interface RegisterData {
     name: string;
     email: string;
@@ -73,6 +84,14 @@ export interface User {
     password?: string;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface LoginResponse {
+    message: string;
+    user: User;
+    accessToken?: string;
+    requires2FA?: boolean;
+    tempToken?: string;
 }
 
 export interface AuthResponse {
@@ -186,6 +205,48 @@ export const authAPI = {
 
     disable2FA: async (code: string): Promise<{ message: string; enabled: boolean }> => {
         const response = await api.post('/auth/2fa/disable', { code });
+        return response.data;
+    },
+
+    // Email Verification
+    verifyEmail: async (token: string): Promise<{ message: string }> => {
+        const response = await api.get(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+        return response.data;
+    },
+
+    resendVerification: async (): Promise<{ message: string }> => {
+        const response = await api.post('/auth/resend-verification');
+        return response.data;
+    },
+
+    // 2FA Login (used when 2FA is required during login)
+    verify2FALogin: async (tempToken: string, code: string, remember?: boolean): Promise<LoginResponse> => {
+        const response = await api.post('/auth/2fa/verify-login', { tempToken, code, remember });
+        return response.data;
+    },
+
+    // OAuth URLs
+    getGoogleOAuthUrl: (): string => {
+        return `${api.defaults.baseURL}/auth/google`;
+    },
+
+    getGithubOAuthUrl: (): string => {
+        return `${api.defaults.baseURL}/auth/github`;
+    },
+
+    // Forgot Password
+    forgotPassword: async (email: string): Promise<{ message: string }> => {
+        const response = await api.post('/auth/forgot-password', { email });
+        return response.data;
+    },
+
+    resetPassword: async (token: string, password: string): Promise<{ message: string }> => {
+        const response = await api.post('/auth/reset-password', { token, password });
+        return response.data;
+    },
+
+    verifyResetToken: async (token: string): Promise<{ valid: boolean }> => {
+        const response = await api.get(`/auth/verify-reset-token?token=${encodeURIComponent(token)}`);
         return response.data;
     },
 

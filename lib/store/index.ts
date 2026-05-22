@@ -227,14 +227,12 @@ export const useNotificationsStore = create<NotificationsState>()(
  * Preferences Store - User Preferences
  */
 interface PreferencesState {
-    language: 'en' | 'bn';
     currency: 'USD' | 'BDT';
     notifications: {
         email: boolean;
         push: boolean;
         sms: boolean;
     };
-    setLanguage: (lang: 'en' | 'bn') => void;
     setCurrency: (currency: 'USD' | 'BDT') => void;
     updateNotificationPreference: (type: 'email' | 'push' | 'sms', enabled: boolean) => void;
 }
@@ -242,7 +240,6 @@ interface PreferencesState {
 export const usePreferencesStore = create<PreferencesState>()(
     persist(
         (set) => ({
-            language: 'en',
             currency: 'USD',
             notifications: {
                 email: true,
@@ -250,7 +247,6 @@ export const usePreferencesStore = create<PreferencesState>()(
                 sms: false,
             },
 
-            setLanguage: (lang) => set({ language: lang }),
             setCurrency: (currency) => set({ currency }),
             updateNotificationPreference: (type, enabled) => set((state) => ({
                 notifications: {

@@ -2,13 +2,17 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useAuthStore, getAuthCheckComplete } from "@/store/useAuthStore";
+import {
+  useAuthStore,
+  getAuthCheckComplete,
+  getIsLoggingOut,
+} from "@/store/useAuthStore";
 
 const AUTH_PATHS = [
-  "/dashboard/login",
-  "/dashboard/register",
-  "/dashboard/forgot-password",
-  "/dashboard/reset-password",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
   "/dashboard/2fa",
 ];
 
@@ -27,10 +31,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Skip auth pages - useProtectedRoute handles those
-  if (isAuthPath(pathname)) return;
-    
+    if (isAuthPath(pathname)) return;
+
+    // Don't re-check auth during logout transition — cookies may still be clearing
+    if (getIsLoggingOut()) return;
+
     // Only check auth once globally per session
-  if (getAuthCheckComplete()) return;
+    if (getAuthCheckComplete()) return;
 
     checkAuth();
   }, [checkAuth, pathname]);

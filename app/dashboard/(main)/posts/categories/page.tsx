@@ -61,7 +61,7 @@ export default function PostCategoriesPage() {
     const [form, setForm] = useState({ name: "", description: "", slug: "" });
 
     const filtered = categories.filter((c: Category) =>
-        c.name.toLowerCase().includes(search.toLowerCase())
+        (c.name || '').toLowerCase().includes(search.toLowerCase())
     );
 
     const handleCreate = () => {

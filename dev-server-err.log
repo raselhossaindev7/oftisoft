@@ -1,0 +1,1230 @@
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+(node:432) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:30344) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:432) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/billing.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/billing.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⨯ upstream image response failed for https://images.unsplash.com/photo-1563986768609-322da13575f2?w=800&q=80 404
+⨯ upstream image response failed for https://images.unsplash.com/photo-1553729459-afe8f2e2b8b4?w=800&q=80 404
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/orders.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/orders.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/orders.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/orders.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/billing.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/billing.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/analytics/track/visit AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/billing/subscription AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/billing/subscription AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/leads AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/leads/stats AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/analytics/track/visit AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/billing/complete-checkout AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/leads AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/leads/stats AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/projects.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/projects.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/projects.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/projects.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/projects.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/projects.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/messages.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/messages.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/index.ts [app-client] (ecmascript) <locals> changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/analytics/track/visit AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+Failed to proxy http://localhost:5500/api/analytics/track/visit AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/orders AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/notifications AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/notifications AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/orders AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/seller AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/available-users AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/support-bot AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/available-users AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/seller AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/support-bot AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (app\(marketing)\shop\success\page.tsx:14:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+Failed to proxy http://localhost:5500/api/analytics/track/visit AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4535:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/billing.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/billing.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4550:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4550:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/billing.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4551:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4551:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/marketing.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4556:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4556:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4556:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4556:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4556:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4556:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⨯ ReferenceError: Cannot access 'axiosClient' before initialization
+    at Module.axiosClient (G:\2026 Work\Mern Stack\oftisoft\frontend\.next\dev\server\chunks\ssr\[root-of-the-server]__c186068d._.js:4556:9)
+    at module evaluation (lib\api\client.ts:8:26)
+    at module evaluation (lib\api\domains\disputes.ts:1:1)
+    at module evaluation (lib\api\domains\index.ts:21:1)
+    at module evaluation (lib\api.ts:56:1)
+    at module evaluation (hooks\useBadgeCounts.ts:2:1)
+    at module evaluation (components\dashboard\sidebar.tsx:61:1)
+    at module evaluation (app\dashboard\(main)\layout.tsx:4:1)
+   6 | import { axiosClient } from "../api";
+   7 |
+>  8 | export const apiClient = axiosClient;
+     |                          ^
+   9 |
+  10 | export const api = {
+  11 |     get: async <T>(url: string, options?: any): Promise<T> => { {
+  digest: '3299816789'
+}
+⚠ Fast Refresh had to perform a full reload when ./lib/api/client.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/client.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/disputes.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/disputes.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/disputes.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/disputes.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/disputes.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/disputes.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/disputes.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+⚠ Fast Refresh had to perform a full reload when ./lib/api/domains/disputes.ts changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/orders AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/orders AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations Error: read ECONNRESET
+    at ignore-listed frames {
+  errno: -4077,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+Error: read ECONNRESET
+    at ignore-listed frames {
+  errno: -4077,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/orders AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/orders AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+Failed to proxy http://localhost:5500/api/messages/conversations AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}
+AggregateError: 
+    at ignore-listed frames {
+  code: 'ECONNREFUSED'
+}

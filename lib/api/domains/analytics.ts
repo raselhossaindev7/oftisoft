@@ -27,7 +27,7 @@ export const affiliateAPI = {
         return response.data;
     },
     cancelWithdrawal: async (id: string): Promise<any> => {
-        const response = await api.post('/affiliate/withdraw/cancel', { id });
+        const response = await api.post(`/affiliate/withdraw/${id}/cancel`);
         return response.data;
     },
 };

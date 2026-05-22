@@ -213,7 +213,7 @@ export default function HelpPage() {
                                             {ticket.status}
                                         </Badge>
                                         <span className="text-xs font-bold text-muted-foreground ">
-                                            #{ticket.id.slice(0, 8)}
+                                            #{(ticket.id || '—').slice(0, 8)}
                                         </span>
                                         <span className="text-xs font-medium text-muted-foreground">
                                             {format(new Date(ticket.createdAt), 'MMM dd, yyyy')}
@@ -295,7 +295,7 @@ export default function HelpPage() {
                                         <Badge variant="outline" className={`capitalize font-semibold border-2 ${getStatusColor(selectedTicket.status)}`}>
                                             {selectedTicket.status}
                                         </Badge>
-                                        <span className="text-xs font-semibold text-muted-foreground ">#{selectedTicket.id.slice(0, 8)}</span>
+                                        <span className="text-xs font-semibold text-muted-foreground ">#{(selectedTicket.id || '—').slice(0, 8)}</span>
                                     </div>
                                     <Badge variant="secondary" className=" text-sm font-semibold px-3 py-1">
                                         {selectedTicket.category}
@@ -314,7 +314,7 @@ export default function HelpPage() {
                                                 isCustomer ? "flex-row" : "flex-row-reverse ml-auto"
                                             )}>
                                                 <Avatar className="h-10 w-10 shrink-0 border-2 border-background shadow-sm">
-                                                    <AvatarFallback className="font-bold text-xs">{msg.sender?.name.charAt(0)}</AvatarFallback>
+                                                    <AvatarFallback className="font-bold text-xs">{(msg.sender?.name || '?').charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <div className={cn(
                                                     "p-4 rounded-[24px] space-y-2 relative",

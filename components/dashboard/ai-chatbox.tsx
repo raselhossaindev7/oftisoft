@@ -42,7 +42,7 @@ export function AIChatbox({ pageKey, className, renderTrigger }: AIChatboxProps)
     setIsLoading(true);
 
     try {
-      const res = await api.post("/api/ai/generate", { message: text, pageKey });
+      const res = await api.post("/ai/generate", { message: text, pageKey });
       const reply = res.data.response;
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch {

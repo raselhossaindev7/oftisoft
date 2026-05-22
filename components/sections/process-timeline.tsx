@@ -1,5 +1,5 @@
 "use client"
-import { AnimatedDiv, useScrollY, useScrollProgress, useTransform, useSpring, useMotionValue } from "@/lib/animated";
+import { AnimatedDiv, useScrollProgress, useSpring } from "@/lib/animated";
 
 import { useRef } from "react";
 import { 
@@ -26,8 +26,21 @@ const iconMap: Record<string, any> = {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+interface Step {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    gradient: string;
+}
+
 export default function ProcessTimeline() {
-    const processContent = {
+    const processContent: {
+        title: string;
+        subtitle: string;
+        badge: string;
+        steps: Step[];
+    } = {
         title: "From Concept to",
         subtitle: "Reality.",
         badge: "How We Work",
@@ -88,7 +101,7 @@ export default function ProcessTimeline() {
                     </div>
 
                     <div className="space-y-8 md:space-y-24">
-                        {processContent.steps.map((step: any, index: number) => (
+                        {processContent.steps.map((step: Step, index: number) => (
                             <TimelineItem 
                                 key={step.id} 
                                 step={step} 
@@ -102,7 +115,7 @@ export default function ProcessTimeline() {
     );
 }
 
-function TimelineItem({ step, index }: { step: any, index: number }) {
+function TimelineItem({ step, index }: { step: Step, index: number }) {
     const isEven = index % 2 === 0;
     
     return (

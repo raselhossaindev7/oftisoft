@@ -48,6 +48,7 @@ export interface Message {
         sender: string;
     };
     reactions?: MessageReaction[];
+    isSystem?: boolean;
     edited?: boolean;
     editedAt?: string;
 }
@@ -62,12 +63,21 @@ export interface ConversationUser {
     lastSeen?: string;
 }
 
+export interface OrderInfo {
+    id: string;
+    orderNumber: string;
+    status: string;
+    total: number;
+    items: { id: string; productName: string; quantity: number; price: number }[];
+}
+
 export interface Conversation {
     id: string;
     name: string;
     role: UserRole;
     email: string;
     avatar: string;
+    avatarUrl?: string;
     status: 'online' | 'offline';
     lastMsg: string;
     lastMsgIds: string;
@@ -79,6 +89,9 @@ export interface Conversation {
     isPinned?: boolean;
     isMuted?: boolean;
     blockedBy?: string[];
+    isOrder?: boolean;
+    isSeller?: boolean;
+    order?: OrderInfo | null;
 }
 
 export interface MessagingPermissions {
@@ -182,10 +195,9 @@ export function canMessageUser(
         return ['Support', 'Editor', 'User', 'Viewer'].includes(recipientRole);
     }
     
-    // Users can message Support and Users/Viewers
+    // Fiverr-style: regular users can only message the seller (admin)
     if (senderRole === 'User' || senderRole === 'Viewer') {
-        if (recipientIsSupport) return true;
-        return recipientRole === 'User' || recipientRole === 'Viewer';
+        return recipientRole === 'SuperAdmin' || recipientRole === 'Admin';
     }
     
     return false;
@@ -223,12 +235,17 @@ function formatConversation(c: any, currentUserId: string): Conversation | null 
         }
     }
 
+    const isSeller = ['SuperAdmin', 'Admin'].includes(other.role);
+    const isOrder = c.type === 'order' || false;
+    const displayName = isOrder && c.name ? c.name : (other.name || "Unknown");
+
     return {
         id: c.id,
-        name: other.name || "Unknown",
+        name: displayName,
         role: other.role || "User",
         email: other.email,
-        avatar: other.avatarUrl || (other.name || "??").slice(0, 2).toUpperCase(),
+        avatarUrl: other.avatarUrl || undefined,
+        avatar: (other.name || "??").slice(0, 2).toUpperCase(),
         status: other.isActive ? "online" : "offline",
         lastMsg: lastMsg ? (isMe ? `You: ${lastMsg.content}` : lastMsg.content) : "No messages yet",
         lastMsgIds: lastMsg?.id || "init",
@@ -239,7 +256,10 @@ function formatConversation(c: any, currentUserId: string): Conversation | null 
         isSupport: other.isAI || other.role === 'Support',
         isPinned: c.isPinned || false,
         isMuted: c.isMuted || false,
-        blockedBy: c.blockedBy || []
+        blockedBy: c.blockedBy || [],
+        isOrder,
+        isSeller,
+        order: c.order || null,
     };
 }
 
@@ -252,6 +272,14 @@ function getRoleColor(role: string): string {
         case 'User': return 'bg-blue-500';
         default: return 'bg-gray-500';
     }
+}
+
+function parseJsonField(val: any): any[] {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+        try { return JSON.parse(val); } catch { return []; }
+    }
+    return [];
 }
 
 function formatMessage(m: any, currentUserId: string, chatId: string, currentUserName?: string): Message {
@@ -277,13 +305,14 @@ function formatMessage(m: any, currentUserId: string, chatId: string, currentUse
         isMe,
         chatId,
         status,
-        attachments: m.attachments || [],
+        attachments: parseJsonField(m.attachments),
         replyTo: m.replyTo ? {
             id: m.replyTo.id,
             text: m.replyTo.content,
             sender: m.replyTo.sender?.name || "Unknown"
         } : undefined,
-        reactions: m.reactions || [],
+        reactions: parseJsonField(m.reactions),
+        isSystem: Array.isArray(m.reactions) && m.reactions.some((r: any) => r.isSystem === true),
         edited: m.edited || false,
         editedAt: m.editedAt
     };
@@ -310,6 +339,7 @@ export function useMessages() {
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const seenMessageIdsRef = useRef<Set<string>>(new Set());
     const lastTypingRef = useRef<number>(0);
+    const selectedChatRef = useRef<Conversation | null>(null);
 
     const userRole = (user?.role || 'User') as UserRole;
     const userPermissions = permissions || getRolePermissions(userRole);
@@ -323,6 +353,7 @@ export function useMessages() {
 
     const setSelectedChat = useCallback((chat: Conversation | null) => {
         setSelectedChatState(chat);
+        selectedChatRef.current = chat;
         const params = new URLSearchParams(searchParams.toString());
         if (chat?.id) {
             params.set('chat', chat.id);
@@ -338,7 +369,7 @@ export function useMessages() {
         if (!silent) setIsLoading(true);
         try {
             const data = await messagesAPI.getConversations();
-            const formatted = (data || [])
+            const formatted = (Array.isArray(data) ? data : [])
                 .map((c: any) => formatConversation(c, user.id))
                 .filter(Boolean) as Conversation[];
             
@@ -400,9 +431,16 @@ export function useMessages() {
             try {
                 if (isFirstLoad) setIsMessagesLoading(true);
                 const data = await messagesAPI.getMessages(chatId);
-                const formatted = (data || []).map((m: any) =>
+                const msgs = data?.messages || data || [];
+                const convData = data?.conversation || null;
+                const formatted = (Array.isArray(msgs) ? msgs : []).map((m: any) =>
                     formatMessage(m, userId, chatId, user?.name)
                 );
+                
+                // Update selectedChat with order data from API
+                if (convData?.order && selectedChatRef.current) {
+                    setSelectedChatState(prev => prev ? { ...prev, order: convData.order } : prev);
+                }
                 
                 // Play sound on new incoming messages
                 if (!isFirstLoad && formatted.length > 0) {
@@ -454,6 +492,11 @@ export function useMessages() {
         setFilteredMessages(filtered);
     }, [messages]);
 
+    const clearSearch = useCallback(() => {
+        setSearchQuery('');
+        setFilteredMessages(messages);
+    }, [messages]);
+
     const sendMessage = async (content: string, attachments?: File[], replyToId?: string) => {
         if (!selectedChat || !content.trim() || !user) return false;
         
@@ -490,9 +533,14 @@ export function useMessages() {
 
             await messagesAPI.sendMessage(selectedChat.id, content.trim(), replyToId, uploadedAttachments);
             const data = await messagesAPI.getMessages(selectedChat.id);
-            const formatted = (data || []).map((m: any) =>
+            const msgs = data?.messages || data || [];
+            const convData = data?.conversation || null;
+            const formatted = (Array.isArray(msgs) ? msgs : []).map((m: any) =>
                 formatMessage(m, user.id, selectedChat.id, user?.name)
             );
+            if (convData?.order) {
+                setSelectedChatState(prev => prev ? { ...prev, order: convData.order } : prev);
+            }
             setMessages(formatted);
             setFilteredMessages(formatted);
             fetchConversations(true);
@@ -515,9 +563,14 @@ export function useMessages() {
             await messagesAPI.editMessage(messageId, newContent);
             if (selectedChat) {
                 const data = await messagesAPI.getMessages(selectedChat.id);
-                const formatted = (data || []).map((m: any) =>
+                const msgs = data?.messages || data || [];
+                const convData = data?.conversation || null;
+                const formatted = (Array.isArray(msgs) ? msgs : []).map((m: any) =>
                     formatMessage(m, user!.id, selectedChat.id, user?.name)
                 );
+                if (convData?.order) {
+                    setSelectedChatState(prev => prev ? { ...prev, order: convData.order } : prev);
+                }
                 setMessages(formatted);
                 setFilteredMessages(formatted);
             }
@@ -552,7 +605,8 @@ export function useMessages() {
             await messagesAPI.addReaction(messageId, emoji);
             if (selectedChat) {
                 const data = await messagesAPI.getMessages(selectedChat.id);
-                const formatted = (data || []).map((m: any) =>
+                const msgs = data?.messages || data || [];
+                const formatted = (Array.isArray(msgs) ? msgs : []).map((m: any) =>
                     formatMessage(m, user!.id, selectedChat.id, user?.name)
                 );
                 setMessages(formatted);
@@ -568,7 +622,8 @@ export function useMessages() {
             await messagesAPI.removeReaction(messageId, emoji);
             if (selectedChat) {
                 const data = await messagesAPI.getMessages(selectedChat.id);
-                const formatted = (data || []).map((m: any) =>
+                const msgs = data?.messages || data || [];
+                const formatted = (Array.isArray(msgs) ? msgs : []).map((m: any) =>
                     formatMessage(m, user!.id, selectedChat.id, user?.name)
                 );
                 setMessages(formatted);
@@ -719,9 +774,53 @@ export function useMessages() {
         }
     }, [conversations, searchParams, selectedChat]);
 
+    const startOrderConversation = async (orderId: string) => {
+        if (!user) return null;
+
+        try {
+            const conv = await messagesAPI.getOrderConversation(orderId);
+            const formatted = formatConversation(conv, user.id);
+            if (!formatted) {
+                toast.error("Failed to open conversation");
+                return null;
+            }
+            setConversations(prev => {
+                const exists = prev.some(c => c.id === formatted.id);
+                if (exists) return prev;
+                return [formatted, ...prev];
+            });
+            setSelectedChat(formatted);
+            return formatted;
+        } catch (e) {
+            console.error("Failed to start order conversation", e);
+            toast.error("Failed to open conversation");
+            return null;
+        }
+    };
+
     const refreshConversations = useCallback((silent = true) => {
         fetchConversations(silent);
     }, [fetchConversations]);
+
+    const refreshMessages = useCallback(async () => {
+        const chat = selectedChatRef.current;
+        if (!chat) return;
+        try {
+            const data = await messagesAPI.getMessages(chat.id);
+            const msgs = data?.messages || data || [];
+            const convData = data?.conversation || null;
+            const formatted = (Array.isArray(msgs) ? msgs : []).map((m: any) =>
+                formatMessage(m, user!.id, chat.id, user?.name)
+            );
+            if (convData?.order) {
+                setSelectedChatState(prev => prev ? { ...prev, order: convData.order } : prev);
+            }
+            setMessages(formatted);
+            setFilteredMessages(formatted);
+        } catch (e) {
+            console.error("Failed to refresh messages", e);
+        }
+    }, [user]);
 
     return {
         conversations: filteredConversations(),
@@ -745,12 +844,15 @@ export function useMessages() {
         sendTypingIndicator,
         startConversation,
         startSupportChat,
+        startOrderConversation,
         refreshConversations,
+        refreshMessages,
         pinConversation,
         muteConversation,
         blockUser,
         unblockUser,
         searchMessages,
+        clearSearch,
         canMessageUser: (recipientRole: UserRole, isSupport?: boolean) => 
             canMessageUser(userRole, recipientRole, isSupport)
     };

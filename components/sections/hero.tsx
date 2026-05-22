@@ -1,5 +1,5 @@
 "use client"
-import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP, useScrollY, useTransform, useSpring } from "@/lib/animated";
+import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP, useTransform, useSpring } from "@/lib/animated";
 import { TypeAnimation } from "react-type-animation";
 import Link from "next/link";
 import Image from "next/image";
@@ -55,8 +55,6 @@ export default function Hero({ data }: HeroProps) {
   const heroContent: HeroContent = data?.hero || defaultHeroContent;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollY = useScrollY();
-  const y1 = useTransform(scrollY, [0, 500], [0, 100]);
 
   // SMOOTH MOUSE PARALLAX - Optimized with RAF throttling
   const [mouseX, setMouseX] = useState(0);
@@ -131,7 +129,7 @@ export default function Hero({ data }: HeroProps) {
 
             <AnimatedH1 initial={false}
               style={{ willChange: "transform, opacity" }}
-              className="text-[1.75rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold tracking-tight leading-[1.1]"
+              className="text-[1.75rem] sm:text-4xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-6xl font-bold tracking-tight leading-[1.1]"
             >
               <span className="block text-foreground drop-shadow-sm">
                 {heroContent.title ?? "Engineering the Future of"}
@@ -229,8 +227,8 @@ export default function Hero({ data }: HeroProps) {
 
               {/* 4. The Logo - Centered */}
               <Link href="/">
-                  <AnimatedDiv animate={{ scale: [1, 1.03, 1] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  <AnimatedDiv animate={{ scale: 1.03 }}
+                    transition={{ duration: 4, repeat: -1, yoyo: true, ease: "easeInOut" }}
                     className="relative w-32 h-32 lg:w-36 lg:h-36 xl:w-44 xl:h-44 rounded-full bg-gradient-to-br from-blue-600 via-indigo-500 to-purple-600 shadow-[0_0_60px_rgba(99,102,241,0.3)] flex flex-col items-center justify-center z-10 group cursor-pointer"
                 >
                   <span className="text-3xl lg:text-4xl xl:text-5xl font-bold text-white drop-shadow-lg">O</span>

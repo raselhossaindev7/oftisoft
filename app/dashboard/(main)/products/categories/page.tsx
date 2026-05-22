@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useCategories } from "@/hooks/useCategories";
+import { RoleGuard } from "@/components/auth/role-guard";
 import {
     Dialog,
     DialogContent,
@@ -114,6 +115,7 @@ export default function CategoriesPage() {
     const coverage = totalProducts > 0 ? 100 : 0;
 
     return (
+        <RoleGuard allowedRoles={["Editor", "Admin", "SuperAdmin"]}>
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -397,5 +399,6 @@ export default function CategoriesPage() {
                 </DialogContent>
             </Dialog>
         </div>
+        </RoleGuard>
     );
 }

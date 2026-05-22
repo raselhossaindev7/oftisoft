@@ -1,17 +1,18 @@
 "use client"
 import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP } from "@/lib/animated";
-;
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Download, Copy, Mail, ShieldCheck, ArrowRight, Home, LayoutDashboard, MessageSquare, Loader2, Package } from "lucide-react";
+import { CheckCircle2, Download, Copy, Mail, ShieldCheck, ArrowRight, Home, LayoutDashboard, MessageSquare, Loader2, Package, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import { api, billingAPI } from "@/lib/api";
+import { useCart } from "@/hooks/use-cart";
 
 interface OrderItem {
   id: string;
@@ -53,26 +54,39 @@ interface OrderData {
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
+  const sessionId = searchParams.get("session_id");
   
   const [orderData, setOrderData] = useState<OrderData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!orderId || !!sessionId);
   const [error, setError] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const { clearCart } = useCart();
 
   useEffect(() => {
-    if (!orderId) {
-      setError("No order ID provided");
-      setLoading(false);
-      return;
+    if (orderId) {
+      fetchOrderData();
+    } else if (sessionId) {
+      completeCheckout();
     }
+  }, [orderId, sessionId]);
 
-    fetchOrderData();
-  }, [orderId]);
+  const completeCheckout = async () => {
+    try {
+      const data = await billingAPI.completeCheckout(sessionId!);
+      setOrderData(data);
+      clearCart();
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? "Failed to process order");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchOrderData = async () => {
     try {
       const response = await api.get(`/orders/${orderId}/success`);
       setOrderData(response.data);
+      clearCart();
     } catch (err: any) {
       setError(err.response?.data?.message ?? "");
     } finally {
@@ -101,25 +115,8 @@ function OrderSuccessContent() {
     );
   }
 
-  if (error || !orderData) {
-    return (
-      <div className="container px-4 py-16 md:py-24 mx-auto max-w-4xl">
-        <Card className="border-red-500/20 bg-red-500/5">
-          <CardHeader className="text-center">
-            <CardTitle className="text-red-400">Unable to Load Order</CardTitle>
-            <CardDescription>{error ?? ""}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center gap-4">
-            <Button asChild>
-              <Link href="/dashboard/orders">View All Orders</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/shop">Continue Shopping</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  if (!orderData) {
+    return <GenericSuccess sessionId={sessionId} error={error} />;
   }
 
   const { order, items, totals, customer, message } = orderData;
@@ -323,6 +320,64 @@ function OrderSuccessContent() {
           </Card>
         </AnimatedDiv>
       </div>
+    </div>
+  );
+}
+
+function GenericSuccess({ sessionId, error }: { sessionId: string | null; error: string | null }) {
+  const router = useRouter();
+  const hasError = !!error;
+
+  useEffect(() => {
+    if (sessionId && !error) {
+      const timer = setTimeout(() => {
+        router.push("/dashboard/orders");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [sessionId, error, router]);
+
+  return (
+    <div className="container px-4 py-16 md:py-24 mx-auto max-w-4xl">
+      <Card className={hasError ? "border-red-500/20 bg-red-500/5" : "border-green-500/20 bg-green-500/5"}>
+        <CardHeader className="text-center">
+          <div className={cn("w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6", hasError ? "bg-red-500/20 text-red-500" : "bg-green-500/20 text-green-500")}>
+            {hasError ? <AlertCircle className="w-12 h-12" /> : <CheckCircle2 className="w-12 h-12" />}
+          </div>
+          <CardTitle className={hasError ? "text-red-400 text-3xl" : "text-green-400 text-3xl"}>
+            {hasError ? "Order Processing Failed" : "Payment Successful!"}
+          </CardTitle>
+          <CardDescription className="text-lg mt-2">
+            {hasError ? error : "Your payment has been processed successfully."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-4">
+          <p className="text-muted-foreground text-center max-w-md">
+            {hasError
+              ? "Your payment was taken but we couldn't create your order. Our team has been notified and will resolve this shortly."
+              : "Your order is being processed. You can view all your orders and download your purchases from the dashboard."}
+          </p>
+          {!hasError && (
+            <p className="text-xs text-muted-foreground">
+              Redirecting to your dashboard in 5 seconds...
+            </p>
+          )}
+          <div className="flex gap-4 mt-4">
+            {hasError ? (
+              <Button asChild>
+                <Link href="/dashboard/support">Contact Support</Link>
+              </Button>
+            ) : (
+              <Button asChild>
+                <Link href="/dashboard/orders">View My Orders</Link>
+              </Button>
+            )}
+            <Button variant="outline" asChild>
+              <Link href="/shop">Continue Shopping</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

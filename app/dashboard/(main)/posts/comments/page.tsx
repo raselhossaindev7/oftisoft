@@ -84,7 +84,7 @@ export default function CommentsPage() {
 
   const filtered = comments.filter((c) => {
     const matchesSearch =
-      c.content.toLowerCase().includes(search.toLowerCase()) ||
+              (c.content || '').toLowerCase().includes(search.toLowerCase()) ||
       c.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
       c.post?.title?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || c.status === statusFilter;

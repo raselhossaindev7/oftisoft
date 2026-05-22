@@ -382,7 +382,7 @@ const defaultContent: HomePageContent = {
         id: 'whyus-1',
         title: 'Why Visionaries',
         subtitle: 'Choose Us.',
-        badge: 'The Ofitsoft Edge',
+        badge: 'The Oftisoft Edge',
         description: 'We bridge the gap between creative ambition and technical reality.',
         features: [
             {
@@ -496,7 +496,7 @@ const defaultContent: HomePageContent = {
                 name: 'Alex Rivera',
                 role: 'CTO, FinTech Global',
                 avatar: 'https://i.pravatar.cc/150?u=alex',
-                quote: 'Ofitsoft\'s architecture handled our Black Friday traffic without a single hiccup. Absolute engineering mastery.',
+                quote: 'Oftisoft\'s architecture handled our Black Friday traffic without a single hiccup. Absolute engineering mastery.',
                 gradient: 'from-blue-500 to-indigo-500'
             },
             {

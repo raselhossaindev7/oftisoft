@@ -5,11 +5,13 @@ import { toast } from 'sonner';
 export function useProjects(projectId?: string, status?: string) {
     const queryClient = useQueryClient();
 
-    const { data: projects = [], isLoading: projectsLoading, isError: projectsError, refetch: refetchProjects } = useQuery({
+    const { data: projectsResponse = [], isLoading: projectsLoading, isError: projectsError, refetch: refetchProjects } = useQuery({
         queryKey: ['projects', status],
         queryFn: () => projectsAPI.getProjects(status),
         enabled: !projectId
     });
+
+    const projects = Array.isArray(projectsResponse) ? projectsResponse : (projectsResponse as any)?.data ?? [];
 
     const { data: project, isLoading: projectLoading } = useQuery({
         queryKey: ['projects', projectId],

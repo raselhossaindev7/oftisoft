@@ -2,10 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
-import { CartSheet } from "@/components/cart-sheet";
-import { AnalyticsTracker } from "@/components/analytics-tracker";
 import { ErrorBoundary } from "@/components/error-boundary";
-import CookieConsent from "@/components/cookie-consent";
 import { defaultMetadata, defaultViewport } from "@/lib/metadata";
 import { jsonLdSchemas } from "@/lib/metadata";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -24,7 +21,9 @@ const geistMono = Geist_Mono({
   preload: true,
 });
 
-import SmoothScroller from "@/components/smooth-scroller";
+import { CartSheet } from "@/components/cart-sheet";
+import { AnalyticsTracker } from "@/components/analytics-tracker";
+import CookieConsent from "@/components/cookie-consent";
 import { QueryProvider } from "@/lib/api/queries";
 import { AuthProvider } from "@/components/auth-provider";
 import SeoScripts from "@/components/seo-scripts";
@@ -92,11 +91,9 @@ export default function RootLayout({
             <QueryProvider>
               <AuthProvider>
                 <AnalyticsTracker />
-                <>
-                  <main id="main-content" tabIndex={-1}>
-                    {children}
-                  </main>
-                </>
+                <main id="main-content" tabIndex={-1}>
+                  {children}
+                </main>
                 <CartSheet />
                 <CookieConsent />
                 <SeoScripts />

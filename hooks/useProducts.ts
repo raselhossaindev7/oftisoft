@@ -27,6 +27,7 @@ export function useProducts(productId?: string, search?: string, category?: stri
         mutationFn: productsAPI.createProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['products', 'stats'] });
             toast.success("Product created successfully");
         },
         onError: () => {
@@ -39,6 +40,7 @@ export function useProducts(productId?: string, search?: string, category?: stri
             productsAPI.updateProduct(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['products', 'stats'] });
             toast.success("Product updated successfully");
         },
         onError: () => {
@@ -50,6 +52,7 @@ export function useProducts(productId?: string, search?: string, category?: stri
         mutationFn: productsAPI.deleteProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['products', 'stats'] });
             toast.success("Product deleted successfully");
         },
         onError: () => {
