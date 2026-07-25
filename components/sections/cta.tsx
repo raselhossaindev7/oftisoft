@@ -1,8 +1,9 @@
 "use client"
-import { Animated, AnimatedDiv, AnimatedH2, AnimatePresence } from "@/lib/animated";
+import { Animated, AnimatedDiv, AnimatedH2 } from "@/lib/animated";
 
 import { CheckCircle2, ArrowRight, Mail, MapPin, Phone } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import gsap from "gsap";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -29,6 +30,8 @@ export default function CTA() {
 
     const { createLead, isCreating } = useLeads();
     const [formState, setFormState] = useState<'idle' | 'success'>('idle');
+    const formRef = useRef<HTMLDivElement>(null);
+    const successRef = useRef<HTMLDivElement>(null);
 
     const handleSubmit = async (e: React.FormEvent<HTMLElement>) => {
         e.preventDefault();
@@ -42,9 +45,43 @@ export default function CTA() {
 
         createLead(data, {
             onSuccess: () => {
-                setFormState('success');
+                if (formRef.current) {
+                    gsap.to(formRef.current, {
+                        opacity: 0, scale: 0.95, duration: 0.25, ease: "power2.in",
+                        onComplete: () => {
+                            setFormState('success');
+                            if (successRef.current) {
+                                gsap.fromTo(successRef.current,
+                                    { opacity: 0, scale: 0.95 },
+                                    { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.4)" }
+                                );
+                            }
+                        }
+                    });
+                } else {
+                    setFormState('success');
+                }
             }
         });
+    };
+
+    const resetForm = () => {
+        if (successRef.current) {
+            gsap.to(successRef.current, {
+                opacity: 0, scale: 0.95, duration: 0.2, ease: "power2.in",
+                onComplete: () => {
+                    setFormState('idle');
+                    if (formRef.current) {
+                        gsap.fromTo(formRef.current,
+                            { opacity: 0, y: 20 },
+                            { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
+                        );
+                    }
+                }
+            });
+        } else {
+            setFormState('idle');
+        }
     };
 
 
@@ -100,40 +137,15 @@ export default function CTA() {
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-[2rem] blur-2xl transform rotate-3 scale-95 -z-10" />
 
                         <div className="bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/10 p-6 md:p-8 lg:p-10 xl:p-12 rounded-3xl md:rounded-[2rem] shadow-2xl overflow-hidden relative">
-                             {/* Decorative noise */}
-                            <div className="absolute inset-0 bg-grain opacity-[0.05] pointer-events-none" />
+                            <div className="bg-grain opacity-[0.05] pointer-events-none" />
 
-                            <AnimatePresence mode="wait">
-                                {formState === 'success' ? (
-                                    <AnimatedDiv key="success"
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.9 }}
-                                        className="min-h-[420px] flex flex-col items-center justify-center text-center p-8"
-                                    >
-                                        <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6 text-green-500 animate-pulse">
-                                            <CheckCircle2 className="w-12 h-12" />
-                                        </div>
-                                         <h3 className="text-heading-2 font-bold text-white mb-3">Message Received!</h3>
-                                         <p className="text-muted-foreground mb-8 type-body-lg">
-                                            We've sent a confirmation email to your inbox. Expect a reply within 24 hours.
-                                        </p>
-                                        <Button onClick={() => setFormState('idle')}
-                                            variant="outline"
-                                            className="px-6 py-3 rounded-full border-white/10 hover:bg-white/10 text-white font-medium transition-colors h-auto"
-                                        >
-                                            Send another message
-                                        </Button>
-                                    </AnimatedDiv>
-                                ) : (
-                                    <Animated as="form"
-                                        key="form"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        onSubmit={handleSubmit}
-                                        className="space-y-5"
-                                    >
+                            <div ref={formRef} className={formState === 'success' ? 'hidden' : ''}>
+                                <Animated as="form"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    onSubmit={handleSubmit}
+                                    className="space-y-5"
+                                >
                                         <div className="grid grid-cols-2 gap-5">
                                             <div className="space-y-2">
                                                 <Label htmlFor="firstName" className="text-xs font-semibold tracking-wide text-white/60 ml-1">First Name</Label>
@@ -183,8 +195,25 @@ export default function CTA() {
                                             By submitting, you agree to our <Link href="/privacy" className="underline hover:text-white">Privacy Policy</Link>.
                                         </p>
                                     </Animated>
-                                )}
-                            </AnimatePresence>
+                            </div>
+
+                            {formState === 'success' && (
+                                <div ref={successRef} className="min-h-[420px] flex flex-col items-center justify-center text-center p-8">
+                                    <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6 text-green-500 animate-pulse">
+                                        <CheckCircle2 className="w-12 h-12" />
+                                    </div>
+                                    <h3 className="text-heading-2 font-bold text-white mb-3">Message Received!</h3>
+                                    <p className="text-muted-foreground mb-8 type-body-lg">
+                                        We've sent a confirmation email to your inbox. Expect a reply within 24 hours.
+                                    </p>
+                                    <Button onClick={resetForm}
+                                        variant="outline"
+                                        className="px-6 py-3 rounded-full border-white/10 hover:bg-white/10 text-white font-medium transition-colors h-auto"
+                                    >
+                                        Send another message
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </AnimatedDiv>
                 </div>

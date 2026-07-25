@@ -499,7 +499,7 @@ export default function MyOrdersPage() {
                                                         <Badge
                                                             variant="outline"
                                                             className="text-xs h-4 px-1.5 border-green-500/30 text-green-500 bg-green-500/5 cursor-pointer hover:bg-green-500/10 transition-colors"
-                                                            onClick={() => handleDownloadProduct(item.downloadUrl)}
+                                                            onClick={() => item.downloadUrl && handleDownloadProduct(item.downloadUrl)}
                                                         >
                                                             <Download className="w-2.5 h-2.5 mr-0.5" /> Download
                                                         </Badge>

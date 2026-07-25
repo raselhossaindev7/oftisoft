@@ -164,7 +164,7 @@ export default function LatestBlog() {
               1024: { slidesPerView: 3, spaceBetween: 32 },
               1440: { slidesPerView: 3, spaceBetween: 32 },
             }}
-            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }}
             speed={800}
             className="!overflow-visible h-full"
             grabCursor={true}

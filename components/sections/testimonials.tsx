@@ -3,8 +3,6 @@ import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
-
 import { Star, Quote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHomeContentStore } from "@/lib/store/home-content";
@@ -48,11 +46,9 @@ export default function Testimonials() {
         ? testimonialsContent.testimonials
         : [];
 
-    const loopTestimonials = [
-        ...testimonialsList,
-        ...testimonialsList,
-        ...testimonialsList
-    ];
+    const loopTestimonials = testimonialsList.length > 0
+        ? [...testimonialsList, ...testimonialsList, ...testimonialsList]
+        : defaultTestimonials;
 
     useEffect(() => {
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP } from "@/lib/animated";
-;
 
 import { useMemo } from "react";
 import { usePublicSubscriptionPlans, mapSubscriptionPlansToPricing } from "@/hooks/usePublicMarketing";
@@ -21,7 +20,7 @@ export default function PricingPage() {
     const { content } = usePricingContentStore();
     const cart = useCart();
 
-    const plansFromApi = useMemo(() => mapSubscriptionPlansToPricing(apiPlans), [apiPlans]);
+    const plansFromApi = useMemo(() => mapSubscriptionPlansToPricing(apiPlans), [apiPlans.length]);
     const plans = plansFromApi.length > 0 ? plansFromApi : (content?.plans || []);
 
     const handleAddToCart = (plan: any) => {
@@ -48,17 +47,18 @@ export default function PricingPage() {
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-blue-600/5 rounded-full blur-[120px] opacity-30" />
             </div>
 
-            <div className="container px-6 mx-auto relative z-10 space-y-24">
-                <div className="text-center space-y-6 max-w-4xl mx-auto">
+            <div className="container px-4 mx-auto relative z-10">
+                {/* Hero Header */}
+                <div className="text-center space-y-6 max-w-4xl mx-auto mb-16 md:mb-20">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold [0.3em] text-xs shadow-[0_0_20px_rgba(var(--primary),0.2)]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.2em] text-xs shadow-[0_0_20px_rgba(var(--primary),0.2)]">
                             {header?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
                     <AnimatedH1 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-semibold tighter text-white"
+                        className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tighter text-white"
                     >
                         {header?.titlePrefix ?? ""} <span className="text-primary underline decoration-white/10 decoration-8 underline-offset-8">{header?.titleHighlight ?? ""}</span>.
                     </AnimatedH1>
@@ -67,9 +67,10 @@ export default function PricingPage() {
                     </AnimatedP>
                 </div>
 
-                <div className="grid lg:grid-cols-3 gap-8">
+                {/* Pricing Cards */}
+                <div className="grid lg:grid-cols-3 gap-8 mb-20 md:mb-24">
                     {plans.map((plan, idx) => (
-                        <AnimatedDiv key={plan.name}
+                        <AnimatedDiv key={plan.id}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -77,60 +78,60 @@ export default function PricingPage() {
                             style={{ willChange: "transform, opacity" }}
                         >
                             <Card className={cn(
-                                "relative h-full border-white/5 bg-white/[0.02] backdrop-blur-3xl rounded-[50px] overflow-hidden hover:border-primary/40 transition-all duration-700 flex flex-col group",
-                                plan.popular && "border-primary/30 ring-1 ring-primary/20 bg-primary/[0.03]"
+                                "relative h-full border-white/5 bg-white/[0.02] backdrop-blur-3xl rounded-3xl overflow-hidden hover:border-primary/40 transition-all duration-700 flex flex-col group",
+                                plan.popular && "border-primary/30 ring-1 ring-primary/20 bg-primary/[0.03] hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/10"
                             )}>
                                 {plan.popular && (
-                                    <div className="absolute top-8 right-8">
-                                        <Badge className="bg-primary text-white font-semibold text-xs widest px-4 py-1.5 shadow-xl shadow-primary/20">
-                                            Architect Choice
+                                    <div className="absolute top-6 right-6">
+                                        <Badge className="bg-primary text-white font-semibold text-xs tracking-[0.15em] px-4 py-1.5 shadow-xl shadow-primary/20">
+                                            Most Popular
                                         </Badge>
                                     </div>
                                 )}
-                                <CardHeader className="p-10 md:p-12 space-y-6 pb-6 border-b border-white/5 bg-white/[0.01]">
-                                    <div className="space-y-2">
-                                        <h3 className="text-3xl font-semibold text-white tight leading-none">{plan.name}</h3>
+                                <CardHeader className={cn("p-6 md:p-8 space-y-4 border-b border-white/5 bg-white/[0.01]", plan.popular && "pb-5")}>
+                                    <div className="space-y-1">
+                                        <h3 className="text-2xl font-semibold text-white leading-tight">{plan.name}</h3>
                                         <p className="text-sm text-muted-foreground font-medium">{plan.description}</p>
                                     </div>
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tighter">${plan.price}</span>
-                                        <span className="text-muted-foreground font-semibold text-xs widest">/ {plan.period ?? ""}</span>
+                                        <span className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tighter">${plan.price}</span>
+                                        <span className="text-muted-foreground font-semibold text-xs tracking-[0.15em] uppercase">/ {plan.period ?? ""}</span>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-10 md:p-12 space-y-8 flex-1">
-                                    <ul className="space-y-5">
+                                <CardContent className="p-6 md:p-8 space-y-5 flex-1">
+                                    <ul className="space-y-4">
                                         {(Array.isArray(plan.features) ? plan.features : []).map((feature: string, i: number) => (
-                                            <li key={i} className="flex items-start gap-4 text-white/70 group/item">
-                                                <div className="mt-1 w-5 h-5 rounded-lg bg-primary/10 flex items-center justify-center group-hover/item:bg-primary group-hover/item:text-white transition-all duration-300">
+                                            <li key={i} className="flex items-start gap-3 text-white/70 group/item">
+                                                <div className="mt-0.5 w-5 h-5 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover/item:bg-primary group-hover/item:text-white transition-all duration-300">
                                                     <Check className="w-3 h-3 text-primary group-hover/item:text-white" />
                                                 </div>
-                                                <span className="text-base font-bold tight group-hover/item:text-white transition-colors">{feature}</span>
+                                                <span className="text-sm leading-tight group-hover/item:text-white transition-colors">{feature}</span>
                                             </li>
                                         ))}
                                     </ul>
                                 </CardContent>
-                                <CardFooter className="p-10 md:p-12 pt-0">
+                                <CardFooter className="p-6 md:p-8 pt-0">
                                     {!isNaN(Number(plan.price)) ? (
                                         <Button 
                                             onClick={() => handleAddToCart(plan)}
                                             className={cn(
-                                                "w-full h-16 rounded-2xl font-black transition-all duration-500 text-lg shadow-2xl",
+                                                "w-full h-14 rounded-2xl font-bold transition-all duration-500 text-base shadow-2xl",
                                                 plan.popular 
                                                     ? "bg-primary text-white shadow-primary/20 hover:scale-[1.02] active:scale-95" 
                                                     : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
                                             )}
                                         >
-                                            {plan.buttonText} <ArrowRight className="w-5 h-5 ml-3" />
+                                            {plan.buttonText || "Get Started"} <ArrowRight className="w-4 h-4 ml-2" />
                                         </Button>
                                     ) : (
                                         <Button asChild className={cn(
-                                            "w-full h-16 rounded-2xl font-black transition-all duration-500 text-lg shadow-2xl",
+                                            "w-full h-14 rounded-2xl font-bold transition-all duration-500 text-base shadow-2xl",
                                             plan.popular 
                                                 ? "bg-primary text-white shadow-primary/20 hover:scale-[1.02] active:scale-95" 
                                                 : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
                                         )}>
                                             <Link href="/contact">
-                                                {plan.buttonText} <ArrowRight className="w-5 h-5 ml-3" />
+                                                {plan.buttonText || "Contact Us"} <ArrowRight className="w-4 h-4 ml-2" />
                                             </Link>
                                         </Button>
                                     )}
@@ -140,53 +141,10 @@ export default function PricingPage() {
                     ))}
                 </div>
 
-                {/* Comparison Table */}
-                <div className="space-y-8">
-                    <AnimatedDiv initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center space-y-4">
-                        <h2 className="text-4xl md:text-5xl font-semibold tighter text-white">Compare <span className="text-primary underline decoration-white/10 decoration-4 underline-offset-4">Plans</span></h2>
-                        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">See exactly what each plan includes and find the right fit for your business.</p>
-                    </AnimatedDiv>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="border-b border-white/10">
-                                    <th className="text-left py-6 pr-8 text-muted-foreground font-semibold text-sm">Feature</th>
-                                    {plans.map(p => (
-                                        <th key={p.name} className={cn("py-6 px-6 text-center font-bold text-lg", p.popular && "text-primary")}>
-                                            {p.name}
-                                            {p.popular && <div className="text-xs font-normal text-primary mt-1 widest">BEST VALUE</div>}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {[
-                                    { label: "Pages Included", values: ["Up to 5", "Up to 15", "Unlimited"] },
-                                    { label: "SEO Optimization", values: ["Basic", "Advanced", "Full Suite"] },
-                                    { label: "Revisions", values: ["1 Round", "Priority Round", "Unlimited"] },
-                                    { label: "Content Strategy", values: ["—", "Included", "Custom Roadmap"] },
-                                    { label: "Support", values: ["Email", "Priority Email", "24/7 Priority"] },
-                                    { label: "Custom Integrations", values: ["—", "—", "Included"] },
-                                ].map((row, i) => (
-                                    <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                                        <td className="py-5 pr-8 text-white/80 font-medium">{row.label}</td>
-                                        {row.values.map((v, j) => (
-                                            <td key={j} className={cn("py-5 px-6 text-center", v === "—" ? "text-muted-foreground/40" : "text-white/90 font-medium")}>
-                                                {v === "—" ? "—" : v}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 {/* FAQ Section */}
-                <div className="max-w-3xl mx-auto space-y-8">
+                <div className="max-w-3xl mx-auto space-y-8 mb-16 md:mb-20">
                     <AnimatedDiv initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center space-y-4">
-                        <h2 className="text-4xl md:text-5xl font-semibold tighter text-white">Frequently Asked <span className="text-primary underline decoration-white/10 decoration-4 underline-offset-4">Questions</span></h2>
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tighter text-white">Frequently Asked <span className="text-primary underline decoration-white/10 decoration-4 underline-offset-4">Questions</span></h2>
                         <p className="text-muted-foreground text-lg">Everything you need to know about our pricing and plans.</p>
                     </AnimatedDiv>
 
@@ -200,10 +158,10 @@ export default function PricingPage() {
                             { q: "What does 'unlimited revisions' mean?", a: "It means you can request as many revision rounds as needed during the active subscription period with no extra cost." },
                         ].map((faq, i) => (
                             <AccordionItem key={i} value={`faq-${i}`} className="border-b border-white/10">
-                                <AccordionTrigger className="text-left font-bold text-white py-6 hover:text-primary transition-colors text-lg">
+                                <AccordionTrigger className="text-left font-bold text-white py-5 hover:text-primary transition-colors text-base md:text-lg">
                                     {faq.q}
                                 </AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground leading-relaxed pb-6 text-base">
+                                <AccordionContent className="text-muted-foreground leading-relaxed pb-5 text-sm md:text-base">
                                     {faq.a}
                                 </AccordionContent>
                             </AccordionItem>
@@ -212,9 +170,12 @@ export default function PricingPage() {
                 </div>
 
                 {/* Consultation Prompt */}
-                <div className="text-center">
+                <div className="text-center py-10 border-t border-white/5">
                     <p className="text-muted-foreground font-medium text-lg">
-                        {consultation?.text ?? ""} <Link href="/contact" className="text-primary underline decoration-primary/20 hover:text-primary/70 transition-colors cursor-pointer">{consultation?.linkText ?? ""}</Link>
+                        {consultation?.text ?? ""}{" "}
+                        <Link href="/contact" className="text-primary underline decoration-primary/20 hover:text-primary/70 transition-colors cursor-pointer">
+                            {consultation?.linkText ?? ""}
+                        </Link>
                     </p>
                 </div>
 
@@ -224,4 +185,3 @@ export default function PricingPage() {
         </div>
     );
 }
-

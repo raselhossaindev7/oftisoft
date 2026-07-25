@@ -231,7 +231,30 @@ type AnimatePresenceProps = {
 };
 
 export function AnimatePresence({ children, mode = "sync", onExitComplete }: AnimatePresenceProps) {
-  return <>{children}</>;
+  const [displayed, setDisplayed] = useState<ReactNode>(children);
+  const prevKeyRef = useRef<string | undefined>(undefined);
+  const exitingRef = useRef(false);
+
+  const childKey = (children as any)?.key ?? "default";
+
+  useEffect(() => {
+    if (childKey !== prevKeyRef.current) {
+      if (mode === "wait" && prevKeyRef.current !== undefined && !exitingRef.current) {
+        exitingRef.current = true;
+        const timer = setTimeout(() => {
+          exitingRef.current = false;
+          setDisplayed(children);
+          onExitComplete?.();
+        }, 250);
+        return () => clearTimeout(timer);
+      } else {
+        setDisplayed(children);
+      }
+      prevKeyRef.current = childKey;
+    }
+  }, [childKey, children, mode, onExitComplete]);
+
+  return <>{displayed}</>;
 }
 
 export function useAnimateOnExit() {

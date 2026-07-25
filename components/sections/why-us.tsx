@@ -101,26 +101,25 @@ export default function WhyUs({ data }: { data?: { whyUs?: WhyUsData } }) {
                          whileInView={{ opacity: 1, scale: 1 }}
                          viewport={{ once: true, margin: "-80px" }}
                          transition={{ duration: 0.5 }}
-                        className="grid grid-cols-2 gap-4"
+                        className={cn(
+                            "grid gap-4",
+                            stats.length <= 2 ? "grid-cols-2" : stats.length === 3 ? "grid-cols-2" : "grid-cols-2 md:grid-cols-4"
+                        )}
                     >
-                             <Card className="bg-white/5 border-white/10 backdrop-blur-sm text-center">
-                            <CardContent className="p-5 sm:p-6 xl:p-8">
-                                 <h4 className="text-heading-2 font-bold text-white mb-1">{stats[0]?.value}</h4>
-                                <p className="text-xs text-muted-foreground tracking-wide">{stats[0]?.label}</p>
-                            </CardContent>
-                             </Card>
-                             <Card className="bg-primary/10 border-primary/20 backdrop-blur-sm text-center">
-                            <CardContent className="p-5 sm:p-6 xl:p-8">
-                                 <h4 className="text-heading-2 font-bold text-primary mb-1">{stats[1]?.value}</h4>
-                                <p className="text-xs text-primary/80 tracking-wide">{stats[1]?.label}</p>
-                            </CardContent>
-                             </Card>
-                             <Card className="bg-white/5 border-white/10 backdrop-blur-sm text-center col-span-2">
-                            <CardContent className="p-5 sm:p-6 xl:p-8">
-                                 <h4 className="text-heading-2 font-bold text-white mb-1">{stats[2]?.value}</h4>
-                                <p className="text-xs text-muted-foreground tracking-wide">{stats[2]?.label}</p>
-                            </CardContent>
-                             </Card>
+                        {stats.map((stat, idx) => (
+                            <Card key={idx}
+                                className={cn(
+                                    "bg-white/5 border-white/10 backdrop-blur-sm text-center",
+                                    idx === 1 && "bg-primary/10 border-primary/20",
+                                    stats.length === 3 && idx === 2 && "col-span-2"
+                                )}
+                            >
+                                <CardContent className="p-5 sm:p-6 xl:p-8">
+                                    <h4 className={cn("text-heading-2 font-bold mb-1", idx === 1 ? "text-primary" : "text-white")}>{stat.value}</h4>
+                                    <p className={cn("text-xs tracking-wide", idx === 1 ? "text-primary/80" : "text-muted-foreground")}>{stat.label}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
                     </AnimatedDiv>
                 </div>
 

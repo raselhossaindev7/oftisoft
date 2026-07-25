@@ -54,6 +54,7 @@ export default function FeaturedProjects() {
 
     const [activeIndex, setActiveIndex] = useState(0);
     const swiperRef = useRef<any>(null);
+    const isHoveredRef = useRef(false);
 
     const prevSlide = () => swiperRef.current?.slidePrev();
     const nextSlide = () => swiperRef.current?.slideNext();
@@ -125,10 +126,12 @@ export default function FeaturedProjects() {
                         1280: { slidesPerView: 2.2, spaceBetween: 60 }
                     }}
                     loop={true}
-                    autoplay={{ delay: 6000, disableOnInteraction: false }}
+                    autoplay={{ delay: 6000, disableOnInteraction: false, pauseOnMouseEnter: true }}
                     speed={800}
                     className="!overflow-visible"
                     centeredSlides={false} 
+                    onMouseEnter={() => { isHoveredRef.current = true; }}
+                    onMouseLeave={() => { isHoveredRef.current = false; }}
                 >
                     {projects.map((project: Project, index: number) => (
                         <SwiperSlide key={project.id} className="group cursor-grab active:cursor-grabbing">

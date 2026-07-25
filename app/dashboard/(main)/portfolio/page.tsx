@@ -376,7 +376,7 @@ function PortfolioPage() {
             setDeleteId(null);
             setSelectedIds(prev => { const n = new Set(prev); n.delete(deleteId); return n; });
             await fetchItems();
-            await fetchStats();
+            await fetchStatsCount();
             toast.success("Portfolio item deleted");
         } catch { toast.error("Failed to delete"); }
     };
@@ -387,7 +387,7 @@ function PortfolioPage() {
             setSelectedIds(new Set());
             setBulkDeleteOpen(false);
             await fetchItems();
-            await fetchStats();
+            await fetchStatsCount();
             toast.success("Items deleted");
         } catch { toast.error("Failed to delete items"); }
     };
@@ -516,8 +516,7 @@ function PortfolioPage() {
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 rounded-xl" align="end">
                             <Calendar mode="range" selected={{ from: dateRange.from, to: dateRange.to }}
-                                onSelect={(r) => setDateRange({ from: r?.from, to: r?.to })}
-                                initialFocus />
+                                onSelect={(r) => setDateRange({ from: r?.from, to: r?.to })} />
                         </PopoverContent>
                     </Popover>
                     {(dateRange.from || dateRange.to) && (

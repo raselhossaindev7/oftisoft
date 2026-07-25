@@ -1,11 +1,12 @@
 "use client"
-import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP, useTransform, useSpring } from "@/lib/animated";
+import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP } from "@/lib/animated";
 import { TypeAnimation } from "react-type-animation";
 import Link from "next/link";
 import Image from "next/image";
 import CountUp from "react-countup";
 import { ArrowRight, Play, Code2, Cpu } from "lucide-react";
 import { useRef, useState, useEffect, useCallback } from "react";
+import gsap from "gsap";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,50 +57,40 @@ export default function Hero({ data }: HeroProps) {
   const heroContent: HeroContent = data?.hero || defaultHeroContent;
 
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // SMOOTH MOUSE PARALLAX - Optimized with RAF throttling
-  const [mouseX, setMouseX] = useState(0);
-  const [mouseY, setMouseY] = useState(0);
+  const showcaseRef = useRef<HTMLDivElement>(null);
   const rafId = useRef<number | null>(null);
-  const pendingMouse = useRef({ x: 0, y: 0 });
+  const activeRef = useRef(false);
 
-  // Optimized mouse handler with RAF throttling (60fps max)
+  useEffect(() => {
+    activeRef.current = true;
+    return () => { activeRef.current = false; };
+  }, []);
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current || !activeRef.current) return;
     const { clientX, clientY } = e;
     const { innerWidth, innerHeight } = window;
     const x = (clientX - innerWidth / 2) / innerWidth;
     const y = (clientY - innerHeight / 2) / innerHeight;
 
-    pendingMouse.current = { x, y };
-
-    if (rafId.current === null) {
-      rafId.current = requestAnimationFrame(() => {
-        setMouseX(pendingMouse.current.x);
-        setMouseY(pendingMouse.current.y);
-        rafId.current = null;
+    if (rafId.current !== null) cancelAnimationFrame(rafId.current);
+    rafId.current = requestAnimationFrame(() => {
+      if (!showcaseRef.current || !activeRef.current) return;
+      gsap.to(showcaseRef.current, {
+        rotateY: x * 5,
+        rotateX: -y * 5,
+        duration: 0.5,
+        ease: "power2.out",
+        overwrite: "auto"
       });
-    }
+    });
   }, []);
 
-  // Cleanup RAF on unmount
   useEffect(() => {
     return () => {
-      if (rafId.current) {
-        cancelAnimationFrame(rafId.current);
-      }
+      if (rafId.current) cancelAnimationFrame(rafId.current);
     };
   }, []);
-
-  // Very smooth spring physics
-  const springConfig = { damping: 50, stiffness: 400, mass: 2 };
-  const rotateX = useSpring(
-    useTransform(mouseY, [-1, 1], [5, -5]),
-    springConfig,
-  );
-  const rotateY = useSpring(
-    useTransform(mouseX, [-1, 1], [-5, 5]),
-    springConfig,
-  );
 
   return (
     <section ref={containerRef}
@@ -208,7 +199,7 @@ export default function Hero({ data }: HeroProps) {
           </div>
 
           {/* Right: Professional Showcase */}
-          <div className="lg:col-span-2 relative hidden lg:flex min-h-[400px] xl:min-h-[600px] w-full items-center justify-center">
+          <div className="lg:col-span-2 relative hidden lg:flex min-h-[400px] xl:min-h-[600px] w-full items-center justify-center perspective-[2000px]">
             <AnimatedDiv initial={false}
               className="relative w-full max-w-[400px] xl:max-w-[500px] flex items-center justify-center"
             >
@@ -216,7 +207,10 @@ export default function Hero({ data }: HeroProps) {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-purple-500/5 to-secondary/10 blur-[120px]" />
 
               {/* Image Card */}
-              <div className="relative z-10 w-full rounded-3xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-[1px] shadow-2xl shadow-primary/10">
+              <div ref={showcaseRef}
+                className="relative z-10 w-full rounded-3xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-[1px] shadow-2xl shadow-primary/10 will-change-transform"
+                style={{ transformStyle: "preserve-3d" }}
+              >
                 <div className="relative w-full rounded-3xl bg-[#0a0a0a] overflow-hidden">
                   {heroContent.image || heroContent.imageUrl ? (
                     <>
@@ -258,20 +252,9 @@ export default function Hero({ data }: HeroProps) {
         </div>
       </div>
 
-      <style jsx global>{`
-        .perspective-container {
-          perspective: 2000px;
-        }
-        .transform-style-3d {
-          transform-style: preserve-3d;
-        }
-        .will-change-transform {
-          will-change: transform;
-        }
-      `}</style>
-    </section>
-  );
-}
+      </section>
+    );
+  }
 
 function SmoothTypewriter({ heroContent }: { heroContent: HeroContent }) {
   const defaultWords: [string, number][] = [
