@@ -71,7 +71,7 @@ export default function Newsletter() {
                                     Weekly Tech Insights
                                 </Badge>
                                 
-                                <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">
+                                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
                                     Join the <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">Innovation</span>
                                 </h2>
                                 
@@ -89,7 +89,7 @@ export default function Newsletter() {
                                         { icon: Code2, label: "Code Snippets" },
                                         { icon: Rocket, label: "Early Access" }
                                     ].map((item, i) => (
-                                        <Badge key={i} variant="secondary" className="gap-2 py-1.5 px-3 text-sm font-normal bg-background/50 border-border/50">
+                                        <Badge key={i} variant="secondary" className="gap-2 py-1.5 px-3 text-xs font-normal bg-background/50 border-border/50">
                                             <item.icon className="w-4 h-4 text-primary" />
                                             {item.label}
                                         </Badge>

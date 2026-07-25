@@ -98,8 +98,8 @@ export function PaymentModal({ project, onClose, onPaymentComplete }: PaymentMod
                                         <button disabled={processing} className="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 disabled:opacity-50 flex items-center justify-center gap-2 mt-4">
                                             {processing ? "Processing..." : `Pay $${project.budget?.toLocaleString()}`}
                                         </button>
-                                        <div className="flex justify-center items-center gap-2 text-[10px] text-muted-foreground">
-                                            <Lock size={10} /> Powered by Stripe
+                                        <div className="flex justify-center items-center gap-2 text-micro text-muted-foreground">
+                                            <Lock size={10} /> Powered by Dodo Payments
                                         </div>
                                     </form>
                                 )}

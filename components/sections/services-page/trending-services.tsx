@@ -54,7 +54,7 @@ export default function TrendingServices({ offers }: TrendingServicesProps) {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.1 }}
                         >
-                            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight">
                                 Trending <span className="text-orange-500">Services</span>
                             </h2>
                             <p className="text-muted-foreground text-base max-w-xl mt-2">

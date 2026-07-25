@@ -99,7 +99,7 @@ export default function TechBreakdown() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-5xl font-bold mb-4 md:mb-6"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6"
                     >
                         Technical <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">Breakdown</span>
                     </AnimatedH2>

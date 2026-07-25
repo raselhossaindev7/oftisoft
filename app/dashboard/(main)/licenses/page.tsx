@@ -64,10 +64,10 @@ export default function LicensesPage() {
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">License Management</h1>
-            <p className="text-muted-foreground">View, grant, and revoke product licenses across all users.</p>
+            <h1 className="text-3xl font-semibold">Licenses</h1>
+            <p className="text-muted-foreground text-sm">View, grant, and revoke product licenses across all users.</p>
           </div>
-          <Button className="gap-2 rounded-xl font-bold" onClick={() => setGrantOpen(true)}>
+          <Button className="gap-2 rounded-lg" onClick={() => setGrantOpen(true)}>
             <Plus className="w-4 h-4" /> Grant License
           </Button>
         </div>
@@ -78,7 +78,7 @@ export default function LicensesPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by product, user, or key..."
-                className="pl-10 h-10 rounded-xl"
+                className="pl-10 h-9 rounded-lg"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -92,18 +92,18 @@ export default function LicensesPage() {
             ) : licenses.length === 0 ? (
               <div className="py-20 text-center text-muted-foreground">
                 <Key className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                <p className="font-bold">No licenses found</p>
+                <p className="font-medium">No licenses found</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/10 hover:bg-transparent">
-                    <TableHead className="font-bold">License Key</TableHead>
-                    <TableHead className="font-bold">Product</TableHead>
-                    <TableHead className="font-bold">User</TableHead>
-                    <TableHead className="font-bold">Type</TableHead>
-                    <TableHead className="font-bold">Granted</TableHead>
-                    <TableHead className="text-right font-bold">Actions</TableHead>
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground">License Key</TableHead>
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground">Product</TableHead>
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground">User</TableHead>
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground">Type</TableHead>
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground">Granted</TableHead>
+                    <TableHead className="text-right text-xs font-medium uppercase text-muted-foreground">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -111,7 +111,7 @@ export default function LicensesPage() {
                     <TableRow key={lic.id} className="group hover:bg-primary/5 transition-colors">
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <code className="text-xs font-mono font-bold bg-muted/30 px-2 py-1 rounded-lg truncate max-w-[200px]">{lic.licenseKey}</code>
+                          <code className="text-xs font-mono font-medium bg-muted/30 px-2 py-1 rounded-lg truncate max-w-[200px]">{lic.licenseKey}</code>
                           <Button variant="ghost" size="icon" className="h-6 w-6 rounded-lg" onClick={() => copyKey(lic.id, lic.licenseKey)}>
                             {copiedId === lic.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                           </Button>
@@ -120,26 +120,26 @@ export default function LicensesPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Package className="w-4 h-4 text-muted-foreground" />
-                          <span className="font-bold text-sm">{lic.product?.name || "—"}</span>
+                          <span className="font-medium text-sm">{lic.product?.name || "—"}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-muted-foreground" />
                           <div>
-                            <p className="text-sm font-bold">{lic.user?.name || "—"}</p>
+                            <p className="text-sm font-medium">{lic.user?.name || "—"}</p>
                             <p className="text-xs text-muted-foreground">{lic.user?.email}</p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="font-bold text-xs">{lic.licenseType}</Badge>
+                        <Badge variant="outline" className="font-medium text-xs">{lic.licenseType}</Badge>
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {format(new Date(lic.purchaseDate), "MMM d, yyyy")}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl text-destructive hover:bg-destructive/10"
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10"
                           onClick={() => setRevokeTarget(lic.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -153,36 +153,36 @@ export default function LicensesPage() {
         </Card>
 
         <Dialog open={grantOpen} onOpenChange={setGrantOpen}>
-          <DialogContent className="rounded-[2rem] border-border/50 max-w-md">
+          <DialogContent className="rounded-xl border-border/50 max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Grant License</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">Grant License</DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
                 Manually issue a license to a user for a specific product.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-bold mb-1 block">User ID</label>
+                <label className="text-sm font-medium mb-1.5 block">User ID</label>
                 <Input
                   placeholder="Enter user UUID..."
-                  className="h-10 rounded-xl"
+                  className="h-9 rounded-lg"
                   value={form.userId}
                   onChange={(e) => setForm({ ...form, userId: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-sm font-bold mb-1 block">Product ID</label>
+                <label className="text-sm font-medium mb-1.5 block">Product ID</label>
                 <Input
                   placeholder="Enter product UUID..."
-                  className="h-10 rounded-xl"
+                  className="h-9 rounded-lg"
                   value={form.productId}
                   onChange={(e) => setForm({ ...form, productId: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-sm font-bold mb-1 block">License Type</label>
+                <label className="text-sm font-medium mb-1.5 block">License Type</label>
                 <select
-                  className="w-full h-10 rounded-xl border border-border/50 bg-background px-3 text-sm font-bold"
+                  className="w-full h-9 rounded-lg border border-border/50 bg-background px-3 text-sm"
                   value={form.licenseType}
                   onChange={(e) => setForm({ ...form, licenseType: e.target.value })}
                 >
@@ -191,18 +191,18 @@ export default function LicensesPage() {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-bold mb-1 block">Bonus Asset (optional)</label>
+                <label className="text-sm font-medium mb-1.5 block">Bonus Asset (optional)</label>
                 <Input
                   placeholder="e.g. Documentation Pack"
-                  className="h-10 rounded-xl"
+                  className="h-9 rounded-lg"
                   value={form.bonusAsset}
                   onChange={(e) => setForm({ ...form, bonusAsset: e.target.value })}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" className="rounded-xl font-bold" onClick={() => setGrantOpen(false)}>Cancel</Button>
-              <Button className="rounded-xl font-bold" onClick={() => grantMutation.mutate(form)}
+              <Button variant="outline" className="rounded-lg" onClick={() => setGrantOpen(false)}>Cancel</Button>
+              <Button className="rounded-lg" onClick={() => grantMutation.mutate(form)}
                 disabled={!form.userId || !form.productId || grantMutation.isPending}>
                 {grantMutation.isPending ? "Granting..." : "Grant License"}
               </Button>
@@ -211,7 +211,7 @@ export default function LicensesPage() {
         </Dialog>
 
         <AlertDialog open={!!revokeTarget} onOpenChange={(o) => !o && setRevokeTarget(null)}>
-          <AlertDialogContent className="rounded-2xl border-border/50 max-w-md">
+          <AlertDialogContent className="rounded-xl border-border/50 max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2 text-destructive">
                 <Trash2 className="w-5 h-5" /> Revoke License
@@ -221,8 +221,8 @@ export default function LicensesPage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-2 sm:gap-0">
-              <AlertDialogCancel className="rounded-xl font-bold">Cancel</AlertDialogCancel>
-              <AlertDialogAction className="rounded-xl font-bold bg-destructive text-destructive-foreground"
+              <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
+              <AlertDialogAction className="rounded-lg bg-destructive text-destructive-foreground"
                 onClick={() => revokeTarget && revokeMutation.mutate(revokeTarget)}
                 disabled={revokeMutation.isPending}>
                 {revokeMutation.isPending ? "Revoking..." : "Revoke"}

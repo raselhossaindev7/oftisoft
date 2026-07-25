@@ -73,10 +73,10 @@ export default function TechStack() {
             <div className="absolute inset-0 bg-transparent" />
             
             <div className="container px-4 mx-auto mb-16 text-center">
-                 <Badge variant="outline" className="text-sm py-2 px-6 border-white/10 text-white/80 tracking-wide bg-white/5 backdrop-blur-sm font-semibold">
+                 <Badge variant="outline" className="text-xs py-2 px-6 border-white/10 text-white/80 tracking-wide bg-white/5 backdrop-blur-sm font-semibold">
                     {techStackContent.badge}
                 </Badge>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mt-6">
+                <h2 className="type-h1 text-white mt-6">
                     {techStackContent.title}{' '}
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                         {techStackContent.subtitle}

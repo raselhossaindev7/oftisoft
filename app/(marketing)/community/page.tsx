@@ -89,14 +89,14 @@ export default function CommunityPage() {
                 {/* Header Section */}
                 <div className="text-center space-y-8 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-[10px] shadow-[0_0_20px_rgba(var(--primary),0.2)]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-xs shadow-[0_0_20px_rgba(var(--primary),0.2)]">
                             {header?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
                     <AnimatedH1 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-8xl font-semibold tracking-tighter text-white"
+                        className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter text-white"
                     >
                         {header?.title ?? ""} <span className="text-primary">{header?.highlight ?? ""}</span>.
                     </AnimatedH1>
@@ -165,7 +165,7 @@ export default function CommunityPage() {
                                 </div>
                             </form>
                             <div className="flex items-center gap-4 justify-center lg:justify-start">
-                                <p className="text-[10px] font-semibold tracking-[0.2em] text-white/30">
+                                <p className="text-xs font-semibold tracking-[0.2em] text-white/30">
                                     {newsletter?.footerText ?? ""}
                                 </p>
                             </div>
@@ -178,7 +178,7 @@ export default function CommunityPage() {
                     {stats.map((stat) => (
                         <div key={stat.id} className="flex flex-col items-center text-center space-y-2">
                             <span className="text-4xl font-semibold text-white tracking-tighter">{stat.value}</span>
-                            <span className="text-[10px] font-semibold tracking-widest text-primary">{stat.label}</span>
+                            <span className="text-xs font-semibold tracking-widest text-primary">{stat.label}</span>
                         </div>
                     ))}
                 </div>

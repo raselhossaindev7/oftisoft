@@ -13,13 +13,13 @@ export function useProjects(projectId?: string, status?: string) {
 
     const projects = Array.isArray(projectsResponse) ? projectsResponse : (projectsResponse as any)?.data ?? [];
 
-    const { data: project, isLoading: projectLoading } = useQuery({
+    const { data: project, isLoading: projectLoading, isError: projectError, refetch: refetchProject } = useQuery({
         queryKey: ['projects', projectId],
         queryFn: () => projectsAPI.getProject(projectId!),
         enabled: !!projectId
     });
 
-    const { data: stats } = useQuery({
+    const { data: stats, refetch: refetchStats } = useQuery({
         queryKey: ['projects', 'stats'],
         queryFn: projectsAPI.getStats,
         enabled: !projectId
@@ -76,8 +76,9 @@ export function useProjects(projectId?: string, status?: string) {
         project: project as Project,
         stats,
         isLoading: projectId ? projectLoading : projectsLoading,
-        isError: !projectId && projectsError,
-        refetch: refetchProjects,
+        isError: projectId ? projectError : projectsError,
+        refetch: projectId ? refetchProject : refetchProjects,
+        fetchStats: refetchStats,
         createProject: (data: Partial<Project>, options?: any) => createProjectMutation.mutate(data, options),
         updateProject: (id: string, data: Partial<Project>, options?: any) => updateProjectMutation.mutate({ id, data }, options),
         deleteProject: (id: string, options?: any) => deleteProjectMutation.mutate(id, options),

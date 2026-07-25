@@ -69,7 +69,7 @@ export default function ContactPage() {
                     <div className="lg:col-span-12 xl:col-span-5 space-y-12">
                         <div className="space-y-6">
                             <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                                <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-[10px]">
+                                <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-xs">
                                     {header?.badge ?? ""}
                                 </Badge>
                             </AnimatedDiv>
@@ -94,7 +94,7 @@ export default function ContactPage() {
                                         <Icon size={28} />
                                     </div>
                                     <div className="space-y-1">
-                                        <h4 className="text-[10px] font-semibold tracking-widest text-muted-foreground">{item.title}</h4>
+                                        <h4 className="text-xs font-semibold tracking-widest text-muted-foreground">{item.title}</h4>
                                         <p className="text-xl font-bold text-white tracking-tight">{item.value}</p>
                                     </div>
                                 </AnimatedDiv>
@@ -104,7 +104,7 @@ export default function ContactPage() {
                         {/* Status Node */}
                         <Card className="border-primary/20 bg-primary/[0.03] backdrop-blur-2xl rounded-[40px] p-8 space-y-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-semibold tracking-widest text-primary">{statusNode?.title ?? ""}</span>
+                                <span className="text-xs font-semibold tracking-widest text-primary">{statusNode?.title ?? ""}</span>
                                 <Badge className="bg-green-500 text-white font-semibold px-4 py-1 animate-pulse">{statusNode?.status ?? ""}</Badge>
                             </div>
                             <p className="text-sm font-bold text-white/60">{statusNode?.latencyText ?? ""}</p>
@@ -130,20 +130,20 @@ export default function ContactPage() {
                                     <form id="contact-form" onSubmit={handleContactSubmit} className="space-y-8">
                                         <div className="grid md:grid-cols-2 gap-8">
                                             <div className="space-y-3">
-                                                <label className="text-[10px] font-semibold tracking-widest text-muted-foreground ml-2">{form?.nameLabel ?? ""}</label>
+                                                <label className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.nameLabel ?? ""}</label>
                                                 <Input name="name" required className="h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold px-8 transition-all" placeholder="Architect Alpha" />
                                             </div>
                                             <div className="space-y-3">
-                                                <label className="text-[10px] font-semibold tracking-widest text-muted-foreground ml-2">{form?.emailLabel ?? ""}</label>
+                                                <label className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.emailLabel ?? ""}</label>
                                                 <Input name="email" required type="email" className="h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold px-8 transition-all" placeholder="alpha@network.com" />
                                             </div>
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-[10px] font-semibold tracking-widest text-muted-foreground ml-2">{form?.subjectLabel ?? ""}</label>
+                                            <label className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.subjectLabel ?? ""}</label>
                                             <Input name="subject" required className="h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold px-8 transition-all" placeholder="Neural Engine Implementation" />
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-[10px] font-semibold tracking-widest text-muted-foreground ml-2">{form?.messageLabel ?? ""}</label>
+                                            <label className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.messageLabel ?? ""}</label>
                                             <Textarea name="message" required className="min-h-[160px] rounded-[32px] bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold p-8 transition-all resize-none" placeholder="Describe the scope of your communication node..." />
                                         </div>
                                     </form>
@@ -162,11 +162,11 @@ export default function ContactPage() {
                 <div className="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40">
                     <div className="flex items-center gap-4">
                         <ShieldCheck className="w-6 h-6 text-primary" />
-                        <span className="text-[10px] font-semibold tracking-widest text-white">{footer?.encryptedText ?? ""}</span>
+                        <span className="text-xs font-semibold tracking-widest text-white">{footer?.encryptedText ?? ""}</span>
                     </div>
                     <div className="flex items-center gap-4">
                         <Bot className="w-6 h-6 text-primary" />
-                        <span className="text-[10px] font-semibold tracking-widest text-white">{footer?.agentText ?? ""}</span>
+                        <span className="text-xs font-semibold tracking-widest text-white">{footer?.agentText ?? ""}</span>
                     </div>
                 </div>
             </div>

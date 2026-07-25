@@ -55,7 +55,7 @@ export default function PopularPosts() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.1 }}
                             style={{ willChange: "transform, opacity" }}
-                            className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70"
+                            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70"
                         >
                             Most Popular Reads
                         </AnimatedH2>

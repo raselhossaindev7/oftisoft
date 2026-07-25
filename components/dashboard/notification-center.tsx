@@ -85,7 +85,7 @@ export function NotificationCenter() {
 
   const markAsRead = async (notificationId: string) => {
     try {
-      await api.patch(`/notifications/${notificationId}/read`);
+      await api.put(`/notifications/${notificationId}/read`);
       setNotifications((prev) =>
         prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
       );
@@ -97,7 +97,7 @@ export function NotificationCenter() {
 
   const markAllAsRead = async () => {
     try {
-      await api.patch("/notifications/read-all");
+      await api.put("/notifications/read-all");
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
       toast.success("All notifications marked as read");
@@ -144,7 +144,7 @@ export function NotificationCenter() {
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]"
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-micro"
               variant="destructive"
             >
               {unreadCount > 99 ? "99+" : unreadCount}

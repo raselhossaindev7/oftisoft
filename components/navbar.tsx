@@ -303,7 +303,7 @@ export default function Navbar() {
                 <span className="relative z-10 flex items-center gap-2">
                   {link.label}
                   {link.label === "Shop" && cart.items.length > 0 && (
-                    <span className="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/50">
+                    <span className="flex items-center justify-center w-5 h-5 text-micro font-bold text-white bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/50">
                       {cart.items.length}
                     </span>
                   )}

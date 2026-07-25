@@ -15,11 +15,15 @@ export function useAffiliateAdmin() {
     const [isLoadingCommissions, setIsLoadingCommissions] = useState(false);
     const [isLoadingWithdrawals, setIsLoadingWithdrawals] = useState(false);
     const [isLoadingSettings, setIsLoadingSettings] = useState(false);
-    
+    const [auditLogs, setAuditLogs] = useState<any>(null);
+    const [isLoadingAuditLogs, setIsLoadingAuditLogs] = useState(false);
+    const [auditStats, setAuditStats] = useState<any>(null);
+
     const [pagination, setPagination] = useState({
         affiliates: { page: 1, limit: 20, total: 0, totalPages: 0 },
         commissions: { page: 1, limit: 20, total: 0, totalPages: 0 },
         withdrawals: { page: 1, limit: 20, total: 0, totalPages: 0 },
+        auditLogs: { page: 1, limit: 50, total: 0, totalPages: 0 },
     });
 
     // Fetch Dashboard Stats
@@ -117,6 +121,40 @@ export function useAffiliateAdmin() {
             toast.error(err?.response?.data?.message || "Failed to load settings");
         } finally {
             setIsLoadingSettings(false);
+        }
+    }, []);
+
+    // Fetch Audit Logs
+    const fetchAuditLogs = useCallback(async (params?: { page?: number; limit?: number; affiliateId?: string; action?: string; dateFrom?: string; dateTo?: string }) => {
+        try {
+            setIsLoadingAuditLogs(true);
+            const data = await affiliateAdminAPI.getAuditLogs(params);
+            setAuditLogs(data);
+            if (data.meta) {
+                setPagination(prev => ({
+                    ...prev,
+                    auditLogs: {
+                        page: data.meta.page,
+                        limit: data.meta.limit,
+                        total: data.meta.total,
+                        totalPages: data.meta.totalPages,
+                    }
+                }));
+            }
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Failed to load audit logs");
+        } finally {
+            setIsLoadingAuditLogs(false);
+        }
+    }, []);
+
+    // Fetch Audit Stats
+    const fetchAuditStats = useCallback(async (days?: number) => {
+        try {
+            const data = await affiliateAdminAPI.getAuditStats(days);
+            setAuditStats(data);
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Failed to load audit stats");
         }
     }, []);
 
@@ -270,17 +308,22 @@ export function useAffiliateAdmin() {
         commissions,
         withdrawals,
         settings,
+        auditLogs,
+        auditStats,
         isLoading,
         isLoadingAffiliates,
         isLoadingCommissions,
         isLoadingWithdrawals,
         isLoadingSettings,
+        isLoadingAuditLogs,
         pagination,
         fetchDashboard,
         fetchAffiliates,
         fetchCommissions,
         fetchWithdrawals,
         fetchSettings,
+        fetchAuditLogs,
+        fetchAuditStats,
         approveAffiliate,
         suspendAffiliate,
         banAffiliate,

@@ -27,12 +27,15 @@ export default function Awards({ data }: { data?: any }) {
     
     const [activeCard, setActiveCard] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
+    const isHoveredRef = useRef(false);
 
-    // Auto-cycle for Desktop Stack
+    // Auto-cycle for Desktop Stack — pauses on hover
     useEffect(() => {
         if (!awards.length) return;
         const interval = setInterval(() => {
-            setActiveCard((prev) => (prev + 1) % awards.length);
+            if (!isHoveredRef.current) {
+                setActiveCard((prev) => (prev + 1) % awards.length);
+            }
         }, 4000);
         return () => clearInterval(interval);
     }, [awards.length]);
@@ -49,7 +52,7 @@ export default function Awards({ data }: { data?: any }) {
                     <div className="relative z-10 w-full">
                         <AnimatedDiv initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }} transition={{ duration: 0.5 }}>
-                            <Badge variant="outline" className="gap-2 px-3 py-1.5 rounded-full bg-white/5 border-white/10 text-sm font-medium text-primary mb-6 hover:bg-white/10 transition-colors">
+                            <Badge variant="outline" className="gap-2 px-3 py-1.5 rounded-full bg-white/5 border-white/10 text-xs font-medium text-primary mb-6 hover:bg-white/10 transition-colors">
                                 <Trophy className="w-3 h-3 fill-current" />
                                 {content?.awardsBadge ?? ""}
                             </Badge>
@@ -109,7 +112,10 @@ export default function Awards({ data }: { data?: any }) {
                         </div>
 
                         {/* 2. Desktop: Custom 3D Stack */}
-                        <div className="hidden lg:flex h-[500px] w-full items-center justify-end perspective-1000 relative">
+                        <div className="hidden lg:flex h-[500px] w-full items-center justify-end perspective-1000 relative"
+                            onMouseEnter={() => { isHoveredRef.current = true; }}
+                            onMouseLeave={() => { isHoveredRef.current = false; }}
+                        >
                             {awards.map((award: any, index: number) => {
                                 const isActive = index === activeCard;
                                 const offset = (index - activeCard + awards.length) % awards.length;
@@ -185,7 +191,7 @@ function AwardCard({ award }: { award: any }) {
                         )}>
                             <Award className="w-7 h-7" />
                         </div>
-                        <Badge variant="secondary" className="px-3 py-1 bg-white/5 border-white/10 text-white/90 font-mono text-sm font-bold hover:bg-white/10 backdrop-blur-sm">
+                        <Badge variant="secondary" className="px-3 py-1 bg-white/5 border-white/10 text-white/90 font-mono text-xs font-bold hover:bg-white/10 backdrop-blur-sm">
                             {award.year}
                         </Badge>
                     </div>

@@ -1,15 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { reviewsAPI, Review } from '@/lib/api';
+import { reviewsAPI, type Review } from '@/lib/api';
 import { toast } from 'sonner';
 
 export function useReviews(options?: { forModeration?: boolean }) {
     const queryClient = useQueryClient();
     const forModeration = options?.forModeration ?? false;
 
-    const { data: reviews, isLoading, error, refetch, isError } = useQuery({
+    const { data, isLoading, error, refetch, isError } = useQuery({
         queryKey: ['reviews', forModeration ? 'moderation' : 'mine'],
-        queryFn: forModeration ? reviewsAPI.getReviewsForModeration : reviewsAPI.getReviews,
+        queryFn: () => {
+            const fn = forModeration ? reviewsAPI.getReviewsForModeration : reviewsAPI.getReviews;
+            return fn(0, 100);
+        },
     });
+
+    const reviews = data?.items ?? [];
 
     const createReview = useMutation({
         mutationFn: reviewsAPI.createReview,
@@ -26,7 +31,7 @@ export function useReviews(options?: { forModeration?: boolean }) {
         mutationFn: ({ id, data }: { id: string; data: Partial<Review> }) => reviewsAPI.updateReview(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['reviews'] });
-            toast.success("Review updated successfully");
+            toast.success("Review updated");
         },
         onError: (error: any) => {
             toast.error(error?.response?.data?.message || error.message || "Failed to update review");
@@ -45,7 +50,7 @@ export function useReviews(options?: { forModeration?: boolean }) {
     });
 
     return {
-        reviews,
+        reviews, total: data?.total ?? 0,
         isLoading,
         error,
         isError,

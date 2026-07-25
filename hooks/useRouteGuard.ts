@@ -26,8 +26,7 @@ const ROUTE_ROLES: Record<string, number> = {
   "/dashboard/purchases": 1,
   // Marketing
   "/dashboard/marketing": 4,
-  "/dashboard/marketing/campaigns": 3,
-  "/dashboard/marketing/ads": 3,
+  "/dashboard/marketing/pricing": 3,
   "/dashboard/marketing/leads": 2,
   // Personal
   "/dashboard/downloads": 1,
@@ -58,7 +57,6 @@ const ROUTE_ROLES: Record<string, number> = {
   "/dashboard/portfolio": 4,
   "/dashboard/team": 4,
   "/dashboard/testimonials": 4,
-  "/dashboard/tickets": 4,
   "/dashboard/events": 4,
   "/dashboard/audit": 4,
   "/dashboard/notifications": 1,

@@ -230,8 +230,27 @@ type AnimatePresenceProps = {
   onExitComplete?: () => void;
 };
 
-export function AnimatePresence({ children }: AnimatePresenceProps) {
+export function AnimatePresence({ children, mode = "sync", onExitComplete }: AnimatePresenceProps) {
   return <>{children}</>;
+}
+
+export function useAnimateOnExit() {
+  const ref = useRef<HTMLElement>(null);
+  const [shouldRender, setShouldRender] = useState(true);
+
+  const exit = (onComplete?: () => void) => {
+    const el = ref.current;
+    if (!el) { onComplete?.(); return; }
+    gsap.to(el, {
+      opacity: 0, y: -10, duration: 0.2, ease: "power2.in",
+      onComplete: () => {
+        setShouldRender(false);
+        onComplete?.();
+      }
+    });
+  };
+
+  return { ref, shouldRender, exit, setShouldRender };
 }
 
 export const AnimatedDiv = (props: Omit<AnimProps, "as">) => <Animated as="div" {...props} />;
@@ -278,12 +297,14 @@ export function Reveal({ children, className = "", delay = 0, duration = 0.4, on
 export function useInView(options?: IntersectionObserverInit & { once?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const { once = true, ...observerOptions } = options || {};
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
         if (entry.isIntersecting && once) observer.unobserve(el);
       },
       { threshold: 0.1, ...observerOptions }
@@ -292,7 +313,7 @@ export function useInView(options?: IntersectionObserverInit & { once?: boolean 
     return () => observer.disconnect();
   }, [once]);
 
-  return { ref };
+  return { ref, isIntersecting };
 }
 
 export function useScrollY(): number {
@@ -364,6 +385,14 @@ export function useTransform(value: number, input: readonly number[], output: re
         const a = output[i];
         const b = output[i + 1];
         if (typeof a === "string" || typeof b === "string") {
+          const numA = parseFloat(String(a));
+          const numB = parseFloat(String(b));
+          if (!isNaN(numA) && !isNaN(numB)) {
+            const suffixA = String(a).replace(/[\d.-]/g, "");
+            const suffixB = String(b).replace(/[\d.-]/g, "");
+            const interpolated = numA + t * (numB - numA);
+            return `${interpolated}${suffixA || suffixB}`;
+          }
           return t < 0.5 ? String(a) : String(b);
         }
         return (a as number) + t * ((b as number) - (a as number));
@@ -377,26 +406,36 @@ export function useSpring(value: number, config?: { stiffness?: number; damping?
   const [smoothed, setSmoothed] = useState(value);
   const valRef = useRef(value);
   const smoothRef = useRef(value);
+  const stiffnessRef = useRef(config?.stiffness ?? 100);
+  const dampingRef = useRef(config?.damping ?? 20);
+  const frameRef = useRef<number | null>(null);
+  const activeRef = useRef(false);
+
   valRef.current = value;
-  const stiffness = config?.stiffness ?? 100;
-  const damping = config?.damping ?? 20;
+  stiffnessRef.current = config?.stiffness ?? 100;
+  dampingRef.current = config?.damping ?? 20;
 
   useEffect(() => {
-    let frame: number;
+    activeRef.current = true;
     const animate = () => {
+      if (!activeRef.current) return;
       const diff = valRef.current - smoothRef.current;
       if (Math.abs(diff) < 0.001) {
         smoothRef.current = valRef.current;
         setSmoothed(valRef.current);
+        frameRef.current = null;
         return;
       }
-      smoothRef.current += diff * (stiffness / 100) * (1 / (1 + damping / 20));
+      smoothRef.current += diff * (stiffnessRef.current / 100) * (1 / (1 + dampingRef.current / 20));
       setSmoothed(smoothRef.current);
-      frame = requestAnimationFrame(animate);
+      frameRef.current = requestAnimationFrame(animate);
     };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, [stiffness, damping]);
+    frameRef.current = requestAnimationFrame(animate);
+    return () => {
+      activeRef.current = false;
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    };
+  }, []);
 
   return smoothed;
 }
@@ -423,19 +462,32 @@ export function useMotionValue(initial: number) {
 }
 
 export function useParallax(elRef: React.RefObject<HTMLElement | null>, factor = 0.5) {
-  const scrollY = useScrollY();
   const [offset, setOffset] = useState(0);
-  const rectRef = useRef({ top: 0 });
 
   useEffect(() => {
-    if (elRef.current) {
-      rectRef.current = elRef.current.getBoundingClientRect();
-    }
-  }, [elRef]);
+    const el = elRef.current;
+    if (!el) return;
 
-  useEffect(() => {
-    setOffset((rectRef.current.top - scrollY) * factor);
-  }, [scrollY, factor]);
+    const onScroll = () => {
+      let rafId: number | null = null;
+      const tick = () => {
+        rafId = null;
+        const rect = el.getBoundingClientRect();
+        const wh = window.innerHeight;
+        const center = rect.top + rect.height / 2;
+        const viewportCenter = wh / 2;
+        setOffset((center - viewportCenter) * factor);
+      };
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(tick);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [elRef, factor]);
 
   return offset;
 }

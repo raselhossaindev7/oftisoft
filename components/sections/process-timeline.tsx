@@ -77,10 +77,10 @@ export default function ProcessTimeline() {
                         viewport={{ once: true, margin: "-80px" }}
                         transition={{ duration: 0.5 }}
                     >
-                        <Badge variant="outline" className="mb-4 border-primary/20 text-primary tracking-widest px-3 py-1">
+                        <Badge variant="outline" className="mb-4 border-primary/20 text-primary tracking-widest px-3 py-1 text-xs">
                             {processContent.badge}
                         </Badge>
-                        <h3 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 leading-tight">
+                        <h3 className="type-h1 text-white mb-6">
                             {processContent.title} <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                                 {processContent.subtitle}
@@ -155,10 +155,10 @@ function TimelineItem({ step, index }: { step: Step, index: number }) {
                             </span>
                         </div>
 
-                        <h4 className="text-lg sm:text-xl md:text-2xl xl:text-3xl font-bold text-white mb-3 group-hover:text-primary transition-colors duration-300 relative z-10">
+                        <h4 className="type-h3 text-white mb-3 group-hover:text-primary transition-colors duration-300 relative z-10">
                             {step.title}
                         </h4>
-                        <p className="text-xs sm:text-sm md:text-base xl:text-lg text-muted-foreground leading-relaxed relative z-10">
+                        <p className="type-body-sm text-muted-foreground relative z-10">
                             {step.description}
                         </p>
                     </CardContent>

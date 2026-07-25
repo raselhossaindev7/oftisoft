@@ -1,8 +1,8 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import gsap from "gsap";
 import { X, ZoomIn, PlayCircle, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,48 @@ export default function OfficeCulture({ data }: { data?: any }) {
     const items = culture?.items || [];
 
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
+    const overlayRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const closingRef = useRef(false);
+
+    const closeLightbox = useCallback(() => {
+        if (closingRef.current || !overlayRef.current) return;
+        closingRef.current = true;
+        const tl = gsap.timeline({
+            onComplete: () => {
+                setSelectedItem(null);
+                closingRef.current = false;
+            }
+        });
+        if (contentRef.current) {
+            tl.to(contentRef.current, { scale: 0.95, opacity: 0, duration: 0.2, ease: "power2.in" }, 0);
+        }
+        tl.to(overlayRef.current, { opacity: 0, duration: 0.25, ease: "power2.in" }, 0);
+    }, []);
+
+    const openLightbox = useCallback((item: any) => {
+        setSelectedItem(item);
+    }, []);
+
+    useEffect(() => {
+        if (!selectedItem) return;
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === "Escape") closeLightbox();
+        };
+        document.addEventListener("keydown", handleEsc);
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.removeEventListener("keydown", handleEsc);
+            document.body.style.overflow = "";
+        };
+    }, [selectedItem, closeLightbox]);
+
+    useEffect(() => {
+        if (selectedItem && overlayRef.current && contentRef.current) {
+            gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" });
+            gsap.fromTo(contentRef.current, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(1.4)", delay: 0.05 });
+        }
+    }, [selectedItem]);
 
     return (
         <section className="py-20 md:py-32 bg-transparent relative overflow-hidden">
@@ -28,10 +70,10 @@ export default function OfficeCulture({ data }: { data?: any }) {
                         transition={{ duration: 0.5 }}
                         style={{ willChange: "transform, opacity" }}
                     >
-                        <Badge variant="outline" className="mb-6 border-primary/20 text-primary tracking-wide px-3 py-1 bg-primary/5 rounded-full font-semibold text-sm">
+                        <Badge variant="outline" className="mb-6 border-primary/20 text-primary tracking-wide px-3 py-1 bg-primary/5 rounded-full font-semibold text-xs">
                             {culture?.badge ?? ""}
                         </Badge>
-                        <h3 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+                        <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
                             {culture?.titleLine1 ?? ""} <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                                 {culture?.titleLine2 ?? ""}
@@ -89,14 +131,15 @@ export default function OfficeCulture({ data }: { data?: any }) {
 
                 {/* Lightbox Overlay */}
                 {selectedItem && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-12"
-                        onClick={() => setSelectedItem(null)}
+                    <div ref={overlayRef}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-12"
+                        onClick={closeLightbox}
                     >
-                        <button className="absolute top-6 right-6 z-10 p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors border border-white/10 text-white">
+                        <button onClick={closeLightbox} className="absolute top-6 right-6 z-10 p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors border border-white/10 text-white">
                             <X className="w-6 h-6" />
                         </button>
 
-                        <div onClick={(e) => e.stopPropagation()}
+                        <div ref={contentRef} onClick={(e) => e.stopPropagation()}
                             className="relative w-full max-w-5xl aspect-video bg-neutral-900 rounded-3xl overflow-hidden shadow-2xl border border-white/10"
                         >
                             {selectedItem.type === 'video' ? (

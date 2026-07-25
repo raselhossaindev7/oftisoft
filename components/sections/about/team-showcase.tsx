@@ -1,8 +1,8 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import gsap from "gsap";
 import { Github, Linkedin, Twitter, ArrowUpRight, Grid, Code, Palette, Zap, Sparkles } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -23,10 +23,35 @@ export default function TeamShowcase({ data }: { data?: any }) {
     const teamMembers = team?.members || [];
 
     const [filter, setFilter] = useState("All");
+    const [displayFilter, setDisplayFilter] = useState("All");
+    const gridRef = useRef<HTMLDivElement>(null);
+    const isAnimating = useRef(false);
 
     const filteredTeam = teamMembers.filter((member: any) =>
-        filter === "All" ? true : member.category === filter || (filter === "Development" && (member.category === "Development" || member.category === "Product"))
+        displayFilter === "All" ? true : member.category === displayFilter || (displayFilter === "Development" && (member.category === "Development" || member.category === "Product"))
     );
+
+    const handleFilterChange = (newFilter: string) => {
+        if (newFilter === filter || isAnimating.current) return;
+        isAnimating.current = true;
+        setFilter(newFilter);
+
+        if (gridRef.current) {
+            gsap.to(gridRef.current, {
+                opacity: 0, y: 10, duration: 0.2, ease: "power2.in",
+                onComplete: () => {
+                    setDisplayFilter(newFilter);
+                    gsap.fromTo(gridRef.current,
+                        { opacity: 0, y: 10 },
+                        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", onComplete: () => { isAnimating.current = false; } }
+                    );
+                }
+            });
+        } else {
+            setDisplayFilter(newFilter);
+            isAnimating.current = false;
+        }
+    };
 
     return (
         <section className="py-24 md:py-32 bg-transparent relative overflow-hidden z-20">
@@ -39,7 +64,7 @@ export default function TeamShowcase({ data }: { data?: any }) {
                         transition={{ duration: 0.5 }}
                         style={{ willChange: "transform, opacity" }}
                     >
-                        <Badge variant="outline" className="mb-6 border-primary/20 text-primary tracking-wide px-3 py-1 bg-primary/5 rounded-full font-semibold text-sm">
+                        <Badge variant="outline" className="mb-6 border-primary/20 text-primary tracking-wide px-3 py-1 bg-primary/5 rounded-full font-semibold text-xs">
                             {team?.badge ?? ""}
                         </Badge>
                         <h3 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
@@ -60,7 +85,7 @@ export default function TeamShowcase({ data }: { data?: any }) {
                         style={{ willChange: "transform, opacity" }}>
                         {categories.map((cat) => (
                             <button key={cat.label}
-                                onClick={() => setFilter(cat.label)}
+                                onClick={() => handleFilterChange(cat.label)}
                                 className={cn(
                                     "flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300",
                                     filter === cat.label
@@ -76,7 +101,7 @@ export default function TeamShowcase({ data }: { data?: any }) {
                 </div>
 
                 {/* Team Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 will-change-transform">
                     {filteredTeam.map((member: any) => (
                         <AnimatedDiv key={member.id}
                             initial={{ opacity: 0, y: 30 }}

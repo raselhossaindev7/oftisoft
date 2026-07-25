@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+
 export interface TeamMember {
     id: string;
     name: string;
@@ -14,13 +15,43 @@ export interface TeamMember {
     updatedAt: string;
 }
 
+export interface TeamMembersResponse {
+    items: TeamMember[];
+    total: number;
+    skip: number;
+    take: number;
+}
+
+export interface TeamStats {
+    total: number;
+    active: number;
+    inactive: number;
+}
+
+export interface TeamFilters {
+    skip?: number;
+    take?: number;
+    search?: string;
+    status?: string;
+    sortField?: string;
+    sortDirection?: 'ASC' | 'DESC';
+}
+
 export const teamMembersAPI = {
-    getAll: async (params?: { search?: string; isActive?: boolean }): Promise<TeamMember[]> => {
-        const response = await api.get('/team-members', { params });
+    getAll: async (filters?: TeamFilters): Promise<TeamMembersResponse> => {
+        const response = await api.get('/team-members', { params: filters });
         return response.data;
     },
     getActive: async (): Promise<TeamMember[]> => {
         const response = await api.get('/team-members/active');
+        return response.data;
+    },
+    getOne: async (id: string): Promise<TeamMember> => {
+        const response = await api.get(`/team-members/${id}`);
+        return response.data;
+    },
+    getStats: async (): Promise<TeamStats> => {
+        const response = await api.get('/team-members/stats');
         return response.data;
     },
     create: async (data: Partial<TeamMember>): Promise<TeamMember> => {
@@ -33,5 +64,14 @@ export const teamMembersAPI = {
     },
     delete: async (id: string): Promise<void> => {
         await api.delete(`/team-members/${id}`);
+    },
+    bulkDelete: async (ids: string[]): Promise<void> => {
+        await api.post('/team-members/bulk-delete', { ids });
+    },
+    bulkUpdateStatus: async (ids: string[], isActive: boolean): Promise<void> => {
+        await api.post('/team-members/bulk-status', { ids, isActive });
+    },
+    reorder: async (updates: { id: string; order: number }[]): Promise<void> => {
+        await api.post('/team-members/reorder', { updates });
     },
 };

@@ -144,7 +144,7 @@ export default function ServiceOfferDetail({ offer }: ServiceOfferDetailProps) {
                 </div>
                 <div>
                   <span className="text-sm font-semibold">Oftisoft</span>
-                  <div className="flex items-center gap-1 text-[10px] text-green-500 font-medium">
+                  <div className="flex items-center gap-1 text-xs text-green-500 font-medium">
                     <ShieldCheck className="w-3 h-3" />
                     Pro Seller
                   </div>
@@ -364,7 +364,7 @@ export default function ServiceOfferDetail({ offer }: ServiceOfferDetailProps) {
                     >
                       {isBestValue && (
                         <div className="absolute top-0 right-0">
-                          <div className="bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-bl-xl">
+                          <div className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-xl">
                             BEST VALUE
                           </div>
                         </div>

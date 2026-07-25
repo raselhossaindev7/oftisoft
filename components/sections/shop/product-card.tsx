@@ -114,7 +114,7 @@ export function ProductCard({ product, isFavorite, onToggleWishlist, index = 0 }
 
                     <div className="flex flex-wrap gap-1 mb-4">
                         {(Array.isArray(product.tags) ? product.tags : []).slice(0, 3).map(tag => (
-                            <span key={tag} className="text-[10px] px-2 py-1 rounded-full bg-muted/50 border border-white/5 text-muted-foreground">
+                            <span key={tag} className="text-xs px-2 py-1 rounded-full bg-muted/50 border border-white/5 text-muted-foreground">
                                 {tag}
                             </span>
                         ))}

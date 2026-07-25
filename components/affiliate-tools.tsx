@@ -52,12 +52,12 @@ export default function AffiliateTools({ category, title }: { category?: string;
                   <p className="text-xs text-muted-foreground mt-0.5">{link.programName}</p>
                 </div>
                 {link.badgeText && (
-                  <Badge variant="outline" className="shrink-0 ml-2 text-[10px] px-2 border-primary/20 text-primary">{link.badgeText}</Badge>
+                  <Badge variant="outline" className="shrink-0 ml-2 text-micro px-2 border-primary/20 text-primary">{link.badgeText}</Badge>
                 )}
               </div>
               {link.description && <p className="text-xs text-muted-foreground/80 leading-relaxed mb-4 line-clamp-2">{link.description}</p>}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                <div className="flex items-center gap-3 text-micro text-muted-foreground">
                   {link.commissionRate > 0 && <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-green-400" />{link.commissionRate}%</span>}
                 </div>
                 <Button size="sm" variant="ghost" className="h-8 text-xs gap-1.5 rounded-full hover:bg-primary/10 hover:text-primary" onClick={() => trackClick(link.id, link.url)}>
@@ -68,7 +68,7 @@ export default function AffiliateTools({ category, title }: { category?: string;
           </Card>
         ))}
       </div>
-      <p className="text-[10px] text-center text-muted-foreground/40">We may earn a commission when you purchase through these links. <a href="/privacy" className="underline">Affiliate disclosure</a></p>
+      <p className="text-micro text-center text-muted-foreground/40">We may earn a commission when you purchase through these links. <a href="/privacy" className="underline">Affiliate disclosure</a></p>
     </div>
   );
 }

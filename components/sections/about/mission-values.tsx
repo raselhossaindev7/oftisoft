@@ -47,7 +47,7 @@ export default function MissionValues({ data }: { data?: any }) {
                         transition={{ duration: 0.5 }}
                         style={{ willChange: "transform, opacity" }}
                     >
-                        <Badge variant="outline" className="mb-6 border-primary/20 text-primary tracking-wide px-3 py-1 bg-primary/5 rounded-full font-semibold text-sm">
+                        <Badge variant="outline" className="mb-6 border-primary/20 text-primary tracking-wide px-3 py-1 bg-primary/5 rounded-full font-semibold text-xs">
                             {mission?.badge ?? ""}
                         </Badge>
                         <h3 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">

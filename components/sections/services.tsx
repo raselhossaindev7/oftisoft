@@ -112,7 +112,7 @@ export default function Services() {
                         <Badge variant="outline" className="mb-4 border-primary/20 text-primary tracking-wide px-4 py-1.5 backdrop-blur-sm font-semibold text-xs">
                             {servicesContent.badge}
                         </Badge>
-                        <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white leading-[1.1]">
+                        <h3 className="type-h1 text-white">
                             {servicesContent.title} <br className="hidden md:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                                 {servicesContent.subtitle}
@@ -129,7 +129,7 @@ export default function Services() {
                         className="w-full md:w-auto flex justify-start md:justify-end"
                     >
                         <Link href="/services">
-                            <Button variant="ghost" className="group text-base md:text-lg font-medium text-white/80 hover:text-white px-0 hover:bg-transparent">
+                            <Button variant="ghost" className="group type-body-lg font-medium text-white/80 hover:text-white px-0 hover:bg-transparent">
                                 Explore All Services
                                 <div className="w-10 h-10 ml-2 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all duration-300">
                                     <ArrowRight className="w-5 h-5 -rotate-45 group-hover:rotate-0 transition-transform" />
@@ -152,7 +152,7 @@ export default function Services() {
                                 onMouseEnter={() => setHoveredIndex(index)}
                                 onMouseLeave={() => setHoveredIndex(null)}
                             >
-                                <Link href="/services" className="block h-full">
+                                <Link href={`/services/${service.id}`} className="block h-full">
                                 <Card className="group relative h-full min-h-[320px] border-white/5 bg-white/5 hover:bg-white/[0.07] transition-all duration-500 overflow-hidden flex flex-col justify-between backdrop-blur-sm">
                                     {/* Gradient Glow Effect */}
                                     <div className={cn(
@@ -171,14 +171,14 @@ export default function Services() {
                                             </div>
                                             <ArrowRight className="w-6 h-6 text-white/30 -rotate-45 group-hover:rotate-0 group-hover:text-white transition-all duration-500 ease-out" />
                                         </div>
-                                        <CardTitle className="text-2xl font-semibold text-white group-hover:translate-x-1 transition-transform duration-300">
+                                        <CardTitle className="text-heading-3 font-semibold text-white group-hover:translate-x-1 transition-transform duration-300">
                                             {service.title}
                                         </CardTitle>
                                     </CardHeader>
 
                                     {/* Content & Tags */}
                                     <CardContent className="relative z-10 pt-4 flex flex-col gap-6 h-full justify-between">
-                                        <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed group-hover:text-white/80 transition-colors duration-300">
+                                        <p className="text-muted-foreground type-body-sm leading-relaxed group-hover:text-white/80 transition-colors duration-300">
                                             {service.description}
                                         </p>
                                         

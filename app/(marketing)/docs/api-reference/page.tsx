@@ -106,11 +106,11 @@ export default function ApiReferencePage() {
             <div className="container px-6 mx-auto relative z-10 space-y-24">
                 <div className="text-center space-y-8 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-purple-500/30 bg-purple-500/5 text-purple-400 font-semibold tracking-[0.3em] text-[10px] shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-purple-500/30 bg-purple-500/5 text-purple-400 font-semibold tracking-[0.3em] text-xs shadow-[0_0_20px_rgba(168,85,247,0.2)]">
                             API REFERENCE
                         </Badge>
                     </AnimatedDiv>
-                    <AnimatedH1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter text-white">
+                    <AnimatedH1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter text-white">
                         API <span className="text-primary">Reference</span>.
                     </AnimatedH1>
                     <AnimatedDiv initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>

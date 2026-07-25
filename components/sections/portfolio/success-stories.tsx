@@ -158,7 +158,7 @@ export default function SuccessStories() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.8 }}
                         >
-                            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-center lg:text-left">
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-center lg:text-left">
                                 Real Results, <br />
                                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
                                     Measurable Impact.

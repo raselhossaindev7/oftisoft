@@ -24,7 +24,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import { AdSlot } from "@/components/ads/ad-slot";
+
 
 export default function BlogPostPage({
   params,
@@ -177,7 +177,7 @@ export default function BlogPostPage({
         <div className="container px-4 mx-auto">
           <div className="flex flex-col lg:flex-row gap-16 max-w-7xl mx-auto">
             <aside className="lg:w-20 hidden lg:flex flex-col gap-6 sticky top-32 h-fit items-center">
-              <div className="text-[10px] font-semibold tracking-[0.2em] text-muted-foreground vertical-text rotate-180 mb-4">
+              <div className="text-xs font-semibold tracking-[0.2em] text-muted-foreground vertical-text rotate-180 mb-4">
                 Share Project
               </div>
               <ShareButton icon={Twitter}
@@ -233,7 +233,6 @@ export default function BlogPostPage({
                         )}
                   </div>
                 </div>
-                <AdSlot position="post-content-bottom" />
               </div>
 
               <div className="mt-12 p-8 rounded-3xl bg-card border border-border flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
@@ -285,7 +284,6 @@ export default function BlogPostPage({
                   </li>
                 </ul>
               </div>
-              <AdSlot position="blog-sidebar" />
             </aside>
           </div>
         </div>

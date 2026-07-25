@@ -667,7 +667,7 @@ function MessagesPageContent() {
                     {selectedChat.order.orderNumber}
                   </p>
                   <Badge variant="outline" className={cn(
-                    "shrink-0 text-[10px] sm:text-xs capitalize border px-1.5 py-0",
+                    "shrink-0 text-micro sm:text-xs capitalize border px-1.5 py-0",
                     selectedChat.order.status === 'completed' && "bg-green-50 text-green-700 border-green-300 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800",
                     selectedChat.order.status === 'pending' && "bg-yellow-50 text-yellow-700 border-yellow-300 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800",
                     selectedChat.order.status === 'processing' && "bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800",
@@ -677,7 +677,7 @@ function MessagesPageContent() {
                     {selectedChat.order.status}
                   </Badge>
                 </div>
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                <p className="text-micro sm:text-xs text-muted-foreground mt-0.5">
                   {selectedChat.order.items.length} item{selectedChat.order.items.length !== 1 ? 's' : ''} • ${Number(selectedChat.order.total).toFixed(2)}
                 </p>
               </div>
@@ -714,14 +714,14 @@ function MessagesPageContent() {
           {/* Order Items - scrollable on mobile */}
           <div className="mt-1.5 flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
             {selectedChat.order.items.slice(0, 3).map((item, i) => (
-              <div key={i} className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-background/80 dark:bg-background/40 rounded-lg border border-border/50 text-[10px] sm:text-xs whitespace-nowrap shrink-0">
+              <div key={i} className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-background/80 dark:bg-background/40 rounded-lg border border-border/50 text-micro sm:text-xs whitespace-nowrap shrink-0">
                 <PackageIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground shrink-0" />
                 <span className="font-medium truncate max-w-[80px] sm:max-w-[120px]">{item.productName}</span>
                 <span className="text-muted-foreground">x{item.quantity}</span>
               </div>
             ))}
             {selectedChat.order.items.length > 3 && (
-              <span className="text-[10px] sm:text-xs text-muted-foreground self-center shrink-0">
+              <span className="text-micro sm:text-xs text-muted-foreground self-center shrink-0">
                 +{selectedChat.order.items.length - 3}
               </span>
             )}
@@ -1026,14 +1026,14 @@ function MessagesPageContent() {
                         {chat.name}
                       </span>
                       {chat.isSeller ? (
-                        <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-0">
+                        <Badge variant="secondary" className="text-micro px-1 py-0 h-4 font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-0">
                           <Store className="w-2.5 h-2.5 mr-0.5" /> Seller
                         </Badge>
                       ) : (
                         ROLE_ICONS[chat.role]
                       )}
                       {chat.isOrder && !chat.isSeller && (
-                        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 font-normal border-primary/30 text-primary">
+                        <Badge variant="outline" className="text-micro px-1 py-0 h-4 font-normal border-primary/30 text-primary">
                           Order
                         </Badge>
                       )}
@@ -1051,7 +1051,7 @@ function MessagesPageContent() {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   {chat.unread > 0 && (
-                    <span className="min-w-[18px] h-4.5 sm:min-w-[20px] sm:h-5 px-1 rounded-full bg-[#0084ff] text-white text-[10px] sm:text-xs font-bold flex items-center justify-center">
+                    <span className="min-w-[18px] h-4.5 sm:min-w-[20px] sm:h-5 px-1 rounded-full bg-[#0084ff] text-white text-micro sm:text-xs font-bold flex items-center justify-center">
                       {chat.unread}
                     </span>
                   )}
@@ -1092,7 +1092,7 @@ function MessagesPageContent() {
                   <>
                     <div className="px-3 pt-3 pb-1 flex items-center gap-2">
                       <ShoppingBag className="w-3 h-3 text-amber-500" />
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Orders</span>
+                      <span className="text-micro font-semibold text-muted-foreground uppercase tracking-wider">Orders</span>
                     </div>
                     {orderChats.map(renderChat)}
                   </>
@@ -1101,7 +1101,7 @@ function MessagesPageContent() {
                   <>
                     <div className={cn("px-3 pt-3 pb-1 flex items-center gap-2", orderChats.length > 0 && "mt-2 border-t border-border/50 pt-4")}>
                       <MessageSquare className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Direct Messages</span>
+                      <span className="text-micro font-semibold text-muted-foreground uppercase tracking-wider">Direct Messages</span>
                     </div>
                     {directChats.map(renderChat)}
                   </>
@@ -1293,7 +1293,7 @@ function MessagesPageContent() {
                         <div className="flex items-center gap-1.5">
                           <p className="text-sm font-semibold truncate">{u.name}</p>
                           {u.isSeller && (
-                            <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-0">
+                            <Badge variant="secondary" className="text-micro px-1 py-0 h-4 font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-0">
                               <Store className="w-2.5 h-2.5 mr-0.5" /> Seller
                             </Badge>
                           )}

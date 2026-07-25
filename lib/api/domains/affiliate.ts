@@ -95,5 +95,15 @@ export const affiliateAdminAPI = {
         const response = await api.get('/affiliate/admin/enums');
         return response.data;
     },
+
+    // Audit Logs
+    getAuditLogs: async (params?: { page?: number; limit?: number; affiliateId?: string; action?: string; dateFrom?: string; dateTo?: string }): Promise<any> => {
+        const response = await api.get('/affiliate/admin/audit-logs', { params });
+        return response.data;
+    },
+    getAuditStats: async (days?: number): Promise<any> => {
+        const response = await api.get('/affiliate/admin/audit-stats', { params: { days } });
+        return response.data;
+    },
 };
 

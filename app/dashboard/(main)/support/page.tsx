@@ -229,17 +229,17 @@ export default function SupportHubPage() {
             case "open":
             case "active":
             case "published":
-                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1.5 font-bold"><CheckCircle2 className="w-3 h-3" /> {status || "—"}</Badge>;
+                return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1.5 font-medium"><CheckCircle2 className="w-3 h-3" /> {status || "—"}</Badge>;
             case "resolved":
             case "ended":
             case "closed":
-                return <Badge variant="secondary" className="bg-muted text-muted-foreground gap-1.5 font-bold"><CheckCircle2 className="w-3 h-3" /> {status || "—"}</Badge>;
+                return <Badge variant="secondary" className="bg-muted text-muted-foreground gap-1.5 font-medium"><CheckCircle2 className="w-3 h-3" /> {status || "—"}</Badge>;
             case "pending":
             case "queued":
             case "draft":
-                return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 gap-1.5 font-bold"><Clock className="w-3 h-3" /> {status}</Badge>;
+                return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 gap-1.5 font-medium"><Clock className="w-3 h-3" /> {status}</Badge>;
             default:
-                return <Badge variant="outline" className="font-bold">{status}</Badge>;
+                return <Badge variant="outline" className="font-medium">{status}</Badge>;
         }
     };
 
@@ -263,11 +263,11 @@ export default function SupportHubPage() {
     const getPriorityBadge = (prio: string | undefined) => {
         switch ((prio || '').toLowerCase()) {
             case "urgent":
-                return <Badge className="bg-red-600 text-white border-none text-sm uppercase font-semibold px-1.5 h-5">Urgent</Badge>;
+                return <Badge className="bg-red-600 text-white border-none text-xs font-medium px-1.5 h-5">Urgent</Badge>;
             case "high":
-                return <Badge className="bg-orange-500 text-white border-none text-sm uppercase font-semibold px-1.5 h-5">High</Badge>;
+                return <Badge className="bg-orange-500 text-white border-none text-xs font-medium px-1.5 h-5">High</Badge>;
             default:
-                return <Badge variant="secondary" className="text-sm uppercase font-semibold px-1.5 h-5 bg-muted text-muted-foreground">{prio}</Badge>;
+                return <Badge variant="secondary" className="text-xs font-medium px-1.5 h-5 bg-muted text-muted-foreground">{prio}</Badge>;
         }
     };
 
@@ -281,40 +281,40 @@ export default function SupportHubPage() {
         <div className="space-y-6 md:space-y-8 pb-10 md:pb-20 px-3 md:px-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-bold ">Support Universe</h1>
-                    <CardDescription className="text-sm">Unified control for tickets, knowledge base, and live customer interaction.</CardDescription>
+                    <h1 className="text-3xl font-semibold">Support</h1>
+                    <CardDescription className="text-sm text-muted-foreground">Manage support tickets, knowledge base, and customer inquiries.</CardDescription>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 md:gap-4">
-                    <Badge variant="outline" className="rounded-xl px-4 md:px-5 h-10 md:h-11 border-primary/20 bg-primary/5 text-primary gap-2.5 font-bold flex items-center text-sm md:text-xs animate-pulse">
-                        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" /> Agent Status: Online
+                    <Badge variant="outline" className="rounded-lg px-4 h-9 border-primary/20 bg-primary/5 text-primary gap-2 font-medium text-xs flex items-center">
+                        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" /> Online
                     </Badge>
                     <Sheet open={isNewTicketOpen} onOpenChange={setIsNewTicketOpen}>
                         <SheetTrigger asChild>
-                            <Button className="gap-2.5 rounded-xl shadow-lg shadow-primary/20 h-10 md:h-11 px-5 md:px-7 font-bold text-xs md:text-sm flex-1 md:flex-none">
+                            <Button className="gap-2 rounded-lg h-9 px-5 text-sm">
                                 <Plus className="w-4 h-4" /> New Ticket
                             </Button>
                         </SheetTrigger>
                         <SheetContent className="sm:max-w-md p-0 overflow-hidden flex flex-col">
-                            <SheetHeader className="p-6 md:p-8 border-b bg-muted/5 shrink-0 space-y-3">
-                                <SheetTitle className="text-xl md:text-2xl font-semibold  text-primary">Create Support Ticket</SheetTitle>
-                                <SheetDescription className="text-sm font-medium">
-                                    Explain your issue in detail and our team will get back to you shortly.
+                            <SheetHeader className="p-6 border-b bg-muted/5 shrink-0 space-y-2">
+                                <SheetTitle className="text-lg font-semibold">Create Ticket</SheetTitle>
+                                <SheetDescription className="text-sm text-muted-foreground">
+                                    Explain your issue and our team will get back to you.
                                 </SheetDescription>
                             </SheetHeader>
-                            <form onSubmit={handleSubmit((data) => createTicketMutation.mutate(data))} className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
-                                <div className="space-y-3">
-                                    <Label className="text-sm font-bold ">Subject Line</Label>
-                                    <Input {...register("subject")} placeholder="Brief summary of the issue" className="rounded-xl h-11 bg-muted/30 border-none focus-visible:ring-primary/20" />
-                                    {errors.subject && <Label className="text-sm text-red-500 font-bold uppercase  pl-1">{errors.subject.message}</Label>}
+                            <form onSubmit={handleSubmit((data) => createTicketMutation.mutate(data))} className="flex-1 overflow-y-auto p-6 space-y-5">
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm font-medium">Subject</Label>
+                                    <Input {...register("subject")} placeholder="Brief summary of the issue" className="rounded-lg h-9 bg-muted/30 border-none" />
+                                    {errors.subject && <Label className="text-xs text-red-500 font-medium pl-1">{errors.subject.message}</Label>}
                                 </div>
-                                <div className="grid grid-cols-2 gap-5">
-                                    <div className="space-y-3">
-                                        <Label className="text-sm font-bold ">Category</Label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-sm font-medium">Category</Label>
                                         <Controller name="category"
                                             control={control}
                                             render={({ field }) => (
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger className="rounded-xl h-11 bg-muted/30 border-none focus:ring-primary/20">
+                                                    <SelectTrigger className="rounded-lg h-9 bg-muted/30 border-none">
                                                         <SelectValue placeholder="Select type" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -326,15 +326,15 @@ export default function SupportHubPage() {
                                                 </Select>
                                             )}
                                         />
-                                        {errors.category && <Label className="text-sm text-red-500 font-bold uppercase  pl-1">{errors.category.message}</Label>}
+                                        {errors.category && <Label className="text-xs text-red-500 font-medium pl-1">{errors.category.message}</Label>}
                                     </div>
-                                    <div className="space-y-3">
-                                        <Label className="text-sm font-bold ">Priority</Label>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-sm font-medium">Priority</Label>
                                         <Controller name="priority"
                                             control={control}
                                             render={({ field }) => (
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger className="rounded-xl h-11 bg-muted/30 border-none focus:ring-primary/20">
+                                                    <SelectTrigger className="rounded-lg h-9 bg-muted/30 border-none">
                                                         <SelectValue placeholder="Priority" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -348,39 +348,32 @@ export default function SupportHubPage() {
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-sm font-bold ">Detailed Description</Label>
-                                        <div className="flex items-center gap-2">
-                                            <Button type="button" variant="ghost" size="icon" className="h-7 w-7"><Bold className="w-3.5 h-3.5" /></Button>
-                                            <Button type="button" variant="ghost" size="icon" className="h-7 w-7"><Italic className="w-3.5 h-3.5" /></Button>
-                                            <Button type="button" variant="ghost" size="icon" className="h-7 w-7"><LinkIcon className="w-3.5 h-3.5" /></Button>
-                                        </div>
-                                    </div>
-                                    <Textarea {...register("description")} placeholder="Describe your problem in detail so our agents can help you faster..." className="min-h-[140px] rounded-xl bg-muted/30 border-none focus-visible:ring-primary/20 resize-none p-4" />
-                                    {errors.description && <Label className="text-sm text-red-500 font-bold uppercase  pl-1">{errors.description.message}</Label>}
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm font-medium">Description</Label>
+                                    <Textarea {...register("description")} placeholder="Describe your problem in detail..." className="min-h-[100px] rounded-lg bg-muted/30 border-none resize-none p-3" />
+                                    {errors.description && <Label className="text-xs text-red-500 font-medium pl-1">{errors.description.message}</Label>}
                                 </div>
 
-                                <div className="space-y-3">
-                                    <Label className="text-sm font-bold ">Attachments</Label>
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm font-medium">Attachments</Label>
                                     <div 
                                         {...getRootProps()} 
                                         className={cn(
-                                            "border-2 border-dashed rounded-2xl p-6 transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer",
-                                            isDragActive ? "border-primary bg-primary/5 scale-[0.98]" : "border-border/50 hover:border-primary/50 hover:bg-muted/30"
+                                            "border-2 border-dashed rounded-lg p-5 transition-all duration-300 flex flex-col items-center justify-center gap-2 cursor-pointer",
+                                            isDragActive ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/50 hover:bg-muted/30"
                                         )}
                                     >
                                         <input {...getInputProps()} />
-                                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                                            <Paperclip className="w-5 h-5 text-primary" />
+                                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                            <Paperclip className="w-4 h-4 text-primary" />
                                         </div>
-                                        <p className="text-xs font-bold">Drag & Drop or Click to upload</p>
-                                        <p className="text-sm text-muted-foreground font-medium uppercase ">PNG, JPG, PDF up to 5MB</p>
+                                        <p className="text-xs font-medium">Drag & drop files or click to upload</p>
+                                        <p className="text-xs text-muted-foreground">PNG, JPG, PDF up to 5MB</p>
                                     </div>
                                 </div>
-                                <SheetFooter className="mt-4 pt-4 border-t border-border/50">
-                                    <Button type="submit" className="w-full h-12 rounded-xl font-semibold uppercase  shadow-xl shadow-primary/20" disabled={createTicketMutation.isPending}>
-                                        {createTicketMutation.isPending ? "Connecting..." : "Initialize Support Ticket"}
+                                <SheetFooter className="pt-4 border-t border-border/50">
+                                    <Button type="submit" className="w-full h-9 rounded-lg" disabled={createTicketMutation.isPending}>
+                                        {createTicketMutation.isPending ? "Submitting..." : "Submit Ticket"}
                                     </Button>
                                 </SheetFooter>
                             </form>
@@ -399,12 +392,12 @@ export default function SupportHubPage() {
                 ].map((kpi) => (
                     <Card key={kpi.label} className="border-border/50 bg-card/50 backdrop-blur-sm">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-xs font-bold uppercase  text-muted-foreground">{kpi.label}</CardTitle>
+                            <CardTitle className="text-xs font-medium text-muted-foreground">{kpi.label}</CardTitle>
                             <kpi.icon className={cn("h-4 w-4", kpi.color)} />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-semibold">{kpi.value}</div>
-                            <CardDescription className="text-sm uppercase font-bold mt-1 opacity-70">{kpi.sub}</CardDescription>
+                            <CardDescription className="text-xs text-muted-foreground mt-0.5">{kpi.sub}</CardDescription>
                         </CardContent>
                     </Card>
                 ))}
@@ -412,26 +405,26 @@ export default function SupportHubPage() {
 
             <Tabs defaultValue="tickets" className="space-y-6">
                 <div className="w-full overflow-x-auto pb-4 scrollbar-none">
-                    <TabsList className="bg-muted/30 p-1.5 rounded-2xl h-14 md:h-16 w-full md:w-fit border border-border/40 backdrop-blur-md shadow-inner min-w-[380px]">
+                    <TabsList className="bg-muted/30 p-1 rounded-lg h-10 w-fit border border-border/40">
                         <TabsTrigger 
                             value="tickets" 
-                            className="flex-1 md:flex-none rounded-xl h-auto gap-3 data-[state=active]:bg-background data-[state=active]:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.1)] data-[state=active]:border data-[state=active]:border-primary/10 data-[state=active]:text-primary font-semibold px-5 md:px-10 transition-all duration-500 text-xs md:text-sm hover:text-primary/70"
+                            className="rounded-md h-8 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium px-5 text-xs transition-all"
                         >
-                            <Layout className="w-4 h-4 md:w-5 h-5 transition-transform duration-500 group-data-[state=active]:scale-110" /> 
+                            <Layout className="w-3.5 h-3.5" /> 
                             <span>Tickets</span>
                         </TabsTrigger>
                         <TabsTrigger 
                             value="knowledge" 
-                            className="flex-1 md:flex-none rounded-xl h-auto gap-3 data-[state=active]:bg-background data-[state=active]:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.1)] data-[state=active]:border data-[state=active]:border-primary/10 data-[state=active]:text-primary font-semibold px-5 md:px-10 transition-all duration-500 text-xs md:text-sm hover:text-primary/70"
+                            className="rounded-md h-8 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium px-5 text-xs transition-all"
                         >
-                            <BookOpen className="w-4 h-4 md:w-5 h-5 transition-transform duration-500 group-data-[state=active]:scale-110" /> 
-                            <span>KB Items</span>
+                            <BookOpen className="w-3.5 h-3.5" /> 
+                            <span>Knowledge Base</span>
                         </TabsTrigger>
                         <TabsTrigger 
                             value="email" 
-                            className="flex-1 md:flex-none rounded-xl h-auto gap-3 data-[state=active]:bg-background data-[state=active]:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.1)] data-[state=active]:border data-[state=active]:border-primary/10 data-[state=active]:text-primary font-semibold px-5 md:px-10 transition-all duration-500 text-xs md:text-sm hover:text-primary/70"
+                            className="rounded-md h-8 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium px-5 text-xs transition-all"
                         >
-                            <Mail className="w-4 h-4 md:w-5 h-5 transition-transform duration-500 group-data-[state=active]:scale-110" /> 
+                            <Mail className="w-3.5 h-3.5" /> 
                             <span>Inbox</span>
                         </TabsTrigger>
                     </TabsList>
@@ -440,20 +433,20 @@ export default function SupportHubPage() {
                 {/* Tickets Management Tab */}
                 <TabsContent value="tickets" className="space-y-4">
                     <Card className="border-border/50">
-                        <CardHeader className="bg-muted/10 border-b border-border/50">
+                        <CardHeader className="bg-muted/5 border-b border-border/50 p-5">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div className="relative flex-1 max-w-sm">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input 
-                                        placeholder="Search tickets, subject, customer..." 
-                                        className="pl-10 h-10 rounded-xl"
+                                        placeholder="Search tickets..." 
+                                        className="pl-10 h-9 rounded-lg"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                     />
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                        <SelectTrigger className="w-[140px] h-10 rounded-xl border-border/50">
+                                        <SelectTrigger className="w-[130px] h-9 rounded-lg border-border/50">
                                             <SelectValue placeholder="Status" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -478,12 +471,12 @@ export default function SupportHubPage() {
                                                 className="rounded-md border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-none"
                                             />
                                         </TableHead>
-                                        <TableHead className="w-[100px] md:w-[120px] text-sm md:text-xs">ID</TableHead>
-                                        <TableHead className="min-w-[180px] md:min-w-[300px] text-sm md:text-xs">Subject & Customer</TableHead>
-                                        <TableHead className="hidden md:table-cell text-sm md:text-xs">Status</TableHead>
-                                        <TableHead className="hidden sm:table-cell text-sm md:text-xs">Priority</TableHead>
-                                        <TableHead className="hidden lg:table-cell text-sm md:text-xs">Category</TableHead>
-                                        <TableHead className="text-right text-sm md:text-xs">Action</TableHead>
+                                        <TableHead className="w-[80px] text-xs font-medium uppercase text-muted-foreground">ID</TableHead>
+                                        <TableHead className="min-w-[180px] text-xs font-medium uppercase text-muted-foreground">Subject</TableHead>
+                                        <TableHead className="hidden md:table-cell text-xs font-medium uppercase text-muted-foreground">Status</TableHead>
+                                        <TableHead className="hidden sm:table-cell text-xs font-medium uppercase text-muted-foreground">Priority</TableHead>
+                                        <TableHead className="hidden lg:table-cell text-xs font-medium uppercase text-muted-foreground">Category</TableHead>
+                                        <TableHead className="text-right text-xs font-medium uppercase text-muted-foreground">Action</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -499,20 +492,20 @@ export default function SupportHubPage() {
                                         <TableRow>
                                             <TableCell colSpan={7} className="h-60 text-center">
                                                 <div className="flex flex-col items-center justify-center gap-3">
-                                                    <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center">
-                                                        <Search className="w-8 h-8 text-muted-foreground/30" />
+                                                    <div className="w-12 h-12 rounded-xl bg-muted/30 flex items-center justify-center">
+                                                        <Search className="w-6 h-6 text-muted-foreground/30" />
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <h3 className="font-bold text-lg">No tickets found</h3>
+                                                        <h3 className="font-medium text-lg">No results</h3>
                                                         <p className="text-sm text-muted-foreground max-w-[250px] mx-auto">
                                                             {statusFilter !== "all" || searchQuery
-                                                                ? "No results for the current filters or search."
+                                                                ? "No matching tickets found."
                                                                 : "Create a ticket to get started."}
                                                         </p>
                                                     </div>
                                                     <div className="flex gap-2 mt-2">
                                                         {(statusFilter !== "all" || searchQuery) && (
-                                                            <Button variant="outline" size="sm" className="rounded-xl h-9" onClick={() => { setSearchQuery(""); setStatusFilter("all"); }}>Clear filters</Button>
+                                                            <Button variant="outline" size="sm" className="rounded-lg h-8" onClick={() => { setSearchQuery(""); setStatusFilter("all"); }}>Clear filters</Button>
                                                         )}
                                                     </div>
                                                 </div>
@@ -540,15 +533,15 @@ export default function SupportHubPage() {
                                                             className="rounded-md border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-none"
                                                         />
                                                     </TableCell>
-                                                    <TableCell className="font-mono text-sm font-bold text-primary max-w-[80px] truncate">{t.id}</TableCell>
+                                                    <TableCell className="font-mono text-xs font-medium text-primary max-w-[80px] truncate">{t.id}</TableCell>
                                                     <TableCell>
                                                         <div className="flex items-center gap-3">
                                                             <div className="flex flex-col">
-                                                                <span className="font-bold text-sm leading-snug group-hover:text-primary transition-colors">{t.subject}</span>
+                                                                <span className="font-medium text-sm leading-snug group-hover:text-primary transition-colors">{t.subject}</span>
                                                                 <div className="flex items-center gap-2 mt-1">
-                                                                    <span className="text-sm text-muted-foreground flex items-center gap-1 font-medium"><User className="w-2.5 h-2.5" /> {t.customer?.name}</span>
-                                                                    <span className="text-sm text-muted-foreground/50 hidden sm:inline">•</span>
-                                                                    <span className="text-sm text-muted-foreground flex items-center gap-1 font-medium"><Clock className="w-2.5 h-2.5" /> Updated {formatDistanceToNow(new Date(t.updatedAt), { addSuffix: true })}</span>
+                                                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><User className="w-2.5 h-2.5" /> {t.customer?.name}</span>
+                                                                    <span className="text-xs text-muted-foreground/50 hidden sm:inline">•</span>
+                                                                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> Updated {formatDistanceToNow(new Date(t.updatedAt), { addSuffix: true })}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -556,13 +549,13 @@ export default function SupportHubPage() {
                                                     <TableCell className="hidden md:table-cell">{getStatusBadge(t.status)}</TableCell>
                                                     <TableCell className="hidden sm:table-cell">{getPriorityBadge(t.priority)}</TableCell>
                                                     <TableCell className="hidden lg:table-cell">
-                                                        <Badge variant="outline" className="text-sm gap-1 font-bold border-border bg-muted/30">
+                                                        <Badge variant="outline" className="text-xs gap-1 font-medium border-border bg-muted/30">
                                                             <Tag className="w-2.5 h-2.5 opacity-40" /> {t.category}
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell className="text-right">
                                                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <Button variant="ghost" size="sm" className="h-8 rounded-lg gap-1 text-primary font-bold px-3 hover:bg-primary/10">
+                                                            <Button variant="ghost" size="sm" className="h-8 rounded-lg gap-1 text-primary font-medium px-3 hover:bg-primary/10">
                                                                 Reply <ChevronRight className="w-3 h-3" />
                                                             </Button>
                                                         </div>
@@ -583,27 +576,27 @@ export default function SupportHubPage() {
                                 initial={{ y: 100, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 100, opacity: 0 }}
-                                className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-xl border border-primary/20 shadow-2xl rounded-2xl px-6 h-16 flex items-center gap-6 min-w-[320px] md:min-w-[500px]"
+                                className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-background/80 backdrop-blur-xl border border-primary/20 shadow-2xl rounded-xl px-5 h-12 flex items-center gap-4 min-w-[320px] md:min-w-[450px]"
                             >
-                                <div className="flex items-center gap-3 border-r border-border pr-6">
-                                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-semibold text-xs">
+                                <div className="flex items-center gap-3 border-r border-border pr-4">
+                                    <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-white font-medium text-xs">
                                         {selectedTicketIds.length}
                                     </div>
-                                    <span className="text-sm md:text-xs font-bold uppercase ">Tickets Selected</span>
+                                    <span className="text-xs font-medium">Selected</span>
                                 </div>
                                 <div className="flex items-center gap-2 flex-1">
-                                    <Button variant="ghost" size="sm" className="h-9 px-3 text-xs font-bold gap-2 hover:bg-primary/10" onClick={handleBulkMarkResolved}>
-                                        <CheckCircle2 className="w-4 h-4" /> <span className="hidden md:inline">Mark Resolved</span>
+                                    <Button variant="ghost" size="sm" className="h-8 px-2.5 text-xs font-medium gap-1.5 hover:bg-primary/10" onClick={handleBulkMarkResolved}>
+                                        <CheckCircle2 className="w-3.5 h-3.5" /> <span className="hidden md:inline">Resolve</span>
                                     </Button>
-                                    <Button variant="ghost" size="sm" className="h-9 px-3 text-xs font-bold gap-2 hover:bg-amber-500/10 hover:text-amber-500" onClick={() => toast.info("Open a ticket to change its status.")}>
-                                        <RefreshCw className="w-4 h-4" /> <span className="hidden md:inline">Update Status</span>
+                                    <Button variant="ghost" size="sm" className="h-8 px-2.5 text-xs font-medium gap-1.5 hover:bg-amber-500/10 hover:text-amber-500" onClick={() => toast.info("Open a ticket to change its status.")}>
+                                        <RefreshCw className="w-3.5 h-3.5" /> <span className="hidden md:inline">Update</span>
                                     </Button>
-                                    <Button variant="ghost" size="sm" className="h-9 px-3 text-xs font-bold gap-2 hover:bg-red-500/10 hover:text-red-500" onClick={() => setSelectedTicketIds([])}>
-                                        <Trash2 className="w-4 h-4" /> <span className="hidden md:inline">Clear</span>
+                                    <Button variant="ghost" size="sm" className="h-8 px-2.5 text-xs font-medium gap-1.5 hover:bg-red-500/10 hover:text-red-500" onClick={() => setSelectedTicketIds([])}>
+                                        <Trash2 className="w-3.5 h-3.5" /> <span className="hidden md:inline">Clear</span>
                                     </Button>
                                 </div>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => setSelectedTicketIds([])}>
-                                    <Plus className="w-4 h-4 rotate-45" />
+                                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => setSelectedTicketIds([])}>
+                                    <Plus className="w-3.5 h-3.5 rotate-45" />
                                 </Button>
                             </AnimatedDiv>
                         )}
@@ -614,80 +607,72 @@ export default function SupportHubPage() {
                 <TabsContent value="knowledge" className="space-y-4">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <Card className="lg:col-span-2 border-border/50">
-                            <CardHeader className="flex flex-row items-center justify-between">
-                                <div>
-                                    <CardTitle>FAQ Inventory</CardTitle>
-                                    <CardDescription>Manage self-service documentation articles.</CardDescription>
-                                </div>
-                                <Sheet open={isNewKbOpen} onOpenChange={setIsNewKbOpen}>
-                                    <SheetTrigger asChild>
-                                        <Button size="sm" className="rounded-xl font-bold h-9">
-                                            <Plus className="w-3.5 h-3.5 mr-2" /> New Article
-                                        </Button>
-                                    </SheetTrigger>
-                                    <SheetContent className="sm:max-w-md p-0 overflow-hidden flex flex-col">
-                                        <SheetHeader className="p-6 md:p-8 border-b bg-muted/5 shrink-0 space-y-3">
-                                            <SheetTitle className="text-xl md:text-2xl font-semibold  text-primary">Publish Article</SheetTitle>
-                                            <SheetDescription>Create a new knowledge base article for self-service support.</SheetDescription>
-                                        </SheetHeader>
-                                        <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
-                                            <div className="space-y-3">
-                                                <Label className="text-sm font-bold ">Article Title</Label>
-                                                <Input placeholder="e.g., How to reset your password" className="rounded-xl h-11 bg-muted/30 border-none" />
-                                            </div>
-                                            <div className="space-y-3">
-                                                <Label className="text-sm font-bold ">Category</Label>
-                                                <Select>
-                                                    <SelectTrigger className="rounded-xl h-11 bg-muted/30 border-none">
-                                                        <SelectValue placeholder="Select category" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="technical">Technical</SelectItem>
-                                                        <SelectItem value="billing">Billing</SelectItem>
-                                                        <SelectItem value="general">General</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <Label className="text-sm font-bold ">Content (Markdown supported)</Label>
-                                                    <div className="flex items-center gap-2">
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7"><Bold className="w-3.5 h-3.5" /></Button>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7"><Italic className="w-3.5 h-3.5" /></Button>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7"><LinkIcon className="w-3.5 h-3.5" /></Button>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7"><ImageIcon className="w-3.5 h-3.5" /></Button>
-                                                    </div>
-                                                </div>
-                                                <Textarea placeholder="Write article content here..." className="min-h-[250px] rounded-xl bg-muted/30 border-none resize-none p-4" />
-                                            </div>
-                                            <SheetFooter className="pt-4 border-t border-border/50">
-                                                <Button className="w-full h-12 rounded-xl font-semibold uppercase " onClick={() => {
-                                                    toast.info("KB publish: connect a knowledge base API to add articles.");
-                                                    setIsNewKbOpen(false);
-                                                }}>Publish to KB</Button>
-                                            </SheetFooter>
+                        <CardHeader className="flex flex-row items-center justify-between p-5">
+                            <div>
+                                <CardTitle className="text-base font-semibold">Knowledge Base</CardTitle>
+                                <CardDescription className="text-sm text-muted-foreground mt-0.5">Self-service documentation articles.</CardDescription>
+                            </div>
+                            <Sheet open={isNewKbOpen} onOpenChange={setIsNewKbOpen}>
+                                <SheetTrigger asChild>
+                                    <Button size="sm" className="rounded-lg h-8">
+                                        <Plus className="w-3.5 h-3.5 mr-1.5" /> New Article
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent className="sm:max-w-md p-0 overflow-hidden flex flex-col">
+                                    <SheetHeader className="p-6 border-b bg-muted/5 shrink-0 space-y-2">
+                                        <SheetTitle className="text-lg font-semibold">New Article</SheetTitle>
+                                        <SheetDescription className="text-sm text-muted-foreground">Create a new knowledge base article.</SheetDescription>
+                                    </SheetHeader>
+                                    <div className="flex-1 overflow-y-auto p-6 space-y-5">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-sm font-medium">Title</Label>
+                                            <Input placeholder="e.g., How to reset your password" className="rounded-lg h-9 bg-muted/30 border-none" />
                                         </div>
-                                    </SheetContent>
-                                </Sheet>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-sm font-medium">Category</Label>
+                                            <Select>
+                                                <SelectTrigger className="rounded-lg h-9 bg-muted/30 border-none">
+                                                    <SelectValue placeholder="Select category" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="technical">Technical</SelectItem>
+                                                    <SelectItem value="billing">Billing</SelectItem>
+                                                    <SelectItem value="general">General</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-sm font-medium">Content</Label>
+                                            <Textarea placeholder="Write article content here..." className="min-h-[200px] rounded-lg bg-muted/30 border-none resize-none p-3" />
+                                        </div>
+                                        <SheetFooter className="pt-4 border-t border-border/50">
+                                            <Button className="w-full h-9 rounded-lg" onClick={() => {
+                                                toast.info("Publish not yet implemented.");
+                                                setIsNewKbOpen(false);
+                                            }}>Publish</Button>
+                                        </SheetFooter>
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
                             </CardHeader>
                             <CardContent className="p-0">
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="bg-muted/5">
-                                            <TableHead>Title</TableHead>
-                                            <TableHead>Category</TableHead>
-                                            <TableHead>Views</TableHead>
-                                            <TableHead>Last Sync</TableHead>
-                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">Title</TableHead>
+                                            <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">Category</TableHead>
+                                            <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">Views</TableHead>
+                                            <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">Last Updated</TableHead>
+                                            <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">Status</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {kbArticles.length === 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={5} className="h-40 text-center text-muted-foreground">
+                                                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
                                                     <div className="flex flex-col items-center justify-center gap-2">
-                                                        <BookOpen className="w-10 h-10 opacity-30" />
-                                                        <p className="font-bold">No KB articles yet</p>
+                                                        <BookOpen className="w-8 h-8 opacity-30" />
+                                                        <p className="text-sm font-medium">No articles yet</p>
                                                         <p className="text-xs">Knowledge base articles will appear here when the API is connected.</p>
                                                     </div>
                                                 </TableCell>
@@ -706,7 +691,7 @@ export default function SupportHubPage() {
                                 <CardContent className="space-y-4">
                                     <div className="flex items-center justify-between text-xs">
                                         <span className="text-muted-foreground font-medium">Article Coverage</span>
-                                        <span className="font-bold">—</span>
+                                        <span className="font-medium">—</span>
                                     </div>
                                     <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                                         <div className="h-full bg-primary w-0" />
@@ -723,24 +708,24 @@ export default function SupportHubPage() {
                 {/* Email Support Tab */}
                 <TabsContent value="email" className="space-y-4">
                      <Card className="border-border/50 overflow-hidden">
-                        <CardHeader className="bg-muted/10 border-b border-border/50 px-6 py-4">
+                        <CardHeader className="bg-muted/5 border-b border-border/50 px-5 py-4">
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <h3 className="font-bold">Support Inbox</h3>
-                                    <Badge className="bg-primary/20 text-primary border-none">Unified</Badge>
+                                <div className="flex items-center gap-3">
+                                    <h3 className="text-sm font-medium">Inbox</h3>
+                                    <Badge className="bg-primary/10 text-primary border-none text-xs font-medium">Unified</Badge>
                                 </div>
-                                <div className="text-xs text-muted-foreground font-medium ">No inbox API</div>
+                                <div className="text-xs text-muted-foreground">No inbox API</div>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="p-12 flex flex-col items-center justify-center text-center text-muted-foreground">
-                                <Mail className="w-12 h-12 opacity-30 mb-3" />
-                                <p className="font-bold">No inbox messages</p>
+                                <Mail className="w-10 h-10 opacity-30 mb-3" />
+                                <p className="font-medium text-sm">No messages</p>
                                 <p className="text-xs max-w-[280px] mt-1">Connect a support email or inbox API to see messages here.</p>
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-muted/5 justify-center py-4 border-t border-border/50">
-                            <Button variant="ghost" className="text-xs font-semibold text-primary hover:bg-transparent px-8" onClick={() => toast.info("Inbox integration coming soon.")}>Load More Messages</Button>
+                        <CardFooter className="bg-muted/5 justify-center py-3 border-t border-border/50">
+                            <Button variant="ghost" className="text-xs font-medium text-primary hover:bg-transparent" onClick={() => toast.info("Inbox integration coming soon.")}>Load More</Button>
                         </CardFooter>
                      </Card>
                 </TabsContent>
@@ -748,15 +733,15 @@ export default function SupportHubPage() {
 
             {/* Ticket Details Dialog */}
             <Dialog open={!!selectedTicketId} onOpenChange={(open) => !open && setSelectedTicketId(null)}>
-                <DialogContent className="max-w-3xl w-[95vw] md:w-full h-[90vh] md:h-[80vh] flex flex-col p-0 overflow-hidden rounded-2xl">
+                <DialogContent className="max-w-3xl w-[95vw] md:w-full h-[90vh] md:h-[80vh] flex flex-col p-0 overflow-hidden rounded-xl">
                     {isLoadingTicketDetails ? (
                         <div className="flex-1 flex flex-col">
                             <DialogHeader className="p-4 md:p-6 border-b bg-muted/10 shrink-0">
-                                <DialogTitle className="text-lg md:text-xl font-bold ">Loading Ticket Details...</DialogTitle>
+                                <DialogTitle className="text-lg font-semibold">Loading...</DialogTitle>
                             </DialogHeader>
                             <div className="flex-1 flex items-center justify-center">
                                 <CardDescription className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4 animate-spin" /> Syncing with support matrix...
+                                    <Clock className="w-4 h-4 animate-spin" /> Loading ticket details...
                                 </CardDescription>
                             </div>
                         </div>
@@ -765,7 +750,7 @@ export default function SupportHubPage() {
                             <DialogHeader className="p-4 md:p-6 border-b bg-muted/10 shrink-0">
                                 <div className="flex items-center justify-between gap-2">
                                     <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                                        <Badge variant="outline" className="font-mono text-xs md:text-sm text-primary">{selectedTicket.id}</Badge>
+                                        <Badge variant="outline" className="font-mono text-xs text-primary">{selectedTicket.id}</Badge>
                                         {getStatusBadge(selectedTicket.status)}
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -773,9 +758,9 @@ export default function SupportHubPage() {
                                             value={selectedTicket.status} 
                                             onValueChange={(status) => updateStatusMutation.mutate({ id: selectedTicket.id, status })}
                                         >
-                                            <SelectTrigger className="w-[130px] h-8 text-sm font-bold">
-                                                <SelectValue />
-                                            </SelectTrigger>
+                                        <SelectTrigger className="w-[110px] h-8 text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value={TicketStatus.OPEN}>Open</SelectItem>
                                                 <SelectItem value={TicketStatus.PENDING}>Pending</SelectItem>
@@ -785,7 +770,7 @@ export default function SupportHubPage() {
                                         </Select>
                                     </div>
                                 </div>
-                                <DialogTitle className="mt-3 md:mt-4 text-lg md:text-xl font-bold  line-clamp-2">{selectedTicket.subject}</DialogTitle>
+                                <DialogTitle className="mt-3 md:mt-4 text-lg font-semibold line-clamp-2">{selectedTicket.subject}</DialogTitle>
                                 <DialogDescription className="flex flex-wrap items-center gap-3 md:gap-4 mt-2">
                                     <Badge variant="outline" className="border-none bg-primary/5 text-primary flex items-center gap-1.5 px-0 text-sm md:text-xs"><User className="w-3 h-3" /> {selectedTicket.customer?.name}</Badge>
                                     <Badge variant="outline" className="border-none bg-muted text-muted-foreground flex items-center gap-1.5 px-0 text-sm md:text-xs"><Tag className="w-3 h-3" /> {selectedTicket.category}</Badge>
@@ -809,7 +794,7 @@ export default function SupportHubPage() {
                                                     : "bg-primary text-primary-foreground rounded-tr-none shadow-lg shadow-primary/10"
                                             )}>
                                                 <div className="flex items-center justify-between gap-4 md:gap-8 mb-1">
-                                                    <Label className="font-bold text-xs md:text-sm opacity-70 truncate max-w-[80px] md:max-w-none">{msg.sender?.name}</Label>
+                                                    <Label className="font-medium text-xs opacity-70 truncate max-w-[80px] md:max-w-none">{msg.sender?.name}</Label>
                                                     <Label className="text-xs md:text-sm opacity-50 font-medium whitespace-nowrap">{msg.createdAt ? formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true }) : "—"}</Label>
                                                 </div>
                                                 <CardDescription className={cn(
@@ -846,7 +831,7 @@ export default function SupportHubPage() {
                                         <Label className="text-sm text-muted-foreground mr-2 hidden sm:block font-medium">Ctrl + Enter to send</Label>
                                         <Button 
                                             size="sm" 
-                                            className="h-9 px-4 rounded-lg font-bold shadow-md shadow-primary/20"
+                                            className="h-9 px-4 rounded-lg shadow-md shadow-primary/20"
                                             onClick={onSendMessage}
                                             disabled={addMessageMutation.isPending || !replyContent.trim()}
                                         >
@@ -869,25 +854,25 @@ export default function SupportHubPage() {
 
             {/* KB Article Detail Dialog */}
             <Dialog open={!!selectedKbArticle} onOpenChange={(open) => !open && setSelectedKbArticle(null)}>
-                <DialogContent className="max-w-2xl w-[95vw] md:w-full rounded-2xl overflow-hidden p-0">
+                <DialogContent className="max-w-2xl w-[95vw] md:w-full rounded-xl overflow-hidden p-0">
                     {selectedKbArticle && (
                         <>
-                            <DialogHeader className="p-6 md:p-8 border-b bg-muted/5">
-                                <Badge variant="secondary" className="w-fit mb-4">{selectedKbArticle.category}</Badge>
-                                <DialogTitle className="text-2xl font-semibold ">{selectedKbArticle.title}</DialogTitle>
+                            <DialogHeader className="p-6 border-b bg-muted/5">
+                                <Badge variant="secondary" className="w-fit mb-3">{selectedKbArticle.category}</Badge>
+                                <DialogTitle className="text-lg font-semibold">{selectedKbArticle.title}</DialogTitle>
                                 <DialogDescription className="flex items-center gap-4 mt-2">
-                                    <span className="flex items-center gap-1.5"><Eye className="w-3" /> {selectedKbArticle.views} views</span>
-                                    <span className="flex items-center gap-1.5"><Clock className="w-3" /> Updated {selectedKbArticle.updatedAt}</span>
+                                    <span className="flex items-center gap-1.5 text-xs"><Eye className="w-3" /> {selectedKbArticle.views} views</span>
+                                    <span className="flex items-center gap-1.5 text-xs"><Clock className="w-3" /> Updated {selectedKbArticle.updatedAt}</span>
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="p-6 md:p-8">
+                            <div className="p-6">
                                 <div className="prose prose-sm dark:prose-invert max-w-none">
                                     <p className="text-muted-foreground leading-relaxed">
                                         This is a simulated knowledge base article content for <strong>{selectedKbArticle.title}</strong>. 
                                         In a real integration, this would be fetched from the CMS or backend database.
                                     </p>
-                                    <div className="mt-8 p-4 bg-muted/30 rounded-xl border border-border/50">
-                                        <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
+                                    <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border/50">
+                                        <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
                                             <Star className="w-3 h-3 text-amber-500 fill-amber-500" /> Was this helpful?
                                         </h4>
                                         <div className="flex gap-2">
@@ -904,28 +889,28 @@ export default function SupportHubPage() {
 
             {/* Email Detail Dialog */}
             <Dialog open={!!selectedEmail} onOpenChange={(open) => !open && setSelectedEmail(null)}>
-                <DialogContent className="max-w-xl w-[95vw] md:w-full rounded-2xl overflow-hidden p-0">
+                <DialogContent className="max-w-xl w-[95vw] md:w-full rounded-xl overflow-hidden p-0">
                     {selectedEmail && (
                         <>
-                            <DialogHeader className="p-6 md:p-8 border-b bg-muted/10">
+                            <DialogHeader className="p-6 border-b bg-muted/10">
                                 <div className="flex items-center gap-4 mb-4">
                                     <Avatar className="h-10 w-10">
                                         <AvatarFallback>{(selectedEmail.from || '?').charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <DialogTitle className="text-lg font-bold">{selectedEmail.from}</DialogTitle>
+                                        <DialogTitle className="text-lg font-semibold">{selectedEmail.from}</DialogTitle>
                                         <CardDescription>{selectedEmail.time}</CardDescription>
                                     </div>
                                 </div>
-                                <h3 className="text-xl font-semibold ">{selectedEmail.subject}</h3>
+                                <h3 className="text-base font-semibold">{selectedEmail.subject}</h3>
                             </DialogHeader>
-                            <div className="p-6 md:p-8 space-y-6">
-                                <p className="text-sm leading-relaxed text-muted-foreground ">
-                                    "{selectedEmail.content || "No content provided in simulation."}"
+                            <div className="p-6 space-y-6">
+                                <p className="text-sm leading-relaxed text-muted-foreground">
+                                    "{selectedEmail.content || "No content provided."}"
                                 </p>
                                 <div className="flex gap-2 pt-4 border-t border-border/50">
-                                    <Button className="flex-1 rounded-xl font-bold h-11" onClick={() => toast.success("Reply draft saved")}>Reply in Inbox</Button>
-                                    <Button variant="outline" className="flex-1 rounded-xl font-bold h-11" onClick={() => toast.success("Ticket created from email")}>Convert to Ticket</Button>
+                                    <Button className="flex-1 rounded-lg h-9" onClick={() => toast.success("Reply draft saved")}>Reply</Button>
+                                    <Button variant="outline" className="flex-1 rounded-lg h-9" onClick={() => toast.success("Ticket created from email")}>Convert to Ticket</Button>
                                 </div>
                             </div>
                         </>

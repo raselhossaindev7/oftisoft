@@ -49,14 +49,14 @@ export default function TermsPage() {
                 {/* Header Section */}
                 <div className="text-center space-y-6 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-[10px]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-xs">
                             {header.badge}
                         </Badge>
                     </AnimatedDiv>
                     <AnimatedH1 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-8xl font-semibold tracking-tighter text-white"
+                        className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter text-white"
                     >
                         {header.title.split(" ").map((word, i) => (
                             <span key={i} className={cn(word.toLowerCase() === "sync." ? "text-primary NOT-italic" : "")}>
@@ -74,7 +74,7 @@ export default function TermsPage() {
                     {/* Navigation Rail */}
                     <div className="lg:col-span-4 space-y-8 hidden lg:block">
                         <Card className="border-white/5 bg-white/[0.02] backdrop-blur-3xl rounded-[40px] p-8 sticky top-32">
-                            <h3 className="text-[10px] font-semibold tracking-[0.3em] text-primary mb-6">{navigationRail.title}</h3>
+                            <h3 className="text-xs font-semibold tracking-[0.3em] text-primary mb-6">{navigationRail.title}</h3>
                             <ul className="space-y-6">
                                 {navigationRail.items.map((item, idx) => (
                                     <li key={idx} className="flex items-center gap-4 group cursor-pointer hover:text-primary transition-all">
@@ -115,7 +115,7 @@ export default function TermsPage() {
 
                         {/* Revision Node */}
                         <div className="pt-12 text-center lg:text-left">
-                            <p className="text-[10px] font-semibold tracking-[0.4rem] text-muted-foreground">
+                            <p className="text-xs font-semibold tracking-[0.4rem] text-muted-foreground">
                                 {revision.prefix} {revision.updatedAt}
                             </p>
                         </div>

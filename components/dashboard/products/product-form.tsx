@@ -176,17 +176,17 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
             </div>
 
             <Tabs defaultValue="basic" className="space-y-6">
-                <TabsList className="bg-muted/50 p-1 h-14 rounded-2xl border border-border">
-                    <TabsTrigger value="basic" className="rounded-xl h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md font-bold text-xs uppercase tracking-wider">
+                <TabsList className="bg-muted/50 p-1 h-12 rounded-xl border border-border">
+                    <TabsTrigger value="basic" className="rounded-lg h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs uppercase tracking-wider">
                         <Layout className="w-4 h-4" /> Basic Info
                     </TabsTrigger>
-                    <TabsTrigger value="details" className="rounded-xl h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md font-bold text-xs uppercase tracking-wider">
+                    <TabsTrigger value="details" className="rounded-lg h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs uppercase tracking-wider">
                         <Info className="w-4 h-4" /> Details & Features
                     </TabsTrigger>
-                    <TabsTrigger value="assets" className="rounded-xl h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md font-bold text-xs uppercase tracking-wider">
+                    <TabsTrigger value="assets" className="rounded-lg h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs uppercase tracking-wider">
                         <FileArchive className="w-4 h-4" /> Digital Assets
                     </TabsTrigger>
-                    <TabsTrigger value="pricing" className="rounded-xl h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md font-bold text-xs uppercase tracking-wider">
+                    <TabsTrigger value="pricing" className="rounded-lg h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs uppercase tracking-wider">
                         <ShieldCheck className="w-4 h-4" /> Pricing & Licensing
                     </TabsTrigger>
                 </TabsList>
@@ -207,7 +207,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="e.g. NeonStore E-commerce UI Kit" 
-                                        className="rounded-xl h-11" 
+                                        className="rounded-lg h-9" 
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -217,7 +217,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                         value={slug}
                                         onChange={(e) => setSlug(e.target.value)}
                                         placeholder="neonstore-ecommerce-ui-kit" 
-                                        className="rounded-xl h-11 bg-muted/30" 
+                                        className="rounded-lg h-9 bg-muted/30" 
                                     />
                                 </div>
                             </div>
@@ -229,7 +229,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     placeholder="A futuristic UI kit designed for..." 
-                                    className="rounded-xl min-h-[100px]" 
+                                    className="rounded-lg min-h-[80px] text-sm" 
                                 />
                             </div>
 
@@ -237,7 +237,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                 <div className="space-y-2">
                                     <Label htmlFor="category">Main Category *</Label>
                                     <Select value={category} onValueChange={setCategory}>
-                                        <SelectTrigger className="rounded-xl h-11">
+                                        <SelectTrigger className="rounded-lg h-9">
                                             <SelectValue placeholder="Select category" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -250,7 +250,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                 <div className="space-y-2">
                                     <Label htmlFor="subcategory">Sub-category</Label>
                                     <Select value={subcategory} onValueChange={setSubcategory} disabled={!category}>
-                                        <SelectTrigger className="rounded-xl h-11">
+                                        <SelectTrigger className="rounded-lg h-9">
                                             <SelectValue placeholder={category ? "Select sub-category" : "Select category first"} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -258,7 +258,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                                 <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                                             ))}
                                             {category && subcategoryOptions.length === 0 && (
-                                                <SelectItem value=" ">— None —</SelectItem>
+                                                <SelectItem value="none">— None —</SelectItem>
                                             )}
                                         </SelectContent>
                                     </Select>
@@ -272,7 +272,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                     value={image}
                                     onChange={(e) => setImage(e.target.value)}
                                     placeholder="https://example.com/image.jpg" 
-                                    className="rounded-xl h-11" 
+                                    className="rounded-lg h-9" 
                                 />
                                 <p className="text-xs text-muted-foreground">Or upload an image (placeholder for file upload)</p>
                             </div>
@@ -281,7 +281,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                 <div className="w-12 h-auto rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary group-hover:scale-110 transition-transform">
                                     <Plus className="w-6 h-6" />
                                 </div>
-                                <p className="font-bold">Upload Main Preview Image</p>
+                                <p className="font-medium">Upload Main Preview Image</p>
                                 <p className="text-xs text-muted-foreground mt-1">Recommended size: 1200x900px (JPG, PNG)</p>
                             </div>
                         </CardContent>
@@ -304,7 +304,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                                 value={feature} 
                                                 onChange={(e) => updateFeature(idx, e.target.value)}
                                                 placeholder="e.g. 50+ Responsive Screens" 
-                                                className="rounded-xl h-11" 
+                                                className="rounded-lg h-9" 
                                             />
                                             <Button 
                                                 variant="ghost" 
@@ -316,8 +316,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                             </Button>
                                         </div>
                                     ))}
-                                    <Button variant="outline" size="sm" onClick={addFeature} className="rounded-lg gap-2 mt-2">
-                                        <Plus className="w-4 h-4" /> Add Another Feature
+                                    <Button variant="outline" size="sm" onClick={addFeature} className="rounded-lg gap-2">+ Add Another Feature
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -334,7 +333,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                                 value={version}
                                                 onChange={(e) => setVersion(e.target.value)}
                                                 placeholder="v1.0.0" 
-                                                className="rounded-xl h-11" 
+                                                className="rounded-lg h-9" 
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -343,7 +342,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                                 value={updatePolicy}
                                                 onChange={(e) => setUpdatePolicy(e.target.value)}
                                                 placeholder="Free lifetime updates" 
-                                                className="rounded-xl h-11" 
+                                                className="rounded-lg h-9" 
                                             />
                                         </div>
                                     </div>
@@ -351,7 +350,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                         <Label>Framework/Software Support</Label>
                                         <div className="flex flex-wrap gap-2 pt-2">
                                             {compatibility.map((tech: string) => (
-                                                <Badge key={tech} variant="outline" className="px-3 py-1.5 rounded-lg bg-background flex items-center gap-2">
+                                                <Badge key={tech} variant="outline" className="px-3 py-1.5 rounded-md bg-background flex items-center gap-2 text-xs">
                                                     {tech}
                                                     <X 
                                                         className="w-3 h-3 cursor-pointer hover:text-destructive" 
@@ -373,25 +372,25 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-2">
+                                        <Label className="text-xs uppercase font-medium text-muted-foreground flex items-center gap-2">
                                             <Globe className="w-3 h-3" /> External Demo URL
                                         </Label>
                                         <Input 
                                             value={demoUrl}
                                             onChange={(e) => setDemoUrl(e.target.value)}
                                             placeholder="https://demo.example.com" 
-                                            className="rounded-xl h-10 text-xs" 
+                                            className="rounded-lg h-9 text-xs" 
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-2">
+                                        <Label className="text-xs uppercase font-medium text-muted-foreground flex items-center gap-2">
                                             <Zap className="w-3 h-3" /> Documentation Link
                                         </Label>
                                         <Input 
                                             value={docUrl}
                                             onChange={(e) => setDocUrl(e.target.value)}
                                             placeholder="https://docs.example.com" 
-                                            className="rounded-xl h-10 text-xs" 
+                                            className="rounded-lg h-9 text-xs" 
                                         />
                                     </div>
                                 </CardContent>
@@ -412,11 +411,11 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                 <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mb-6 text-primary shadow-inner">
                                     <FileArchive className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-black mb-2">Primary Product File (.zip)</h3>
-                                <p className="text-muted-foreground text-sm max-w-sm mb-6">Drag and drop your project bundle here. Max file size: <span className="text-foreground font-bold">500MB</span></p>
+                                <h3 className="text-lg font-semibold mb-2">Primary Product File (.zip)</h3>
+                                <p className="text-muted-foreground text-sm max-w-sm mb-6">Drag and drop your project bundle here. Max file size: <span className="text-foreground font-medium">500MB</span></p>
                                 <div className="flex gap-4">
-                                    <Button className="rounded-full px-8 h-auto shadow-xl shadow-primary/20">Select File</Button>
-                                    <Button variant="outline" className="rounded-full px-8 h-auto">Cloud Upload</Button>
+                                    <Button className="rounded-lg px-6 h-9 shadow-lg shadow-primary/20">Select File</Button>
+                                    <Button variant="outline" className="rounded-lg px-6 h-9">Cloud Upload</Button>
                                 </div>
                             </div>
                         </CardContent>
@@ -437,7 +436,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                 <div className="space-y-2">
                                     <Label>Standard Price (USD)</Label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">$</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
                                         <Input 
                                             type="number"
                                             value={licenseRegular}
@@ -445,7 +444,7 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                                 setLicenseRegular(Number(e.target.value));
                                                 setPrice(Number(e.target.value));
                                             }}
-                                            className="pl-10 h-auto rounded-xl text-xl font-bold" 
+                                            className="pl-10 h-9 rounded-lg text-xl font-semibold" 
                                         />
                                     </div>
                                 </div>
@@ -463,12 +462,12 @@ export function ProductForm({ isEdit, initialData }: ProductFormProps) {
                                 <div className="space-y-2">
                                     <Label>Standard Price (USD)</Label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">$</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
                                         <Input 
                                             type="number"
                                             value={licenseExtended}
                                             onChange={(e) => setLicenseExtended(Number(e.target.value))}
-                                            className="pl-10 h-auto rounded-xl text-xl font-bold" 
+                                            className="pl-10 h-9 rounded-lg text-xl font-semibold" 
                                         />
                                     </div>
                                 </div>

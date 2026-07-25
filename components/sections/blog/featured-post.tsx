@@ -138,7 +138,7 @@ export default function FeaturedPost() {
                                 </div>
                                 <div>
                                     <p className="text-sm md:text-base font-bold text-white">{authors.find(a => a.id === featuredPosts[activeIndex].authorId)?.name ?? ""}</p>
-                                    <p className="text-[10px] md:text-xs text-white/60 tracking-widest">Author</p>
+                                    <p className="text-xs md:text-xs text-white/60 tracking-widest">Author</p>
                                 </div>
                             </div>
 

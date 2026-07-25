@@ -3,7 +3,7 @@ import { AnimatedDiv, AnimatedSpan, useScrollProgress, useTransform } from "@/li
 import { ArrowLeft, ExternalLink, Github, Calendar, Layers, Cpu, Globe, ArrowRight, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef, use, useMemo } from "react";
 import CTA from "@/components/sections/cta";
 
 // Swiper
@@ -15,24 +15,44 @@ import "swiper/css/navigation";
 import "swiper/css/effect-fade";
 
 import { cn } from "@/lib/utils";
-import { usePortfolioContentStore } from "@/lib/store/portfolio-content";
-import { notFound, useRouter } from "next/navigation";
+import { mapApiPortfolioToProject, mapApiPortfolioToProjects } from "@/hooks/usePublicMarketing";
+import { portfolioAPI } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { defaultContent } from "@/lib/store/portfolio-content";
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
-    const { content } = usePortfolioContentStore();
-
     const router = useRouter();
 
-    // Find project by ID (slug)
-    const project = content?.projects.find(p => p.id === slug);
+    const { data: apiProject, isLoading } = useQuery({
+        queryKey: ["public", "portfolio", slug],
+        queryFn: () => portfolioAPI.getBySlug(slug),
+        staleTime: 1000 * 60 * 5,
+    });
 
-    // Fallback if not found (should be handled by middleware or static generation usually, but here client-side)
+    const { data: apiPortfolio = [] } = useQuery({
+        queryKey: ["public", "portfolio"],
+        queryFn: () => portfolioAPI.getPublished(),
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const fallbackProject = useMemo(() => {
+        if (apiProject) return null;
+        return defaultContent.projects.find(p => p.slug === slug || p.id === slug) ?? null;
+    }, [slug, apiProject]);
+
+    const project = apiProject ? mapApiPortfolioToProject(apiProject) : fallbackProject;
+    const allProjects = useMemo(() => {
+        const api = mapApiPortfolioToProjects(apiPortfolio);
+        return api.length > 0 ? api : defaultContent.projects;
+    }, [apiPortfolio]);
+
     useEffect(() => {
-        if (!project && content?.projects.length) {
+        if (!isLoading && !project) {
             router.push('/portfolio');
         }
-    }, [project, router, content]);
+    }, [isLoading, project, router]);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollYProgress = useScrollProgress(containerRef);
@@ -42,10 +62,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
     // Lightbox State
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-    const [isMounted, setIsMounted] = useState(false);
-    useEffect(() => setIsMounted(true), []);
-
-    if (!isMounted || !project) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-pulse bg-primary/20 w-12 h-12 rounded-full" /></div>;
+    if (isLoading || !project) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-pulse bg-primary/20 w-12 h-12 rounded-full" /></div>;
 
     const galleryImages = project.image ? [project.image] : [];
 
@@ -60,12 +77,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                 >
                     <ArrowLeft className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </Link>
-                <div className="pointer-events-auto flex gap-4">
-                     <Link href="/contact" className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-105 transition-all">
-                        <ExternalLink className="w-4 h-4" />
-                        <span>Request Case Study</span>
-                     </Link>
-                </div>
+                <div className="pointer-events-auto" />
             </nav>
 
             {/* Hero Section */}
@@ -271,10 +283,24 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                                     </div>
                                 </div>
 
+                                {/* Live Preview */}
+                                {project.url && (
+                                    <Link href={project.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 w-full py-5 rounded-2xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all group shadow-lg shadow-primary/25">
+                                        <ExternalLink className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                        <span>Live Preview</span>
+                                    </Link>
+                                )}
+
                                 {/* Source Code CTA */}
                                 <Link href="/contact" className="flex items-center justify-center gap-3 w-full py-5 rounded-2xl border border-border bg-card hover:bg-muted font-bold transition-all group">
                                     <Github className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                     <span>Request Access to Source</span>
+                                </Link>
+
+                                {/* Live Preview */}
+                                <Link href="/contact" className="flex items-center justify-center gap-3 w-full py-5 rounded-2xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all group shadow-lg shadow-primary/25">
+                                    <ExternalLink className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                    <span>Live Preview</span>
                                 </Link>
 
                             </div>
@@ -286,14 +312,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
 
             {/* Next Project Navigation */}
             {(() => {
-                const allProjects = content?.projects || [];
-                const currentIdx = allProjects.findIndex(p => p.id === slug);
+                if (allProjects.length === 0) return null;
+                const currentIdx = allProjects.findIndex(p => p.id === project.id);
                 const nextProject = currentIdx >= 0 && currentIdx < allProjects.length - 1 ? allProjects[currentIdx + 1] : allProjects[0];
                 if (!nextProject) return null;
                 return (
                     <section className="py-20 border-t border-border">
                         <div className="container px-4 mx-auto">
-                            <Link href={`/portfolio/${nextProject.id}`} className="flex justify-between items-center group cursor-pointer">
+                            <Link href={`/portfolio/${nextProject.slug || nextProject.id}`} className="flex justify-between items-center group cursor-pointer">
                                 <div className="text-left">
                                     <span className="text-sm text-muted-foreground tracking-widest mb-2 block">Next Project</span>
                                     <h2 className="text-3xl md:text-5xl font-semibold group-hover:text-primary transition-colors">{nextProject.title}</h2>

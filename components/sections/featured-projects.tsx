@@ -79,7 +79,7 @@ export default function FeaturedProjects() {
                                 {projectsContent.badge}
                             </Badge>
                         </AnimatedDiv>
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white mb-4 md:mb-6">
+                        <h2 className="type-h1 text-white mb-4 md:mb-6">
                             {projectsContent.title} <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40">
                                 {projectsContent.subtitle}
@@ -133,6 +133,7 @@ export default function FeaturedProjects() {
                     {projects.map((project: Project, index: number) => (
                         <SwiperSlide key={project.id} className="group cursor-grab active:cursor-grabbing">
                             {/* Card Image Container */}
+                            <Link href={`/portfolio/${project.id}`} className="block">
                             <div className="relative aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden mb-6 md:mb-8 border border-white/10 bg-card">
                                 {/* Project Image */}
                                 <Image src={project.image}
@@ -142,7 +143,6 @@ export default function FeaturedProjects() {
                                     loading="lazy"
                                 />
 
-                                
                                 {/* Noise Texture Overlay */}
                                 <div className="absolute inset-0 opacity-20 bg-grain" style={{ filter: 'contrast(120%) brightness(120%)' }} />
 
@@ -157,27 +157,26 @@ export default function FeaturedProjects() {
                                         </div>
                                     </div>
 
-                                                        <Link href="/portfolio" className="contents">
-                                        <div className="flex flex-wrap gap-2 mb-0 md:mb-4 opacity-100 md:opacity-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-500 delay-100">
-                                            {project.tech.map((t: string, i: number) => (
-                                                <Badge key={i} variant="secondary" className="bg-white/10 backdrop-blur-md text-white/90 font-medium hover:bg-white/20">
-                                                    {t}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    </Link>
+                                    <div className="flex flex-wrap gap-2 mb-0 md:mb-4 opacity-100 md:opacity-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-500 delay-100 pointer-events-none">
+                                        {project.tech.map((t: string, i: number) => (
+                                            <Badge key={i} variant="secondary" className="bg-white/10 backdrop-blur-md text-white/90 font-medium hover:bg-white/20">
+                                                {t}
+                                            </Badge>
+                                        ))}
+                                    </div>
                                     </div>
                                 </div>
+                            </Link>
                                 
                                 {project.stats?.length ? (
                                     /* Info Below Card */
-                                    <Link href="/portfolio" className="block">
+                                    <Link href={`/portfolio/${project.id}`} className="block">
                                     <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 border-b border-white/10 pb-6 group-hover:border-white/30 transition-colors duration-500">
                                         <div className="space-y-2 max-w-md">
-                                            <h3 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl font-bold text-white group-hover:text-primary transition-colors duration-300">
+                                            <h3 className="text-heading-2 font-bold text-white group-hover:text-primary transition-colors duration-300">
                                                 {project.title}
                                             </h3>
-                                            <p className="text-muted-foreground text-xs sm:text-sm md:text-base line-clamp-2">
+                                            <p className="text-muted-foreground type-body-sm line-clamp-2">
                                                 {project.description}
                                             </p>
                                         </div>
@@ -186,21 +185,21 @@ export default function FeaturedProjects() {
                                         <div className="flex gap-6 md:gap-8 text-left md:text-right shrink-0">
                                             {project.stats.map((stat: { label: string; value: string }, i: number) => (
                                                 <div key={i}>
-                                                    <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">{stat.value}</div>
-                                                    <div className="text-[10px] md:text-xs text-muted-foreground tracking-wide">{stat.label}</div>
+                                                     <div className="text-heading-3 font-bold text-white">{stat.value}</div>
+                                                    <div className="text-xs text-muted-foreground tracking-wide">{stat.label}</div>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                     </Link>
                                  ) : (
-                                     <Link href="/portfolio" className="block">
+                                     <Link href={`/portfolio/${project.id}`} className="block">
                                      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 border-b border-white/10 pb-6 group-hover:border-white/30 transition-colors duration-500">
                                         <div className="space-y-2 max-w-md">
-                                            <h3 className="text-xl sm:text-2xl md:text-3xl xl:text-4xl font-bold text-white group-hover:text-primary transition-colors duration-300">
+                                             <h3 className="text-heading-2 font-bold text-white group-hover:text-primary transition-colors duration-300">
                                                 {project.title}
                                             </h3>
-                                             <p className="text-muted-foreground text-xs sm:text-sm md:text-base line-clamp-2">
+                                             <p className="text-muted-foreground type-body-sm line-clamp-2">
                                                 {project.description}
                                             </p>
                                         </div>

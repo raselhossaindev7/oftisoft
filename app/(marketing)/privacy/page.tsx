@@ -49,14 +49,14 @@ export default function PrivacyPage() {
                 {/* Header Section */}
                 <div className="text-center space-y-6 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-blue-500/30 bg-blue-500/5 text-blue-400 font-semibold tracking-[0.3em] text-[10px]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-blue-500/30 bg-blue-500/5 text-blue-400 font-semibold tracking-[0.3em] text-xs">
                             {header?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
                     <AnimatedH1 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-8xl font-semibold tracking-tighter text-white"
+                        className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter text-white"
                     >
                         {header?.titlePrefix ?? ""} <span className="text-blue-500">{header?.titleHighlight ?? ""}</span>.
                     </AnimatedH1>
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
                                 {guarantee?.stats.map((stat, i) => (
                                     <Card key={i} className="bg-white/5 border-white/10 rounded-3xl p-6 text-center space-y-2">
                                         <h4 className="text-2xl font-semibold text-white tracking-tight">{stat.value}</h4>
-                                        <p className="text-[9px] font-semibold text-blue-400 tracking-widest">{stat.label}</p>
+                                        <p className="text-xs font-semibold text-blue-400 tracking-widest">{stat.label}</p>
                                     </Card>
                                 ))}
                             </div>
@@ -120,7 +120,7 @@ export default function PrivacyPage() {
 
                 {/* Sub-Footer Meta */}
                 <div className="pt-12 text-center">
-                    <p className="text-[10px] font-semibold tracking-[0.4rem] text-muted-foreground">
+                    <p className="text-xs font-semibold tracking-[0.4rem] text-muted-foreground">
                         {footer?.status ?? ""}
                     </p>
                 </div>

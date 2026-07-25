@@ -1,6 +1,7 @@
 export * from './auth';
 export * from './support';
 export * from './billing';
+export * from './favorites';
 export * from './marketing';
 export * from './users';
 export * from './messages';
@@ -16,7 +17,8 @@ export * from './leads';
 export * from './team';
 export * from './audit';
 export * from './reviews';
-export * from './ads';
 export * from './milestones';
 export * from './disputes';
+export * from './events';
 export * from './admin';
+export * from './services-content';

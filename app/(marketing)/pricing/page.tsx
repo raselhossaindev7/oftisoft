@@ -51,14 +51,14 @@ export default function PricingPage() {
             <div className="container px-6 mx-auto relative z-10 space-y-24">
                 <div className="text-center space-y-6 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold [0.3em] text-[10px] shadow-[0_0_20px_rgba(var(--primary),0.2)]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold [0.3em] text-xs shadow-[0_0_20px_rgba(var(--primary),0.2)]">
                             {header?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
                     <AnimatedH1 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl sm:text-5xl md:text-8xl font-semibold tighter text-white"
+                        className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-semibold tighter text-white"
                     >
                         {header?.titlePrefix ?? ""} <span className="text-primary underline decoration-white/10 decoration-8 underline-offset-8">{header?.titleHighlight ?? ""}</span>.
                     </AnimatedH1>
@@ -82,7 +82,7 @@ export default function PricingPage() {
                             )}>
                                 {plan.popular && (
                                     <div className="absolute top-8 right-8">
-                                        <Badge className="bg-primary text-white font-semibold text-[9px] widest px-4 py-1.5 shadow-xl shadow-primary/20">
+                                        <Badge className="bg-primary text-white font-semibold text-xs widest px-4 py-1.5 shadow-xl shadow-primary/20">
                                             Architect Choice
                                         </Badge>
                                     </div>
@@ -94,7 +94,7 @@ export default function PricingPage() {
                                     </div>
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tighter">${plan.price}</span>
-                                        <span className="text-muted-foreground font-semibold text-[10px] widest">/ {plan.period ?? ""}</span>
+                                        <span className="text-muted-foreground font-semibold text-xs widest">/ {plan.period ?? ""}</span>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-10 md:p-12 space-y-8 flex-1">
@@ -155,7 +155,7 @@ export default function PricingPage() {
                                     {plans.map(p => (
                                         <th key={p.name} className={cn("py-6 px-6 text-center font-bold text-lg", p.popular && "text-primary")}>
                                             {p.name}
-                                            {p.popular && <div className="text-[10px] font-normal text-primary mt-1 widest">BEST VALUE</div>}
+                                            {p.popular && <div className="text-xs font-normal text-primary mt-1 widest">BEST VALUE</div>}
                                         </th>
                                     ))}
                                 </tr>

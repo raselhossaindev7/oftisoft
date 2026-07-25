@@ -22,6 +22,7 @@ import "swiper/css/effect-creative";
 
 import { cn } from "@/lib/utils";
 import { useServicesContentStore } from "@/lib/store/services-content";
+import { useServicesContent } from "@/hooks/useServicesContent";
 import ServicePackages from "@/components/sections/services-page/service-packages";
 import ServiceOfferDetail from "@/components/sections/services-page/service-offer-detail";
 
@@ -36,6 +37,7 @@ const iconMap: any = {
 export default function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = use(params);
     const { content } = useServicesContentStore();
+    useServicesContent();
 
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollYProgress = useScrollProgress(containerRef);

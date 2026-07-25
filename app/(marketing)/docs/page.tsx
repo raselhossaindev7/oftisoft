@@ -67,14 +67,14 @@ export default function DocsPage() {
             <div className="container px-6 mx-auto relative z-10 space-y-24">
                 <div className="text-center space-y-8 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-[10px] shadow-[0_0_20px_rgba(var(--primary),0.2)]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-xs shadow-[0_0_20px_rgba(var(--primary),0.2)]">
                             {header?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
                     <AnimatedH1 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-8xl font-semibold tracking-tighter text-white"
+                        className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter text-white"
                     >
                         {header?.title ?? ""} <span className="text-primary">{header?.highlight ?? ""}</span>.
                     </AnimatedH1>
@@ -121,7 +121,7 @@ export default function DocsPage() {
                                             <div className="space-y-2">
                                                 <h3 className="text-2xl font-semibold text-white tracking-tight leading-tight">{category.title}</h3>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-[10px] font-semibold text-muted-foreground tracking-widest">{category.count}</span>
+                                                    <span className="text-xs font-semibold text-muted-foreground tracking-widest">{category.count}</span>
                                                     <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-2 transition-all" />
                                                 </div>
                                             </div>
@@ -135,7 +135,7 @@ export default function DocsPage() {
                                         <div className="space-y-2">
                                             <h3 className="text-2xl font-semibold text-white tracking-tight leading-tight">{category.title}</h3>
                                             <div className="flex items-center justify-between">
-                                                <span className="text-[10px] font-semibold text-muted-foreground tracking-widest">{category.count}</span>
+                                                <span className="text-xs font-semibold text-muted-foreground tracking-widest">{category.count}</span>
                                                 <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-2 transition-all" />
                                             </div>
                                         </div>

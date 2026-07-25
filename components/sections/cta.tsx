@@ -64,7 +64,7 @@ export default function CTA() {
                             viewport={{ once: true, margin: "-80px" }}
                             transition={{ duration: 0.5 }}
                             style={{ willChange: "transform, opacity" }}
-                            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 leading-tight"
+                            className="type-h1 text-white mb-6"
                         >
                             {ctaContent.title.split(' ').slice(0, -2).join(' ')}{' '}
                             <br />
@@ -73,7 +73,7 @@ export default function CTA() {
                             </span>
                         </AnimatedH2>
 
-                        <p className="text-base sm:text-lg md:text-xl text-muted-foreground/80 mb-8 md:mb-12 leading-relaxed">
+                        <p className="type-body-lg text-muted-foreground/80 mb-8 md:mb-12">
                             {ctaContent.description}
                         </p>
 
@@ -114,8 +114,8 @@ export default function CTA() {
                                         <div className="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mb-6 text-green-500 animate-pulse">
                                             <CheckCircle2 className="w-12 h-12" />
                                         </div>
-                                        <h3 className="text-3xl font-bold text-white mb-3">Message Received!</h3>
-                                        <p className="text-muted-foreground mb-8 text-lg">
+                                         <h3 className="text-heading-2 font-bold text-white mb-3">Message Received!</h3>
+                                         <p className="text-muted-foreground mb-8 type-body-lg">
                                             We've sent a confirmation email to your inbox. Expect a reply within 24 hours.
                                         </p>
                                         <Button onClick={() => setFormState('idle')}
@@ -211,8 +211,8 @@ function ContactItem({ icon: Icon, title, value, delay }: { icon: React.Componen
                 <Icon className="w-6 h-6 text-white" />
             </div>
             <div>
-                <h4 className="text-sm font-semibold text-white/40 tracking-wide mb-1 group-hover:text-primary transition-colors">{title}</h4>
-                <p className="text-lg font-medium text-white">{value}</p>
+                                        <h4 className="text-caption font-semibold text-white/40 tracking-wide mb-1 group-hover:text-primary transition-colors">{title}</h4>
+                                        <p className="text-body-lg font-medium text-white">{value}</p>
             </div>
         </AnimatedDiv>
     );

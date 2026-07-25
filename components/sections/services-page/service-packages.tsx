@@ -32,11 +32,11 @@ const pkgBgMap: Record<string, string> = {
 };
 
 const packages = [
-    { id: "web-starter", name: "Web App Starter", price: 2999, description: "A complete MVP-ready web application — frontend, backend, database, and deployment.", features: ["React/Next.js Frontend", "Node.js API", "PostgreSQL Database", "Authentication", "Responsive Design", "1 Month Support"], color: "blue", icon: "Globe" },
-    { id: "mobile-starter", name: "Mobile App Starter", price: 4999, description: "Cross-platform mobile application with backend, push notifications, and app store deployment.", features: ["React Native App", "REST API Backend", "Push Notifications", "App Store Deploy", "Analytics SDK", "2 Months Support"], color: "purple", icon: "Smartphone" },
-    { id: "ai-integration", name: "AI Integration", price: 7999, description: "Custom AI model development and integration — LLM, computer vision, or predictive analytics.", features: ["Model Selection & Training", "API Integration", "Prompt Engineering", "Performance Tuning", "Documentation", "3 Months Support"], color: "green", icon: "Brain" },
-    { id: "saas-platform", name: "SaaS Platform", price: 14999, description: "Full SaaS platform with multi-tenancy, subscription billing, and admin dashboard.", features: ["Multi-tenant Architecture", "Subscription Billing", "Admin Dashboard", "Team Management", "Audit Logging", "3 Months Support"], color: "orange", icon: "Cloud", popular: true },
-    { id: "enterprise-suite", name: "Enterprise Suite", price: 29999, description: "Enterprise-grade solution with microservices, SSO, compliance, and dedicated infrastructure.", features: ["Microservices Architecture", "SSO & RBAC", "GDPR/HIPAA Compliance", "Dedicated Infrastructure", "24/7 On-Call Support", "6 Months Support"], color: "indigo", icon: "Server" },
+    { id: "web-starter", name: "Web App Starter", price: 2999, monthlyPrice: 499, description: "A complete MVP-ready web application — frontend, backend, database, and deployment.", features: ["React/Next.js Frontend", "Node.js API", "PostgreSQL Database", "Authentication", "Responsive Design", "1 Month Support"], color: "blue", iconName: "Globe" },
+    { id: "mobile-starter", name: "Mobile App Starter", price: 4999, monthlyPrice: 799, description: "Cross-platform mobile application with backend, push notifications, and app store deployment.", features: ["React Native App", "REST API Backend", "Push Notifications", "App Store Deploy", "Analytics SDK", "2 Months Support"], color: "purple", iconName: "Smartphone" },
+    { id: "ai-integration", name: "AI Integration", price: 7999, monthlyPrice: 1299, description: "Custom AI model development and integration — LLM, computer vision, or predictive analytics.", features: ["Model Selection & Training", "API Integration", "Prompt Engineering", "Performance Tuning", "Documentation", "3 Months Support"], color: "green", iconName: "Brain" },
+    { id: "saas-platform", name: "SaaS Platform", price: 14999, monthlyPrice: 2199, description: "Full SaaS platform with multi-tenancy, subscription billing, and admin dashboard.", features: ["Multi-tenant Architecture", "Subscription Billing", "Admin Dashboard", "Team Management", "Audit Logging", "3 Months Support"], color: "orange", iconName: "Cloud", highlight: true },
+    { id: "enterprise-suite", name: "Enterprise Suite", price: 29999, monthlyPrice: 3999, description: "Enterprise-grade solution with microservices, SSO, compliance, and dedicated infrastructure.", features: ["Microservices Architecture", "SSO & RBAC", "GDPR/HIPAA Compliance", "Dedicated Infrastructure", "24/7 On-Call Support", "6 Months Support"], color: "indigo", iconName: "Server" },
 ];
 
 export default function ServicePackages() {
@@ -66,21 +66,20 @@ export default function ServicePackages() {
                         </Badge>
                     </AnimatedDiv>
                     
-                    <h2 className="text-3xl md:text-6xl font-semibold tracking-tight">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight">
                         Choose Your <span className="text-primary">Trajectory</span>
                     </h2>
                     
                     {/* Billing Toggle */}
                     <div className="flex justify-center items-center gap-4 mt-8">
                         <span className={cn("text-sm font-bold transition-colors cursor-pointer select-none", billing === 'one-time' ? "text-foreground" : "text-muted-foreground")} onClick={() => setBilling('one-time')}>One-time Payment</span>
-                        <div 
+                        <div
                             onClick={() => setBilling(b => b === 'one-time' ? 'monthly' : 'one-time')}
-                            className="w-14 h-8 rounded-full bg-input border border-border relative flex items-center p-1 cursor-pointer hover:border-primary/50 transition-colors"
+                            className="w-14 h-8 rounded-full bg-muted border border-border relative flex items-center p-1 cursor-pointer hover:border-primary/50 transition-colors"
                         >
-                            <AnimatedDiv 
-                                className="w-6 h-6 rounded-full bg-primary shadow-lg shadow-primary/30"
-                                animate={{ x: billing === 'one-time' ? 0 : 24 }}
-                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            <div
+                                className="w-6 h-6 rounded-full bg-primary shadow-lg shadow-primary/30 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                                style={{ transform: `translateX(${billing === 'one-time' ? 0 : 24}px)` }}
                             />
                         </div>
                         <span className={cn("text-sm font-bold transition-colors cursor-pointer select-none", billing === 'monthly' ? "text-foreground" : "text-muted-foreground")} onClick={() => setBilling('monthly')}>Monthly Retainer</span>
@@ -198,7 +197,7 @@ function PricingCard({ pkg, billing }: { pkg: any, billing: 'one-time' | 'monthl
                         <span className="text-muted-foreground font-medium">{period}</span>
                     </div>
                      {billing === 'monthly' && !isCustom && (
-                        <Badge variant="secondary" className="mt-2 text-[10px] tracking-wide text-primary bg-primary/10 hover:bg-primary/20 border-primary/10">
+                        <Badge variant="secondary" className="mt-2 text-xs tracking-wide text-primary bg-primary/10 hover:bg-primary/20 border-primary/10">
                             Includes Maintenance
                         </Badge>
                     )}

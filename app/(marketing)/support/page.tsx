@@ -75,7 +75,7 @@ export default function SupportPage() {
                 {/* Header Section */}
                 <div className="text-center space-y-8 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-[10px] shadow-[0_0_20px_rgba(var(--primary),0.2)]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-xs shadow-[0_0_20px_rgba(var(--primary),0.2)]">
                             {header.badge}
                         </Badge>
                     </AnimatedDiv>
@@ -122,7 +122,7 @@ export default function SupportPage() {
                                             <h3 className="text-2xl font-semibold text-white tracking-tight leading-tight">{channel.title}</h3>
                                             <p className="text-sm text-muted-foreground font-medium leading-relaxed">{channel.desc}</p>
                                         </div>
-                                        <Button variant="ghost" className="h-10 text-primary font-semibold tracking-widest text-[10px] hover:bg-transparent group/btn">
+                                        <Button variant="ghost" className="h-10 text-primary font-semibold tracking-widest text-xs hover:bg-transparent group/btn">
                                             Initiate Connection <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-2 transition-transform" />
                                         </Button>
                                     </CardContent>
@@ -200,7 +200,7 @@ export default function SupportPage() {
                                     <Card key={metric.id} className="bg-white/2 border-white/5 rounded-3xl p-8 space-y-4">
                                         <div className="flex items-center gap-3 text-primary">
                                             <MetricIcon size={20} />
-                                            <span className="text-[10px] font-semibold tracking-widest">{metric.label}</span>
+                                            <span className="text-xs font-semibold tracking-widest">{metric.label}</span>
                                         </div>
                                         <h4 className="text-3xl font-semibold text-white tracking-tight">{metric.value}</h4>
                                     </Card>

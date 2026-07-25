@@ -35,8 +35,8 @@ export const adminUserAPI = {
 };
 
 export const adminFinanceAPI = {
-    getTransactions: async () => {
-        const response = await api.get<any[]>("/admin/billing/transactions");
+    getTransactions: async (params?: { status?: string; dateFrom?: string; dateTo?: string }) => {
+        const response = await api.get<any[]>("/admin/billing/transactions", { params });
         return response.data;
     },
     getStats: async () => {
@@ -58,5 +58,42 @@ export const adminFinanceAPI = {
     updateConfig: async (config: any) => {
         const response = await api.patch("/admin/billing/config", config);
         return response.data;
-    }
+    },
+    getTaxRates: async () => {
+        const response = await api.get<any[]>("/admin/billing/tax-rates");
+        return response.data;
+    },
+    createTaxRate: async (data: any) => {
+        const response = await api.post("/admin/billing/tax-rates", data);
+        return response.data;
+    },
+    updateTaxRate: async (id: string, data: any) => {
+        const response = await api.patch(`/admin/billing/tax-rates/${id}`, data);
+        return response.data;
+    },
+    deleteTaxRate: async (id: string) => {
+        await api.delete(`/admin/billing/tax-rates/${id}`);
+    },
+
+    // Dodo Payments
+    getDodoProducts: async () => {
+        const response = await api.get<any[]>("/admin/billing/dodo/products");
+        return response.data;
+    },
+    getDodoPayments: async (customerId?: string) => {
+        const response = await api.get<any[]>("/admin/billing/dodo/payments", { params: { customerId } });
+        return response.data;
+    },
+    getDodoSubscriptions: async (customerId?: string) => {
+        const response = await api.get<any[]>("/admin/billing/dodo/subscriptions", { params: { customerId } });
+        return response.data;
+    },
+    getDodoCustomers: async () => {
+        const response = await api.get<any[]>("/admin/billing/dodo/customers");
+        return response.data;
+    },
+    getDodoDiscounts: async () => {
+        const response = await api.get<any[]>("/admin/billing/dodo/discounts");
+        return response.data;
+    },
 };

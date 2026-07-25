@@ -35,7 +35,7 @@ export default function ChangelogPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <Badge variant="outline" className="px-4 py-1 rounded-full border-primary/20 bg-primary/5 text-primary font-semibold tracking-widest text-[10px]">
+                        <Badge variant="outline" className="px-4 py-1 rounded-full border-primary/20 bg-primary/5 text-primary font-semibold tracking-widest text-xs">
                             {header?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
@@ -79,12 +79,12 @@ export default function ChangelogPage() {
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-3">
-                                                <Badge className={cn("text-[9px] font-black uppercase tracking-widest", 
+                                                <Badge className={cn("text-xs font-black uppercase tracking-widest", 
                                                     update.category === "Major" ? "bg-primary text-white" : "bg-muted text-muted-foreground"
                                                 )}>
                                                     {update.category}
                                                 </Badge>
-                                                <span className="text-[10px] font-semibold text-muted-foreground">{update.date}</span>
+                                                <span className="text-xs font-semibold text-muted-foreground">{update.date}</span>
                                             </div>
                                             <CardTitle className="text-2xl md:text-3xl font-semibold">{update.title}</CardTitle>
                                         </div>
@@ -99,7 +99,7 @@ export default function ChangelogPage() {
                                     </p>
                                     
                                     <div className="space-y-4">
-                                        <h4 className="text-[10px] font-semibold text-primary tracking-widest flex items-center gap-2">
+                                        <h4 className="text-xs font-semibold text-primary tracking-widest flex items-center gap-2">
                                             <Icon size={14} /> Refinements & Features
                                         </h4>
                                         <ul className="grid md:grid-cols-1 gap-3">
@@ -125,7 +125,7 @@ export default function ChangelogPage() {
                     style={{ willChange: "transform, opacity" }}
                     className="pt-12 text-center"
                 >
-                    <p className="text-[10px] font-semibold tracking-widest text-muted-foreground bg-muted/30 py-3 px-6 rounded-full w-fit mx-auto border border-border/50">
+                    <p className="text-xs font-semibold tracking-widest text-muted-foreground bg-muted/30 py-3 px-6 rounded-full w-fit mx-auto border border-border/50">
                         Operational nodes synced. End of Log.
                     </p>
                 </AnimatedDiv>

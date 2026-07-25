@@ -18,8 +18,8 @@ export default function PaymentSettingsPage() {
     const [config, setConfig] = useState<SystemConfig | null>(null);
 
     const [form, setForm] = useState({
-        stripePublishableKey: "",
-        stripeSecretKey: "",
+        dodoPaymentsApiKey: "",
+        dodoPaymentsWebhookKey: "",
         paypalClientId: "",
         paypalClientSecret: ""
     });
@@ -30,8 +30,8 @@ export default function PaymentSettingsPage() {
                 const data = await systemAPI.getConfig();
                 setConfig(data);
                 setForm({
-                    stripePublishableKey: data.stripePublishableKey || "",
-                    stripeSecretKey: data.stripeSecretKey || "",
+                    dodoPaymentsApiKey: data.dodoPaymentsApiKey || "",
+                    dodoPaymentsWebhookKey: data.dodoPaymentsWebhookKey || "",
                     paypalClientId: data.paypalClientId || "",
                     paypalClientSecret: data.paypalClientSecret || ""
                 });
@@ -92,7 +92,7 @@ export default function PaymentSettingsPage() {
 
             <form onSubmit={handleSave} className="space-y-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Stripe Card */}
+                    {/* Dodo Payments Card */}
                     <AnimatedDiv initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
@@ -103,29 +103,29 @@ export default function PaymentSettingsPage() {
                                     <div className="w-14 h-14 bg-indigo-600 rounded-[22px] flex items-center justify-center text-white shadow-xl shadow-indigo-600/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                                         <CreditCard size={28} />
                                     </div>
-                                    <Badge className="bg-indigo-600/10 text-indigo-600 border-none font-semibold text-sm px-4 py-1.5 rounded-full">STRIPE_NODE</Badge>
+                                    <Badge className="bg-indigo-600/10 text-indigo-600 border-none font-semibold text-sm px-4 py-1.5 rounded-full">DODO_NODE</Badge>
                                 </div>
-                                <CardTitle className="mt-8 text-2xl font-semibold">Stripe Infrastructure</CardTitle>
-                                <CardDescription className="font-medium mt-2">Synchronize your marketplace with the Stripe global ledger.</CardDescription>
+                                <CardTitle className="mt-8 text-2xl font-semibold">Dodo Payments</CardTitle>
+                                <CardDescription className="font-medium mt-2">Connect your Dodo Payments account for checkout sessions.</CardDescription>
                             </CardHeader>
                             <CardContent className="p-10 space-y-6">
                                 <div className="space-y-3">
-                                    <Label className="text-sm font-semibold uppercase text-muted-foreground/60 ml-2">Broadcast Key (Publishable)</Label>
+                                    <Label className="text-sm font-semibold uppercase text-muted-foreground/60 ml-2">API Key</Label>
                                     <Input 
-                                        value={form.stripePublishableKey}
-                                        onChange={(e) => setForm({ ...form, stripePublishableKey: e.target.value })}
-                                        placeholder="pk_live_..." 
+                                        value={form.dodoPaymentsApiKey}
+                                        onChange={(e) => setForm({ ...form, dodoPaymentsApiKey: e.target.value })}
+                                        placeholder="Your Dodo Payments API key" 
                                         className="h-14 px-6 rounded-2xl border-none bg-muted/30 focus-visible:ring-primary/20 font-mono text-xs font-bold"
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <Label className="text-sm font-semibold uppercase text-muted-foreground/60 ml-2">Private Fragment (Secret Key)</Label>
+                                    <Label className="text-sm font-semibold uppercase text-muted-foreground/60 ml-2">Webhook Signing Secret</Label>
                                     <div className="relative">
                                         <Input 
                                             type="password"
-                                            value={form.stripeSecretKey}
-                                            onChange={(e) => setForm({ ...form, stripeSecretKey: e.target.value })}
-                                            placeholder="sk_live_..." 
+                                            value={form.dodoPaymentsWebhookKey}
+                                            onChange={(e) => setForm({ ...form, dodoPaymentsWebhookKey: e.target.value })}
+                                            placeholder="whsec_..." 
                                             className="h-14 px-6 rounded-2xl border-none bg-muted/30 focus-visible:ring-primary/20 font-mono text-xs font-bold"
                                         />
                                         <Lock className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />

@@ -32,7 +32,7 @@ const pageData = {
   ],
   founder: {
     name: "Rasel Hossain", role: "Founder & CEO", tagline: "Building world-class software from Bangladesh",
-    image: "/images/1.png",
+    image: "/images/2.png",
     socials: { github: "https://github.com/oftisoft", linkedin: "https://linkedin.com/company/oftisoft", twitter: "https://twitter.com/oftisoft" },
     badgeTitle: "Meet the Founder", titleLine1: "Built by a Developer,", titleLine2: "for Developers.",
     bioPar1: "Rasel has been building software since 2015. He founded Oftisoft in 2019 with a vision to create a world-class software engineering firm from Bangladesh. Under his leadership, Oftisoft has grown from a solo consultancy to a 25+ person engineering powerhouse serving clients across 4 continents.",
@@ -93,7 +93,7 @@ const pageData = {
     titleLine1: "The People Behind",
     titleLine2: "the Code",
     members: [
-      { id: "m1", name: "Rasel Hossain", role: "Founder & CEO", image: "/images/1.png", bio: "Visionary leader with 10+ years in software engineering.", category: "Leadership", gradient: "from-blue-500 to-cyan-500", socials: { github: "https://github.com/oftisoft", linkedin: "https://linkedin.com/company/oftisoft", twitter: "https://twitter.com/oftisoft" } },
+      { id: "m1", name: "Rasel Hossain", role: "Founder & CEO", image: "/images/2.png", bio: "Visionary leader with 10+ years in software engineering.", category: "Leadership", gradient: "from-blue-500 to-cyan-500", socials: { github: "https://github.com/oftisoft", linkedin: "https://linkedin.com/company/oftisoft", twitter: "https://twitter.com/oftisoft" } },
       { id: "m2", name: "Sarah Rahman", role: "CTO", image: "", bio: "Full-stack architect specializing in distributed systems.", category: "Leadership", gradient: "from-purple-500 to-pink-500", socials: { github: "#", linkedin: "#", twitter: "#" } },
       { id: "m3", name: "Kabir Ahmed", role: "Lead Engineer", image: "", bio: "Expert in React, Node.js, and cloud infrastructure.", category: "Development", gradient: "from-green-500 to-teal-500", socials: { github: "#", linkedin: "#", twitter: "#" } },
     ]
@@ -115,7 +115,7 @@ export default function AboutPage() {
         />
         <div className="absolute top-[20%] left-[-10%] w-[70vw] h-[70vw] bg-primary/10 rounded-full blur-[160px] opacity-30" />
         <div className="absolute inset-0 bg-neutral-900/5 opacity-50" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-50" />
+        <div className="absolute inset-0 bg-grain opacity-20 brightness-50 pointer-events-none" />
       </div>
       <div className=" container px-6 mx-auto ">
         {" "}
@@ -123,12 +123,8 @@ export default function AboutPage() {
       </div>{" "}
       <div className="relative overflow-hidden py-5 border-y border-white/[0.03] bg-white/[0.01]">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-30" />
-        <AnimatedDiv
-          animate={{ x: [0, -600] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="flex gap-6 items-center"
-        >
-          {[1, 2, 3, 4, 5].map((i) => (
+        <div className="animate-marquee flex gap-6 items-center w-max">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="flex gap-6 items-center shrink-0">
               <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-primary/[0.06] border border-primary/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-sm">
                 <span className="relative flex w-2 h-2">
@@ -165,7 +161,7 @@ export default function AboutPage() {
               </div>
             </div>
           ))}
-        </AnimatedDiv>
+        </div>
       </div>
       <div className="container px-6 mx-auto relative z-10 space-y-32 pt-20">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -187,7 +183,7 @@ export default function AboutPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05] mb-6"
+              className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.05] mb-6"
             >
               {hero?.title ?? ""} <br />
               <span className="text-primary relative inline-block">
@@ -245,7 +241,7 @@ export default function AboutPage() {
                       ].map((avatar, i) => (
                         <div
                           key={i}
-                          className={`w-10 h-10 rounded-full border-2 border-[#050505] bg-gradient-to-br ${avatar.from} ${avatar.to} flex items-center justify-center text-[10px] font-bold text-white`}
+                          className={`w-10 h-10 rounded-full border-2 border-[#050505] bg-gradient-to-br ${avatar.from} ${avatar.to} flex items-center justify-center text-xs font-bold text-white`}
                         >
                           {avatar.initials}
                         </div>
@@ -253,7 +249,7 @@ export default function AboutPage() {
                     </div>
                     <div className="h-8 w-px bg-white/[0.06]" />
                     <div className="space-y-0.5">
-                      <p className="text-[11px] font-semibold text-white/40 tracking-[0.15em] uppercase">The Team</p>
+                      <p className="text-xs font-semibold text-white/40 tracking-[0.15em] uppercase">The Team</p>
                       <p className="text-sm font-medium text-white/70">25+ Engineers & Designers</p>
                     </div>
                   </div>
@@ -295,7 +291,7 @@ export default function AboutPage() {
                           transition={{ duration: 1, delay: i * 0.08, ease: "easeOut" }}
                           className="w-full rounded-t-lg bg-gradient-to-t from-primary/70 to-primary/20 min-h-[4px]"
                         />
-                        <span className="text-[10px] text-white/25 font-medium tracking-wide">{bar.label}</span>
+                        <span className="text-xs text-white/25 font-medium tracking-wide">{bar.label}</span>
                       </div>
                     ))}
                   </div>

@@ -95,7 +95,7 @@ export default function ServiceComparison() {
 
             <div className="container px-4 mx-auto relative z-10">
                 <div className="text-center mb-12 md:mb-16">
-                    <h2 className="text-3xl md:text-5xl font-semibold mb-4 md:mb-6 tracking-tight">Compare Plans</h2>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold mb-4 md:mb-6 tracking-tight">Compare Plans</h2>
                     <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
                         Transparent pricing with no hidden fees. Choose the plan that fits your scale.
                     </p>
@@ -117,7 +117,7 @@ export default function ServiceComparison() {
                                     tier.highlight ? "border-primary shadow-2xl shadow-primary/10 scale-100" : "border-border scale-95 opacity-90"
                                 )}>
                                     {tier.highlight && (
-                                        <div className="absolute top-0 right-0 bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 rounded-bl-xl border-l border-b border-primary/20 backdrop-blur-sm">
+                                        <div className="absolute top-0 right-0 bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-bl-xl border-l border-b border-primary/20 backdrop-blur-sm">
                                             MOST POPULAR
                                         </div>
                                     )}

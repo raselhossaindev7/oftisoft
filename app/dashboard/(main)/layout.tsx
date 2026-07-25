@@ -40,7 +40,7 @@ export default function DashboardLayout({
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 <Header />
                 <div data-lenis-prevent className="flex-1 overflow-y-auto bg-muted/10">
-                    <div className="min-h-full p-4 md:p-8 pb-32 md:pb-8">
+                    <div className="min-h-full p-4 md:p-6 pb-32 md:pb-6">
                         <ErrorBoundary>{children}</ErrorBoundary>
                     </div>
                 </div>

@@ -268,7 +268,7 @@ export default function LiveChatPopup() {
                                 <div>
                                     <h3 className="font-bold text-sm flex items-center gap-2">
                                         {agentState === "ai" ? "Oftisoft Support" : "Sarah (Senior Agent)"}
-                                        {agentState === "ai" && <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded uppercase tracking-wide">Bot</span>}
+                                        {agentState === "ai" && <span className="text-micro bg-white/20 px-1.5 py-0.5 rounded uppercase tracking-wide">Bot</span>}
                                     </h3>
                                     {isTyping ? (
                                         <span className="text-xs opacity-90 animate-pulse">Typing...</span>
@@ -309,7 +309,7 @@ export default function LiveChatPopup() {
                                                 : "bg-card border border-border text-foreground rounded-bl-none"
                                         )}>
                                             <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                                            <span className="text-[10px] opacity-0 group-hover:opacity-60 transition-opacity absolute -bottom-5 right-0 text-muted-foreground block min-w-[50px] text-right">
+                                            <span className="text-micro opacity-0 group-hover:opacity-60 transition-opacity absolute -bottom-5 right-0 text-muted-foreground block min-w-[50px] text-right">
                                                 {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
@@ -376,7 +376,7 @@ export default function LiveChatPopup() {
                                 </button>
                             </form>
                             <div className="text-center mt-2">
-                                <span className="text-[10px] text-muted-foreground">Powered by Oftisoft AI</span>
+                                <span className="text-micro text-muted-foreground">Powered by Oftisoft AI</span>
                             </div>
                         </div>
 

@@ -44,7 +44,7 @@ export default function AuthorSpotlight() {
                         <Sparkles className="w-4 h-4" />
                         Creative Minds
                     </Badge>
-                    <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
                         Author Spotlight
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
@@ -112,7 +112,7 @@ export default function AuthorSpotlight() {
                                                     transition={{ delay: 0.5, type: "spring" }}
                                                     className="absolute bottom-6 right-2 bg-background p-1.5 md:p-2 rounded-full shadow-lg border border-border"
                                                 >
-                                                    <Badge className="text-[10px] font-bold px-2 py-0.5 md:py-1 rounded-full h-auto">
+                                                    <Badge className="text-xs font-bold px-2 py-0.5 md:py-1 rounded-full h-auto">
                                                         PRO
                                                     </Badge>
                                                 </AnimatedDiv>
@@ -149,7 +149,7 @@ export default function AuthorSpotlight() {
                                                         className="text-center md:text-left"
                                                     >
                                                         <div className="font-bold text-xl md:text-2xl text-foreground">{stat.value}</div>
-                                                        <div className="text-[10px] md:text-xs text-muted-foreground tracking-wider">{stat.label}</div>
+                                                        <div className="text-xs md:text-xs text-muted-foreground tracking-wider">{stat.label}</div>
                                                     </AnimatedDiv>
                                                 ))}
                                             </div>

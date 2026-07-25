@@ -1,6 +1,5 @@
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 // Types for different sections of the services page
@@ -156,10 +155,15 @@ interface ServicesContentState {
     updateTechCategory: (id: string, category: Partial<TechCategory>) => void;
     deleteTechCategory: (id: string) => void;
 
+    // Service Offers
+    addOffer: (offer: ServiceOffer) => void;
+    updateOffer: (id: string, offer: Partial<ServiceOffer>) => void;
+    deleteOffer: (id: string) => void;
+
     resetToDefaults: () => void;
 }
 
-const defaultContent: ServicesPageContent = {
+export const defaultContent: ServicesPageContent = {
     heroVideoUrl: "",
     overview: [
         {
@@ -393,8 +397,7 @@ const defaultContent: ServicesPageContent = {
 };
 
 export const useServicesContentStore = create<ServicesContentState>()(
-    persist(
-        immer((set) => ({
+    immer((set) => ({
             content: defaultContent,
             isLoading: false,
             isSaving: false,
@@ -580,12 +583,32 @@ export const useServicesContentStore = create<ServicesContentState>()(
                 }
             }),
 
+            // Service Offers
+            addOffer: (offer) => set((state) => {
+                if (state.content) {
+                    state.content.offers.push(offer);
+                    state.content.lastUpdated = new Date().toISOString();
+                }
+            }),
+
+            updateOffer: (id, data) => set((state) => {
+                if (state.content) {
+                    const index = state.content.offers.findIndex(o => o.id === id);
+                    if (index !== -1) {
+                        state.content.offers[index] = { ...state.content.offers[index], ...data };
+                        state.content.lastUpdated = new Date().toISOString();
+                    }
+                }
+            }),
+
+            deleteOffer: (id) => set((state) => {
+                if (state.content) {
+                    state.content.offers = state.content.offers.filter(o => o.id !== id);
+                    state.content.lastUpdated = new Date().toISOString();
+                }
+            }),
+
             resetToDefaults: () => set({ content: defaultContent })
-        })),
-        {
-            name: 'services-content-storage',
-            storage: createJSONStorage(() => localStorage),
-        }
-    )
+        }))
 );
 

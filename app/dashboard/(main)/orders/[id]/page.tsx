@@ -18,10 +18,14 @@ import {
   XCircle,
   MessageCircle,
   Store,
+  AlertCircle,
+  ExternalLink,
+  Save,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -56,6 +60,8 @@ export default function OrderDetailsPage() {
   const {
     order,
     isLoading,
+    isError,
+    refetch,
     updateStatus,
     updateOrder,
     isUpdatingOrder,
@@ -65,21 +71,41 @@ export default function OrderDetailsPage() {
   } = useOrders(id);
   const [status, setStatus] = useState<string>("");
   const [internalNotes, setInternalNotes] = useState("");
+  const [trackingNumber, setTrackingNumber] = useState("");
 
   useEffect(() => {
     if (order) {
       setStatus(order.status);
       setInternalNotes(order.internalNotes ?? "");
+      setTrackingNumber(order.trackingNumber ?? "");
     }
   }, [order]);
 
   if (isLoading) {
     return (
-      <div className="space-y-8  mx-auto pb-20">
+      <div className="space-y-8 mx-auto pb-20">
         <Skeleton className="h-12 w-1/3" />
         <div className="grid lg:grid-cols-3 gap-8">
           <Skeleton className="h-[400px] w-full lg:col-span-2" />
           <Skeleton className="h-[200px] w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <AlertCircle className="w-12 h-12 text-destructive" />
+        <h1 className="text-2xl font-bold">Failed to load order</h1>
+        <p className="text-muted-foreground">Something went wrong while fetching the order details.</p>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => refetch()}>
+            Try Again
+          </Button>
+          <Button onClick={() => router.push("/dashboard/orders")}>
+            Go Back
+          </Button>
         </div>
       </div>
     );
@@ -108,6 +134,11 @@ export default function OrderDetailsPage() {
   const handleSaveNotes = () => {
     if (id)
       updateOrder(id, { internalNotes: internalNotes.trim() || undefined });
+  };
+
+  const handleSaveTracking = () => {
+    if (id)
+      updateOrder(id, { trackingNumber: trackingNumber.trim() || undefined });
   };
 
   const handleEmailReceipt = () => {
@@ -208,9 +239,19 @@ export default function OrderDetailsPage() {
                       </div>
                       <div>
                         <p className="font-bold">{item.productName || '—'}</p>
-                        <p className="text-xs text-muted-foreground  font-mono">
+                        <p className="text-xs text-muted-foreground font-mono">
                           ID: {item.productId}
                         </p>
+                        {item.downloadUrl && order.status === 'completed' && (
+                          <a
+                            href={item.downloadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+                          >
+                            <Download className="w-3 h-3" /> Download
+                          </a>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
@@ -257,19 +298,47 @@ export default function OrderDetailsPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold  text-muted-foreground">
-                      Tracking
-                    </p>
-                    <p className="font-bold">
-                      {order.trackingNumber ? "Shipped" : "Pending"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-4">
-                      Tracking Number
-                    </p>
-                    <span className="font-mono text-primary font-bold">
-                      {order.trackingNumber || "—"}
-                    </span>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-muted-foreground">
+                        Tracking Status
+                      </p>
+                      <p className="font-bold">
+                        {order.trackingNumber ? "Shipped" : "Pending"}
+                      </p>
+                    </div>
+                    {canManage ? (
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground">
+                          Tracking Number
+                        </p>
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Enter tracking number"
+                            value={trackingNumber}
+                            onChange={(e) => setTrackingNumber(e.target.value)}
+                            className="font-mono text-sm"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleSaveTracking}
+                            disabled={isUpdatingOrder}
+                          >
+                            <Save className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground">
+                          Tracking Number
+                        </p>
+                        <span className="font-mono text-primary font-bold">
+                          {order.trackingNumber || "—"}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-4">
                     <div className="flex gap-4">

@@ -57,7 +57,7 @@ export default function CareersPage() {
                 {/* Header Section */}
                 <div className="text-center space-y-8 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-[10px] shadow-[0_0_20px_rgba(var(--primary),0.2)]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-xs shadow-[0_0_20px_rgba(var(--primary),0.2)]">
                             {hero?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
@@ -117,9 +117,9 @@ export default function CareersPage() {
                                             <div className="space-y-1">
                                                 <h3 className="text-2xl font-semibold text-white tracking-tight leading-none transition-colors group-hover:text-primary">{job.title}</h3>
                                                 <div className="flex items-center gap-4">
-                                                    <span className="text-[10px] font-semibold tracking-widest text-primary">{job.team}</span>
+                                                    <span className="text-xs font-semibold tracking-widest text-primary">{job.team}</span>
                                                     <div className="w-1 h-1 rounded-full bg-white/10" />
-                                                    <span className="text-[10px] font-semibold tracking-widest text-muted-foreground">{job.type}</span>
+                                                    <span className="text-xs font-semibold tracking-widest text-muted-foreground">{job.type}</span>
                                                 </div>
                                             </div>
                                         </div>

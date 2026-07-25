@@ -32,11 +32,11 @@ export default function CompanyTimeline({ data }: { data?: any }) {
                     >
                         <Badge
                             variant="outline"
-                            className="mb-6 border-primary/20 text-primary tracking-wide font-semibold px-5 py-2 bg-primary/5 rounded-full text-sm"
+                            className="mb-6 border-primary/20 text-primary tracking-wide font-semibold px-5 py-2 bg-primary/5 rounded-full text-xs"
                         >
                             {content?.timelineBadge ?? ""}
                         </Badge>
-                        <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                        <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
                             {content?.timelineTitle ?? ""}{" "}
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                                 {content?.timelineTitleHighlight ?? ""}
@@ -47,9 +47,9 @@ export default function CompanyTimeline({ data }: { data?: any }) {
 
                 <div className="relative max-w-5xl mx-auto">
                     <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-[2px] bg-white/5 -translate-x-1/2">
-                        <AnimatedDiv
+                        <div
+                            className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-primary via-purple-500 to-secondary will-change-transform"
                             style={{ transform: `scaleY(${scaleY})`, transformOrigin: "top" }}
-                            className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-primary via-purple-500 to-secondary"
                         />
                     </div>
 

@@ -47,7 +47,7 @@ export default function FeaturesPage() {
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                     >
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/20 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-[10px]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/20 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-xs">
                             {header?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
@@ -55,7 +55,7 @@ export default function FeaturesPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-4xl sm:text-5xl md:text-8xl font-semibold tracking-tighter text-white"
+                        className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter text-white"
                     >
                         {header?.titlePrefix ?? ""} <span className="text-primary underline decoration-white/10 decoration-8 underline-offset-8">{header?.titleHighlight ?? ""}</span>.
                     </AnimatedH1>
@@ -92,7 +92,7 @@ export default function FeaturesPage() {
                                             {feature.description}
                                         </p>
                                     </div>
-                                    <Button variant="ghost" className="h-10 p-0 text-primary font-semibold tracking-widest text-[10px] hover:bg-transparent group/btn" asChild>
+                                    <Button variant="ghost" className="h-10 p-0 text-primary font-semibold tracking-widest text-xs hover:bg-transparent group/btn" asChild>
                                         <Link href="/docs">
                                             Analyze Documentation <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-2 transition-transform" />
                                         </Link>

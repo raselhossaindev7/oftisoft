@@ -45,7 +45,7 @@ export default function CookieConsent() {
               <p className="text-xs sm:text-sm font-bold text-foreground">
                 We value your privacy
               </p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
+              <p className="text-micro sm:text-xs text-muted-foreground leading-relaxed">
                 We use cookies to enhance your experience, serve personalized
                 content, and analyze traffic. By clicking &quot;Accept
                 All&quot;, you consent to our use of cookies.{" "}
@@ -63,14 +63,14 @@ export default function CookieConsent() {
                 variant="outline"
                 size="sm"
                 onClick={decline}
-                className="rounded-xl text-[10px] sm:text-xs h-9 sm:h-10 px-3 sm:px-5 flex-1 sm:flex-none"
+                className="rounded-xl text-micro sm:text-xs h-9 sm:h-10 px-3 sm:px-5 flex-1 sm:flex-none"
               >
                 Decline
               </Button>
               <Button
                 size="sm"
                 onClick={accept}
-                className="rounded-xl text-[10px] sm:text-xs h-9 sm:h-10 px-4 sm:px-6 flex-1 sm:flex-none shadow-lg shadow-primary/20"
+                className="rounded-xl text-micro sm:text-xs h-9 sm:h-10 px-4 sm:px-6 flex-1 sm:flex-none shadow-lg shadow-primary/20"
               >
                 Accept All
               </Button>

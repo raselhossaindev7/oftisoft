@@ -6,7 +6,7 @@ export function usePosts(params?: { status?: string; search?: string; categoryId
     const queryClient = useQueryClient();
 
     const { data, isLoading } = useQuery({
-        queryKey: ['posts', params],
+        queryKey: ['posts', params?.status, params?.search, params?.categoryId, params?.limit, params?.offset],
         queryFn: () => postsAPI.getPosts(params),
     });
 

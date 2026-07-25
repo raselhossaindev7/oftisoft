@@ -64,7 +64,7 @@ export default function ServiceProcess() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
-                        className="text-3xl md:text-5xl font-semibold mb-6 tracking-tight"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold mb-6 tracking-tight"
                     >
                         Our <span className="text-primary">Methodology</span>
                     </AnimatedH2>

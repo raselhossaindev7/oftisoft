@@ -13,15 +13,13 @@ export function useSubscription() {
     });
 
     const updateMutation = useMutation({
-        mutationFn: async ({ plan, paymentIntentId, interval }: { plan: string; paymentIntentId?: string; interval?: string }) => {
-            return billingAPI.updateSubscription(plan, paymentIntentId, interval);
+        mutationFn: async ({ plan }: { plan: string }) => {
+            return billingAPI.updateSubscription(plan);
         },
         onSuccess: (data, variables) => {
-            if (!data.requiresPayment) {
-                toast.success(`Switched to ${variables.plan} Plan!`);
-                queryClient.invalidateQueries({ queryKey: ['subscription'] });
-                queryClient.invalidateQueries({ queryKey: ['plans'] });
-            }
+            toast.success(`Switched to ${variables.plan} Plan!`);
+            queryClient.invalidateQueries({ queryKey: ['subscription'] });
+            queryClient.invalidateQueries({ queryKey: ['plans'] });
         },
         onError: (err: any) => {
             const message = err.response?.data?.message || "Failed to update subscription";
@@ -34,8 +32,8 @@ export function useSubscription() {
         isLoading,
         isError,
         error: isError ? "Failed to load subscription" : null,
-        updateSubscription: (plan: string, paymentIntentId?: string, interval?: string) =>
-            updateMutation.mutateAsync({ plan, paymentIntentId, interval }),
+        updateSubscription: (plan: string) =>
+            updateMutation.mutateAsync({ plan }),
         isUpdating: updateMutation.isPending,
         refetch: () => queryClient.refetchQueries({ queryKey: ['subscription'] }),
     };

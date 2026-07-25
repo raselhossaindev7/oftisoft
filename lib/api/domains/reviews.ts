@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+
 export enum ReviewStatus {
     PENDING = 'pending',
     APPROVED = 'approved',
@@ -17,20 +18,36 @@ export interface Review {
     updatedAt: string;
 }
 
+export interface ReviewProductInfo {
+    id: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
+    helpfulCount: number;
+    user: { id: string; name: string };
+}
+
+export interface PaginatedReviews {
+    items: Review[];
+    total: number;
+    skip: number;
+    take: number;
+}
+
 export const reviewsAPI = {
     createReview: async (data: { productId: string; rating: number; comment: string }): Promise<Review> => {
         const response = await api.post('/reviews', data);
         return response.data;
     },
-    getReviews: async (): Promise<Review[]> => {
-        const response = await api.get('/reviews');
+    getReviews: async (skip = 0, take = 50): Promise<PaginatedReviews> => {
+        const response = await api.get('/reviews', { params: { skip, take } });
         return response.data;
     },
-    getReviewsForModeration: async (): Promise<Review[]> => {
-        const response = await api.get('/reviews/moderation');
+    getReviewsForModeration: async (skip = 0, take = 50): Promise<PaginatedReviews> => {
+        const response = await api.get('/reviews/moderation', { params: { skip, take } });
         return response.data;
     },
-    getByProduct: async (productId: string): Promise<Review[]> => {
+    getByProduct: async (productId: string): Promise<ReviewProductInfo[]> => {
         const response = await api.get(`/reviews/${productId}`);
         return response.data;
     },

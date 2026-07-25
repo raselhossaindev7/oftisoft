@@ -341,7 +341,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ slug:
                                 <span className="text-muted-foreground">Compatibility</span>
                                 <div className="flex flex-wrap gap-1 justify-end max-w-[150px]">
                                     {product.compatibility.map(c => (
-                                        <Badge key={c} variant="outline" className="text-[10px] px-2 py-0">{c}</Badge>
+                                        <Badge key={c} variant="outline" className="text-xs px-2 py-0">{c}</Badge>
                                     ))}
                                 </div>
                             </div>

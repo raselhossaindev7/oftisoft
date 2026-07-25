@@ -1,5 +1,5 @@
 "use client"
-import { AnimatedDiv, useScrollProgress, useTransform } from "@/lib/animated";
+import { AnimatedDiv } from "@/lib/animated";
 
 import Link from "next/link";
 import {
@@ -10,10 +10,10 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { postsAPI } from "@/lib/api";
-import { format } from "date-fns";
+import { postsAPI, Post } from "@/lib/api";
+import { format, isValid } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,13 +21,11 @@ import {
   Card,
   CardContent,
   CardFooter,
-  CardHeader,
 } from "@/components/ui/card";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, FreeMode } from "swiper/modules";
 
-// Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -42,6 +40,12 @@ const gradients = [
   "from-amber-500 via-orange-500 to-red-600",
 ];
 
+function formatDate(value: string | undefined | null) {
+  if (!value) return "";
+  const d = new Date(value);
+  return isValid(d) ? format(d, "MMM d, yyyy") : "";
+}
+
 export default function LatestBlog() {
   const { data, isLoading } = useQuery({
     queryKey: ["blog-posts-latest"],
@@ -49,14 +53,14 @@ export default function LatestBlog() {
   });
 
   const apiPosts = data?.posts || [];
-  const posts = apiPosts.map((post: any, i: number) => ({
+  const posts = apiPosts.map((post: Post, i: number) => ({
     id: post.id,
     slug: post.slug,
     title: post.title,
     excerpt: post.excerpt,
     featuredImage: post.featuredImage || "",
     category: post.category?.name || post.categoryId || "Uncategorized",
-    date: format(new Date(post.publishedAt || post.createdAt), "MMM d, yyyy"),
+    date: formatDate(post.publishedAt) || formatDate(post.createdAt),
     readTime: `${post.readTime} min`,
     gradient: post.gradient || gradients[i % gradients.length],
   }));
@@ -108,7 +112,7 @@ export default function LatestBlog() {
             >
               {blogContent.badge}
             </Badge>
-            <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white leading-[1.1]">
+            <h3 className="type-h1 text-white">
               {blogContent.title} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                 {blogContent.subtitle}
@@ -224,6 +228,7 @@ function BlogCard({ post, index }: { post: any; index: number }) {
             {hasImage ? (
               <img src={post.featuredImage}
                 alt={post.title}
+                loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
@@ -253,7 +258,7 @@ function BlogCard({ post, index }: { post: any; index: number }) {
           </div>
 
           <CardContent className="flex flex-col flex-1 justify-between">
-            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3 font-semibold tracking-wide">
+            <div className="flex items-center gap-4 text-caption text-muted-foreground mb-3 font-semibold tracking-wide">
               <span className="flex items-center gap-1.5 font-bold">
                 <Calendar className="w-3.5 h-3.5 text-primary" /> {post.date}
               </span>
@@ -263,11 +268,11 @@ function BlogCard({ post, index }: { post: any; index: number }) {
               </span>
             </div>
 
-                            <h3 className="text-lg sm:text-xl xl:text-2xl font-bold text-white mb-3 leading-tight group-hover:text-primary transition-colors duration-300 line-clamp-2 tracking-tight">
+                            <h3 className="type-h3 text-white mb-3 group-hover:text-primary transition-colors duration-300 line-clamp-2">
               {post.title}
             </h3>
 
-            <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed font-medium flex-grow">
+            <p className="type-body-sm text-muted-foreground line-clamp-3 font-medium flex-grow">
               {post.excerpt}
             </p>
           </CardContent>

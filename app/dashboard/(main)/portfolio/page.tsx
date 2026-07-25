@@ -1,246 +1,358 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
-    Search,
-    Plus,
-    Download,
-    Star,
-    Trash2,
-    RefreshCw,
-    SearchX,
-    MoreVertical,
-    Pencil,
-    Layers,
-    ImageIcon,
-    Eye,
-    EyeOff,
-    FolderKanban,
+    Search, Filter, MoreVertical, Plus, Download, Folder, Star, Eye, EyeOff,
+    Trash2, RefreshCw, Activity, Image, Edit3, Loader2, X, Tag,
+    AlertCircle, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
+    LayoutGrid, List, GripVertical, CheckSquare, Square, CheckCheck, XCircle,
+    CalendarIcon, User, Hash, Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+    DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import {
+    Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { portfolioAPI, PortfolioItem } from "@/lib/api";
 import { toast } from "sonner";
+import { portfolioAPI, authAPI, type PortfolioItem } from "@/lib/api";
 import { withRoleProtection } from "@/components/auth/role-guard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
+import Link from "next/link";
+import {
+    DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
+    type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+    arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import StatsEditor from "@/components/dashboard/portfolio/stats-editor";
+import ScreenshotsUpload from "@/components/dashboard/portfolio/screenshots-upload";
 
-const defaultForm = {
-    title: "",
-    slug: "",
-    category: "",
-    client: "",
-    description: "",
-    longDescription: "",
-    image: "",
-    tags: "",
-    gradient: "",
-    featured: false,
-    status: "draft",
-    order: 0,
-};
+interface StatEntry { label: string; value: string }
+
+const ITEMS_PER_PAGE = 12;
+
+function SortablePortfolioRow({ item, view, isSelected, onToggleSelect, onToggleFeatured, onToggleStatus, onEdit, onDelete, style }: any) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+
+    const dragStyle = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        ...style,
+    };
+
+    const tags = Array.isArray(item.tags) ? item.tags : typeof item.tags === "string" && item.tags ? item.tags.split(",").map((t: string) => t.trim()) : [];
+
+    if (view === "grid") {
+        return (
+            <div ref={setNodeRef} style={dragStyle}
+                className="group relative bg-card border border-border/40 rounded-xl overflow-hidden hover:shadow-md hover:border-primary/20 transition-all">
+                <div className="absolute top-2 left-2 z-10 flex gap-1">
+                    <button onClick={(e) => { e.stopPropagation(); onToggleSelect(item.id); }}
+                        className="p-1.5 rounded-lg bg-background/80 backdrop-blur-sm hover:bg-background transition-colors">
+                        {isSelected ? <CheckSquare className="w-3.5 h-3.5 text-primary" /> : <Square className="w-3.5 h-3.5" />}
+                    </button>
+                    <button {...attributes} {...listeners}
+                        className="p-1.5 rounded-lg bg-background/80 backdrop-blur-sm hover:bg-background transition-colors cursor-grab active:cursor-grabbing">
+                        <GripVertical className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                </div>
+                <div className="absolute top-2 right-2 z-10">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button onClick={(e) => e.stopPropagation()} className="p-1.5 rounded-lg bg-background/80 backdrop-blur-sm hover:bg-background transition-colors">
+                                <MoreVertical className="w-3.5 h-3.5" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl">
+                            <DropdownMenuLabel className="text-xs">{item.title}</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onEdit(item)}><Edit3 className="w-4 h-4 mr-2" /> Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onToggleFeatured(item)}>
+                                <Star className="w-4 h-4 mr-2" /> {item.featured ? "Unfeature" : "Feature"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onToggleStatus(item)}>
+                                {item.status === "published" ? <><EyeOff className="w-4 h-4 mr-2" /> Draft</> : <><Eye className="w-4 h-4 mr-2" /> Publish</>}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive" onClick={() => onDelete(item)}>
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+                <Link href={`/dashboard/portfolio/${item.id}`}>
+                    <div className={`relative h-36 ${item.gradient || "bg-gradient-to-br from-primary/20 to-primary/5"}`}>
+                        {item.image ? (
+                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <Image className="w-10 h-10 text-muted-foreground/30" />
+                            </div>
+                        )}
+                        <div className="absolute top-9 left-2 flex gap-1">
+                            {item.featured && <Star className="w-3 h-3 fill-amber-400 text-amber-400" />}
+                            <Badge variant={item.status === "published" ? "default" : "secondary"}
+                                className="text-[10px] h-4 px-1.5 rounded">
+                                {item.status}
+                            </Badge>
+                        </div>
+                    </div>
+                    <div className="p-3 space-y-1.5">
+                        <h3 className="text-sm font-semibold leading-tight truncate">{item.title}</h3>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Folder className="w-3 h-3" /><span className="truncate">{item.category}</span>
+                            <User className="w-3 h-3 ml-1" /><span className="truncate">{item.client}</span>
+                        </div>
+                        {tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                                {tags.slice(0, 3).map((t: string, i: number) => (
+                                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{t}</span>
+                                ))}
+                                {tags.length > 3 && <span className="text-[10px] text-muted-foreground">+{tags.length - 3}</span>}
+                            </div>
+                        )}
+                    </div>
+                </Link>
+            </div>
+        );
+    }
+
+    return (
+        <TableRow ref={setNodeRef} style={dragStyle} className={cn(isDragging && "opacity-50")}>
+            <TableCell className="w-10">
+                <div className="flex items-center gap-1">
+                    <button onClick={() => onToggleSelect(item.id)}>
+                        {isSelected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-muted-foreground" />}
+                    </button>
+                    <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-0.5">
+                        <GripVertical className="w-4 h-4 text-muted-foreground/50 hover:text-muted-foreground" />
+                    </button>
+                </div>
+            </TableCell>
+            <TableCell>
+                <Link href={`/dashboard/portfolio/${item.id}`} className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden ${item.gradient || "bg-gradient-to-br from-primary/20 to-primary/5"}`}>
+                        {item.image ? (
+                            <img src={item.image} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <Image className="w-5 h-5 text-muted-foreground/30" />
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium">{item.title}</p>
+                        <p className="text-xs text-muted-foreground">{item.client}</p>
+                    </div>
+                </Link>
+            </TableCell>
+            <TableCell>
+                <Badge variant="outline" className="rounded-lg text-xs font-normal">{item.category}</Badge>
+            </TableCell>
+            <TableCell>
+                <div className="flex gap-1">
+                    <Badge variant={item.status === "published" ? "default" : "secondary"} className="rounded-lg text-xs">
+                        {item.status}
+                    </Badge>
+                    {item.featured && (
+                        <Badge variant="outline" className="rounded-lg text-xs border-amber-400 text-amber-500">
+                            <Star className="w-3 h-3 mr-0.5 fill-amber-400" />
+                        </Badge>
+                    )}
+                </div>
+            </TableCell>
+            <TableCell className="text-sm text-muted-foreground">{format(new Date(item.createdAt), "MMM d, yyyy")}</TableCell>
+            <TableCell className="text-right">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                            <MoreVertical className="w-4 h-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="rounded-xl">
+                        <DropdownMenuLabel className="text-xs">Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onEdit(item)}><Edit3 className="w-4 h-4 mr-2" /> Edit</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onToggleFeatured(item)}>
+                            <Star className="w-4 h-4 mr-2" /> {item.featured ? "Unfeature" : "Feature"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onToggleStatus(item)}>
+                            {item.status === "published" ? <><EyeOff className="w-4 h-4 mr-2" /> Draft</> : <><Eye className="w-4 h-4 mr-2" /> Publish</>}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive" onClick={() => onDelete(item)}>
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </TableCell>
+        </TableRow>
+    );
+}
 
 function PortfolioPage() {
     const [items, setItems] = useState<PortfolioItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [activeSegment, setActiveSegment] = useState("All Items");
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedTab, setSelectedTab] = useState("all");
+    const [view, setView] = useState<"list" | "grid">("list");
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+    const [bulkStatusOpen, setBulkStatusOpen] = useState<"published" | "draft" | null>(null);
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<PortfolioItem | null>(null);
-    const [formData, setFormData] = useState(defaultForm);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [isUploading, setIsUploading] = useState(false);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const screenshotsInputRef = useRef<HTMLInputElement>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [image, setImage] = useState("");
+    const [screenshots, setScreenshots] = useState<string[]>([]);
+    const [dialogStats, setDialogStats] = useState<StatEntry[]>([]);
+    const [statsCount, setStatsCount] = useState<{ total: number; published: number; draft: number; featured: number } | null>(null);
 
-    const handleImageUpload = async (file: File) => {
-        if (!file) return;
-        if (!file.type.startsWith("image/")) {
-            toast.error("Please select an image file");
-            return;
-        }
-        setIsUploading(true);
-        setUploadProgress(0);
-        const objectUrl = URL.createObjectURL(file);
-        setPreviewUrl(objectUrl);
-        const interval = setInterval(() => {
-            setUploadProgress(prev => Math.min(prev + 20, 90));
-        }, 200);
-        try {
-            const formData = new FormData();
-            formData.append("file", file);
-            const response = await fetch("/api/upload", { method: "POST", body: formData });
-            const result = await response.json();
-            clearInterval(interval);
-            setUploadProgress(100);
-            const imageUrl = result?.url || result?.image || objectUrl;
-            setFormData(prev => ({ ...prev, image: imageUrl }));
-            toast.success("Image uploaded");
-            setTimeout(() => { setUploadProgress(0); setIsUploading(false); }, 500);
-        } catch {
-            clearInterval(interval);
-            setUploadProgress(0);
-            setIsUploading(false);
-            toast.error("Upload failed");
-        }
-    };
+    const [sortField, setSortField] = useState("createdAt");
+    const [sortDirection, setSortDirection] = useState<"ASC" | "DESC">("DESC");
+    const [currentPage, setCurrentPage] = useState(0);
+    const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
 
-    const fetchItems = useCallback(async (search?: string) => {
+    const [formData, setFormData] = useState({
+        title: "", slug: "", category: "", client: "", description: "", longDescription: "",
+        tags: "", demoUrl: "", status: "draft", featured: false, order: 0,
+    });
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
+
+    const fetchItems = useCallback(async () => {
         setIsLoading(true);
+        setError(null);
         try {
-            const data = await portfolioAPI.getAll();
-            setItems(data);
+            const params: any = { take: ITEMS_PER_PAGE, skip: currentPage * ITEMS_PER_PAGE, sortField, sortDirection };
+            if (searchTerm) params.search = searchTerm;
+            if (selectedTab !== "all" && selectedTab !== "featured") params.status = selectedTab;
+            if (selectedTab === "featured") params.featured = "true";
+            const data = await portfolioAPI.getAll(params);
+            setItems(data.items ?? data);
         } catch {
-            toast.error("Failed to load portfolio items");
-        } finally {
-            setIsLoading(false);
-        }
+            setError("Failed to load portfolio items");
+        } finally { setIsLoading(false); }
+    }, [currentPage, sortField, sortDirection, searchTerm, selectedTab]);
+
+    const fetchStatsCount = useCallback(async () => {
+        try {
+            const data = await portfolioAPI.getStats();
+            setStatsCount(data);
+        } catch {}
     }, []);
 
-    useEffect(() => {
-        fetchItems();
-    }, [fetchItems]);
+    useEffect(() => { fetchItems(); fetchStatsCount(); }, [fetchItems, fetchStatsCount]);
 
-    const handleRefresh = async () => {
-        setIsRefreshing(true);
-        await fetchItems();
-        setIsRefreshing(false);
-        toast.success("Portfolio matrix synchronized");
-    };
-
-    const filteredItems = (() => {
-        const q = searchQuery.toLowerCase();
+    const filteredItems = useMemo(() => {
         let filtered = items;
-        if (q) {
-            filtered = filtered.filter(
-                (i) =>
-                    (i.title || '').toLowerCase().includes(q) ||
-                    (i.category || '').toLowerCase().includes(q) ||
-                    (i.client || '').toLowerCase().includes(q)
-            );
+        if (dateRange.from) {
+            const from = new Date(dateRange.from);
+            filtered = filtered.filter(i => new Date(i.createdAt) >= from);
         }
-        switch (activeSegment) {
-            case "Published":
-                return filtered.filter((i) => i.status === "published");
-            case "Draft":
-                return filtered.filter((i) => i.status === "draft");
-            case "Featured":
-                return filtered.filter((i) => i.featured);
-            default:
-                return filtered;
+        if (dateRange.to) {
+            const to = new Date(dateRange.to);
+            to.setHours(23, 59, 59, 999);
+            filtered = filtered.filter(i => new Date(i.createdAt) <= to);
         }
-    })();
+        return filtered;
+    }, [items, dateRange]);
 
-    const handleExport = () => {
-        if (filteredItems.length === 0) {
-            toast.info("No items to export for current segment.");
-            return;
+    const handleSort = (field: string) => {
+        if (sortField === field) {
+            setSortDirection(d => d === "ASC" ? "DESC" : "ASC");
+        } else {
+            setSortField(field);
+            setSortDirection("DESC");
         }
-        const headers = ["Title", "Category", "Client", "Status", "Featured", "Created"];
-        const rows = filteredItems.map((i) =>
-            [
-                i.title.replace(/"/g, '""'),
-                i.category.replace(/"/g, '""'),
-                i.client.replace(/"/g, '""'),
-                i.status,
-                i.featured ? "Yes" : "No",
-                new Date(i.createdAt).toISOString(),
-            ]
-                .map((c) => `"${c}"`)
-                .join(",")
-        );
-        const csv = [headers.join(","), ...rows].join("\n");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `portfolio-export-${new Date().toISOString().slice(0, 10)}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast.success("Portfolio export downloaded");
     };
 
-    const openCreate = () => {
-        setEditingItem(null);
-        setFormData(defaultForm);
-        setPreviewUrl(null);
-        setUploadProgress(0);
-        setIsUploading(false);
-        setIsDialogOpen(true);
+    const handleToggleSelect = (id: string) => {
+        setSelectedIds(prev => {
+            const n = new Set(prev);
+            if (n.has(id)) n.delete(id); else n.add(id);
+            return n;
+        });
     };
 
-    const openEdit = (item: PortfolioItem) => {
+    const handleSelectAll = () => {
+        if (selectedIds.size === filteredItems.length) setSelectedIds(new Set());
+        else setSelectedIds(new Set(filteredItems.map(i => i.id)));
+    };
+
+    const handleEdit = (item: PortfolioItem) => {
         setEditingItem(item);
         setFormData({
-            title: item.title,
-            slug: item.slug,
-            category: item.category,
-            client: item.client,
-            description: item.description,
-            longDescription: item.longDescription || "",
-            image: item.image || "",
-            tags: (item.tags || []).join(", "),
-            gradient: item.gradient || "",
-            featured: item.featured,
-            status: item.status,
-            order: item.order,
+            title: item.title, slug: item.slug, category: item.category, client: item.client,
+            description: item.description, longDescription: item.longDescription || "",
+            tags: Array.isArray(item.tags) ? item.tags.join(", ") : item.tags || "",
+            demoUrl: item.demoUrl || "",
+            status: item.status, featured: item.featured, order: item.order,
         });
+        setImage(item.image || "");
+        setScreenshots(Array.isArray(item.screenshots) ? item.screenshots : []);
+        try { const p = typeof item.stats === 'string' ? JSON.parse(item.stats) : item.stats; setDialogStats(Array.isArray(p) ? p : []); } catch { setDialogStats([]); }
         setPreviewUrl(null);
-        setUploadProgress(0);
-        setIsUploading(false);
         setIsDialogOpen(true);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleNew = () => {
+        setEditingItem(null);
+        setFormData({ title: "", slug: "", category: "", client: "", description: "", longDescription: "", tags: "", demoUrl: "", status: "draft", featured: false, order: 0 });
+        setImage("");
+        setScreenshots([]);
+        setDialogStats([]);
+        setPreviewUrl(null);
+        setIsDialogOpen(true);
+    };
+
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formData.title.trim() || !formData.category.trim() || !formData.client.trim() || !formData.description.trim()) {
+            toast.error("Title, category, client, and description are required"); return;
+        }
         setIsSaving(true);
+        const payload = {
+            ...formData,
+            slug: formData.slug.trim() || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+            image: image || undefined,
+            screenshots: screenshots.length > 0 ? screenshots : undefined,
+            tags: formData.tags ? formData.tags.split(",").map(t => t.trim()).filter(Boolean) : [],
+            stats: dialogStats.length > 0 ? JSON.stringify(dialogStats) : undefined,
+            demoUrl: formData.demoUrl || undefined,
+        };
         try {
-            const payload = {
-                ...formData,
-                tags: formData.tags
-                    .split(",")
-                    .map((t) => t.trim())
-                    .filter(Boolean),
-                order: Number(formData.order),
-            };
             if (editingItem) {
                 await portfolioAPI.update(editingItem.id, payload);
                 toast.success("Portfolio item updated");
@@ -250,512 +362,425 @@ function PortfolioPage() {
             }
             setIsDialogOpen(false);
             setEditingItem(null);
-            setFormData(defaultForm);
             await fetchItems();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to save portfolio item");
-        } finally {
-            setIsSaving(false);
-        }
+            await fetchStatsCount();
+        } catch {
+            toast.error(editingItem ? "Failed to update" : "Failed to create");
+        } finally { setIsSaving(false); }
     };
 
     const handleDelete = async () => {
         if (!deleteId) return;
         try {
             await portfolioAPI.delete(deleteId);
-            toast.success("Portfolio item deleted");
             setDeleteId(null);
+            setSelectedIds(prev => { const n = new Set(prev); n.delete(deleteId); return n; });
             await fetchItems();
-        } catch {
-            toast.error("Failed to delete portfolio item");
-        }
+            await fetchStats();
+            toast.success("Portfolio item deleted");
+        } catch { toast.error("Failed to delete"); }
     };
 
-    const getStatusBadge = (status: string) => {
-        if (status === "published") {
-            return (
-                <Badge className="bg-green-500/10 text-green-500 border-green-500/20 gap-1 rounded-lg">
-                    <Eye className="w-3 h-3" /> Published
-                </Badge>
-            );
-        }
-        return (
-            <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 gap-1 rounded-lg">
-                <EyeOff className="w-3 h-3" /> Draft
-            </Badge>
-        );
+    const handleBulkDelete = async () => {
+        try {
+            await portfolioAPI.bulkDelete(Array.from(selectedIds));
+            setSelectedIds(new Set());
+            setBulkDeleteOpen(false);
+            await fetchItems();
+            await fetchStats();
+            toast.success("Items deleted");
+        } catch { toast.error("Failed to delete items"); }
     };
+
+    const handleBulkStatus = async (status: string) => {
+        try {
+            await portfolioAPI.bulkUpdateStatus(Array.from(selectedIds), status);
+            setSelectedIds(new Set());
+            setBulkStatusOpen(null);
+            await fetchItems();
+            toast.success(`Items ${status === "published" ? "published" : "drafted"}`);
+        } catch { toast.error("Failed to update items"); }
+    };
+
+    const handleToggleFeatured = async (item: PortfolioItem) => {
+        try {
+            await portfolioAPI.update(item.id, { featured: !item.featured });
+            setItems(prev => prev.map(i => i.id === item.id ? { ...i, featured: !i.featured } : i));
+            toast.success(`Item ${item.featured ? "unfeatured" : "featured"}`);
+        } catch { toast.error("Failed to update"); }
+    };
+
+    const handleToggleStatus = async (item: PortfolioItem) => {
+        const newStatus = item.status === "published" ? "draft" : "published";
+        try {
+            await portfolioAPI.update(item.id, { status: newStatus });
+            setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: newStatus } : i));
+            toast.success(`Item ${newStatus === "published" ? "published" : "drafted"}`);
+        } catch { toast.error("Failed to update"); }
+    };
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+        const oldIndex = items.findIndex(i => i.id === active.id);
+        const newIndex = items.findIndex(i => i.id === over.id);
+        const reordered = arrayMove(items, oldIndex, newIndex);
+        setItems(reordered);
+        try {
+            const updates = reordered.map((item, index) => ({ id: item.id, order: index }));
+            await portfolioAPI.reorder(updates);
+        } catch { toast.error("Failed to save order"); setItems(items); }
+    };
+
+    const handleImageUpload = async (file: File) => {
+        if (!file || !file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+        setIsUploading(true);
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewUrl(objectUrl);
+        try {
+            const { authAPI } = await import("@/lib/api");
+            const data = await authAPI.uploadAvatar(file);
+            setFormData(prev => ({ ...prev, image: data.avatarUrl || data.avatar || "" }));
+            toast.success("Image uploaded");
+        } catch { setPreviewUrl(null); toast.error("Upload failed"); }
+        finally { setIsUploading(false); }
+    };
+
+    const SortIcon = ({ field }: { field: string }) => {
+        if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground/50" />;
+        return sortDirection === "ASC" ? <ArrowUp className="w-3.5 h-3.5 ml-1" /> : <ArrowDown className="w-3.5 h-3.5 ml-1" />;
+    };
+
+    const tabs = [
+        { key: "all", label: "All", count: statsCount?.total ?? 0 },
+        { key: "published", label: "Published", count: statsCount?.published ?? 0 },
+        { key: "draft", label: "Drafts", count: statsCount?.draft ?? 0 },
+        { key: "featured", label: "Featured", count: statsCount?.featured ?? 0 },
+    ];
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-semibold">Portfolio Management</h1>
-                    <p className="text-muted-foreground font-medium">Curate, create, and organize your project showcase.</p>
+                    <h1 className="text-3xl font-bold">Portfolio</h1>
+                    <p className="text-sm text-muted-foreground">Manage your portfolio projects</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                    <Button variant="outline"
-                        className="gap-2 rounded-xl h-11 border-border/50 bg-card/50 backdrop-blur-sm"
-                        onClick={handleRefresh}
-                    >
-                        <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
-                        Fast Sync
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" className="rounded-xl h-9 w-9" onClick={() => { fetchItems(); fetchStatsCount(); }} disabled={isLoading}>
+                        <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
                     </Button>
-                    <Button variant="outline"
-                        className="gap-2 rounded-xl h-11 border-border/50 bg-card/50 backdrop-blur-sm"
-                        onClick={handleExport}
-                    >
-                        <Download className="w-4 h-4" />
-                        Export
-                    </Button>
-                    <Button className="gap-2 rounded-xl h-11 shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 px-8 font-semibold"
-                        onClick={openCreate}
-                    >
-                        <Plus className="w-4 h-4" />
-                        Add Item
+                    <Button asChild variant="outline" className="gap-2 rounded-xl h-9">
+                        <Link href="/dashboard/portfolio/new"><Plus className="w-4 h-4" /> New</Link>
                     </Button>
                 </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                    { label: "Total Items", value: items.length, color: "", bg: "bg-primary/10", text: "text-primary", hover: "hover:border-primary/30", icon: Layers, sub: "Portfolio Entries", featured: false },
-                    { label: "Published", value: items.filter(i => i.status === "published").length, color: "text-green-500", bg: "bg-green-500/10", text: "text-green-500", hover: "hover:border-green-500/30", icon: Eye, sub: "Live Projects", featured: false },
-                    { label: "Draft", value: items.filter(i => i.status === "draft").length, color: "text-amber-500", bg: "bg-amber-500/10", text: "text-amber-500", hover: "hover:border-amber-500/30", icon: FolderKanban, sub: "In Progress", featured: false },
-                    { label: "Featured", value: items.filter(i => i.featured).length, color: "text-white", bg: "bg-white/20", text: "text-white", hover: "", icon: Star, sub: "Showcased Projects", featured: true },
-                ].map((s, i) => (
-                    <Card key={i} className={cn(
-                        "border-border/50 bg-card/40 backdrop-blur-md rounded-[2.5rem] overflow-hidden group transition-all h-full flex flex-col",
-                        s.featured ? "bg-primary shadow-xl shadow-primary/20 border-none relative" : s.hover
-                    )}>
-                        {s.featured && <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:scale-125 transition-transform" />}
-                        <CardHeader className="flex flex-row items-center justify-between pb-1 p-5">
-                            <CardTitle className={cn("text-sm font-semibold ", s.featured ? "text-primary-foreground/70" : "text-muted-foreground")}>{s.label}</CardTitle>
-                            <div className={cn("p-1.5 rounded-xl group-hover:scale-110 transition-transform", s.bg, s.text)}>
-                                <s.icon className="h-4 w-4" />
+                    { label: "Total", value: statsCount?.total ?? 0, icon: Image, color: "text-blue-500" },
+                    { label: "Published", value: statsCount?.published ?? 0, icon: Eye, color: "text-green-500" },
+                    { label: "Drafts", value: statsCount?.draft ?? 0, icon: Edit3, color: "text-amber-500" },
+                    { label: "Featured", value: statsCount?.featured ?? 0, icon: Star, color: "text-purple-500" },
+                ].map((stat) => (
+                    <Card key={stat.label} className="border-border/40">
+                        <CardContent className="p-4 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-background/50 border border-border/30 flex items-center justify-center">
+                                <stat.icon className={cn("w-5 h-5", stat.color)} />
                             </div>
-                        </CardHeader>
-                        <CardContent className={cn("p-5 pt-0 flex-1", s.featured && "relative z-10")}>
-                            <div className={cn("text-3xl font-semibold", s.color)}>{s.value}</div>
-                            <p className={cn("text-xs  mt-2 font-semibold opacity-60", s.color || "text-muted-foreground")}>{s.sub}</p>
+                            <div>
+                                <p className="text-xs text-muted-foreground">{stat.label}</p>
+                                <p className="text-xl font-bold">{stat.value}</p>
+                            </div>
                         </CardContent>
                     </Card>
                 ))}
             </div>
 
-            <div className="grid lg:grid-cols-4 gap-8">
-                {/* Sidebar Filters */}
-                <div className="space-y-6">
-                    <Card className="border-border/50 h-fit rounded-[2.5rem] overflow-hidden shadow-sm bg-card/40 backdrop-blur-md">
-                        <CardHeader className="p-8 pb-4">
-                            <CardTitle className="text-sm font-semibold  text-muted-foreground">Portfolio Filters</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0">
-                            <div className="flex flex-col gap-1">
-                                {[
-                                    { name: "All Items", count: items.length },
-                                    { name: "Published", count: items.filter((i) => i.status === "published").length },
-                                    { name: "Draft", count: items.filter((i) => i.status === "draft").length },
-                                    { name: "Featured", count: items.filter((i) => i.featured).length },
-                                ].map((segment) => (
-                                    <button key={segment.name}
-                                        onClick={() => setActiveSegment(segment.name)}
-                                        className={cn(
-                                            "flex items-center justify-between px-6 py-4 rounded-2xl text-sm transition-all group",
-                                            activeSegment === segment.name
-                                                ? "bg-primary text-white font-semibold shadow-lg shadow-primary/20"
-                                                : "text-muted-foreground font-semibold hover:bg-primary/5 hover:text-primary"
-                                        )}
-                                    >
-                                        <span className=" ">{segment.name}</span>
-                                        <span className={cn(
-                                                "px-2 py-0.5 rounded-lg text-xs font-semibold",
-                                                activeSegment === segment.name
-                                                    ? "bg-white/20 text-white"
-                                                    : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-                                            )}
-                                        >
-                                            {segment.count}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-border/50 bg-primary/5 rounded-[2.5rem] border-dashed p-4">
-                        <CardHeader className="p-6">
-                            <CardTitle className="text-sm font-semibold  flex items-center gap-2">
-                                <ImageIcon className="w-4 h-4 text-primary" /> Media Protocol
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="px-6 pb-6 pt-0 space-y-4">
-                            <p className="text-sm font-semibold text-muted-foreground leading-relaxed  opacity-70">
-                                Portfolio assets are optimized and cached via CDN. Featured items appear on the homepage showcase.
-                            </p>
-                            <Button variant="outline"
-                                className="w-full rounded-[1.2rem] bg-background text-sm h-10 font-semibold border-primary/20 text-primary hover:bg-primary hover:text-white transition-all"
-                                onClick={handleRefresh}
-                            >
-                                SYNC ASSETS
-                            </Button>
-                        </CardContent>
-                    </Card>
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Search projects..." className="pl-9 h-9 rounded-lg"
+                        value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(0); }} />
                 </div>
-
-                {/* Portfolio Table */}
-                <div className="lg:col-span-3 space-y-4">
-                    <Card className="border-border/50 rounded-2xl overflow-hidden shadow-sm">
-                        <CardHeader className="p-6 border-b border-border/50 bg-muted/5">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div className="relative flex-1 max-w-sm">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input placeholder="Search by title, category, client..."
-                                        className="pl-10 h-11 rounded-xl bg-background font-medium"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            {isLoading && items.length === 0 ? (
-                                <div className="py-32 flex flex-col items-center justify-center gap-6">
-                                    <div className="relative">
-                                        <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
-                                        <RefreshCw className="h-10 w-10 text-primary animate-spin relative z-10" />
-                                    </div>
-                                    <p className="text-sm text-primary font-semibold  animate-pulse">
-                                        Loading Portfolio Stream...
-                                    </p>
-                                </div>
-                            ) : filteredItems.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-32 bg-muted/5">
-                                    <div className="w-20 h-20 rounded-[2rem] bg-muted/20 flex items-center justify-center mb-6">
-                                        <SearchX className="h-10 w-10 text-muted-foreground/30" />
-                                    </div>
-                                    <h3 className="text-2xl font-semibold">No Records Found</h3>
-                                    <p className="text-muted-foreground text-sm font-semibold  max-w-xs text-center mt-3 opacity-60">
-                                        The current query or segment returned no entries.
-                                    </p>
-                                    <Button variant="outline"
-                                        className="mt-8 rounded-[1.2rem] font-semibold text-sm border-primary/20 text-primary px-10 h-11 hover:bg-primary hover:text-white transition-all"
-                                        onClick={() => {
-                                            setSearchQuery("");
-                                            setActiveSegment("All Items");
-                                        }}
-                                    >
-                                        RESET FILTERS
-                                    </Button>
-                                </div>
-                            ) : (
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="bg-muted/10 hover:bg-transparent border-b border-border/50">
-                                            <TableHead className="font-semibold  text-sm px-6 h-auto">
-                                                Title
-                                            </TableHead>
-                                            <TableHead className="font-semibold  text-sm h-auto">
-                                                Category
-                                            </TableHead>
-                                            <TableHead className="font-semibold  text-sm h-auto">
-                                                Client
-                                            </TableHead>
-                                            <TableHead className="font-semibold  text-sm h-auto">
-                                                Status
-                                            </TableHead>
-                                            <TableHead className="font-semibold  text-sm h-auto">
-                                                Featured
-                                            </TableHead>
-                                            <TableHead className="font-semibold  text-sm h-auto">
-                                                Created
-                                            </TableHead>
-                                            <TableHead className="text-right font-semibold  text-sm px-6 h-auto">
-                                                Actions
-                                            </TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {filteredItems.map((item) => (
-                                            <TableRow key={item.id}
-                                                className="group hover:bg-primary/[0.02] transition-all border-b border-border/20"
-                                            >
-                                                <TableCell className="px-6 py-6">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center overflow-hidden border border-border/30">
-                                                            {item.image ? (
-                                                                <img src={item.image}
-                                                                    alt={item.title}
-                                                                    className="w-full h-full object-cover"
-                                                                />
-                                                            ) : (
-                                                                <ImageIcon className="w-5 h-5 text-primary" />
-                                                            )}
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="font-semibold text-sm">
-                                                                {item.title}
-                                                            </span>
-                                                            <span className="text-sm text-muted-foreground font-semibold  opacity-60">
-                                                                {item.slug}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="text-sm font-semibold">{item.category}</span>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="text-sm font-semibold">{item.client}</span>
-                                                </TableCell>
-                                                <TableCell>{getStatusBadge(item.status)}</TableCell>
-                                                <TableCell>
-                                                    {item.featured ? (
-                                                        <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                                                    ) : (
-                                                        <Star className="w-4 h-4 text-muted-foreground/30" />
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex flex-col gap-1">
-                                                        <div className="text-sm font-semibold">
-                                                            {new Date(item.createdAt).toLocaleDateString()}
-                                                        </div>
-                                                        <div className="text-xs font-semibold  text-muted-foreground">
-                                                            {new Date(item.createdAt).toLocaleTimeString([], {
-                                                                hour: "2-digit",
-                                                                minute: "2-digit",
-                                                            })}{" "}
-                                                            UTC
-                                                        </div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-right px-6">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost"
-                                                                size="icon"
-                                                                className="h-10 w-10 rounded-2xl hover:bg-muted/50"
-                                                            >
-                                                                <MoreVertical className="h-5 w-5" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end"
-                                                            className="w-64 rounded-[1.5rem] p-2 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.2)] border-border/50 backdrop-blur-xl"
-                                                        >
-                                                            <DropdownMenuLabel className="text-sm font-semibold  text-muted-foreground px-3 py-2">
-                                                                Item Actions
-                                                            </DropdownMenuLabel>
-                                                            <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-semibold py-3 text-xs"
-                                                                onClick={() => openEdit(item)}
-                                                            >
-                                                                <Pencil className="w-4 h-4 text-primary" /> EDIT ENTRY
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator className="my-2 opacity-50" />
-                                                            <DropdownMenuItem className="gap-3 text-destructive focus:bg-destructive/10 cursor-pointer rounded-xl font-semibold py-3 text-xs"
-                                                                onClick={() => setDeleteId(item.id)}
-                                                            >
-                                                                <Trash2 className="w-4 h-4" /> Delete Item
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            )}
-                        </CardContent>
-                    </Card>
+                <div className="flex gap-2">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" className="rounded-lg h-9 gap-2">
+                                <CalendarIcon className="w-4 h-4" />
+                                {dateRange.from ? format(dateRange.from, "MMM d") : "From"}
+                                {dateRange.to ? ` - ${format(dateRange.to, "MMM d")}` : ""}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 rounded-xl" align="end">
+                            <Calendar mode="range" selected={{ from: dateRange.from, to: dateRange.to }}
+                                onSelect={(r) => setDateRange({ from: r?.from, to: r?.to })}
+                                initialFocus />
+                        </PopoverContent>
+                    </Popover>
+                    {(dateRange.from || dateRange.to) && (
+                        <Button variant="ghost" size="icon" className="rounded-lg h-9 w-9"
+                            onClick={() => setDateRange({})}>
+                            <X className="w-4 h-4" />
+                        </Button>
+                    )}
+                    <div className="flex border border-border/40 rounded-lg overflow-hidden">
+                        <button onClick={() => setView("list")}
+                            className={cn("p-2 transition-colors", view === "list" ? "bg-primary text-primary-foreground" : "hover:bg-muted")}>
+                            <List className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setView("grid")}
+                            className={cn("p-2 transition-colors", view === "grid" ? "bg-primary text-primary-foreground" : "hover:bg-muted")}>
+                            <LayoutGrid className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* Create / Edit Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-3xl rounded-[2.5rem] border-border/40 bg-card/60 backdrop-blur-xl shadow-2xl p-0 flex flex-col max-h-[85vh]">
-                    <DialogHeader className="p-8 pb-4 shrink-0">
-                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-                            <Layers className="w-7 h-7 text-primary" />
+            {/* Tabs */}
+            <div className="flex gap-1 bg-muted/30 p-1 rounded-lg w-fit">
+                {tabs.map(tab => (
+                    <button key={tab.key}
+                        onClick={() => { setSelectedTab(tab.key); setCurrentPage(0); }}
+                        className={cn("px-4 py-1.5 text-sm font-medium rounded-md transition-all",
+                            selectedTab === tab.key ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}>
+                        {tab.label} ({tab.count})
+                    </button>
+                ))}
+            </div>
+
+            {/* Bulk actions */}
+            {selectedIds.size > 0 && (
+                <div className="flex items-center gap-2 p-2 bg-primary/5 rounded-lg border border-primary/20">
+                    <span className="text-sm font-medium px-2">{selectedIds.size} selected</span>
+                    <Button variant="outline" size="sm" className="rounded-lg h-8 gap-1 text-xs"
+                        onClick={() => setBulkStatusOpen("published")}>
+                        <Eye className="w-3.5 h-3.5" /> Publish
+                    </Button>
+                    <Button variant="outline" size="sm" className="rounded-lg h-8 gap-1 text-xs"
+                        onClick={() => setBulkStatusOpen("draft")}>
+                        <EyeOff className="w-3.5 h-3.5" /> Draft
+                    </Button>
+                    <Button variant="outline" size="sm" className="rounded-lg h-8 gap-1 text-xs text-destructive"
+                        onClick={() => setBulkDeleteOpen(true)}>
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                    </Button>
+                    <Button variant="ghost" size="sm" className="rounded-lg h-8 ml-auto"
+                        onClick={() => setSelectedIds(new Set())}>
+                        Clear
+                    </Button>
+                </div>
+            )}
+
+            {/* Content */}
+            {isLoading ? (
+                view === "list" ? (
+                    <div className="space-y-2">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <Skeleton key={i} className="h-14 w-full rounded-lg" />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <Skeleton key={i} className="h-56 w-full rounded-xl" />
+                        ))}
+                    </div>
+                )
+            ) : error ? (
+                <Card className="border-destructive/20">
+                    <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+                            <AlertCircle className="w-6 h-6 text-destructive" />
                         </div>
-                        <DialogTitle className="text-3xl font-semibold  ">
-                            {editingItem ? "Edit Portfolio Entry" : "New Portfolio Entry"}
-                        </DialogTitle>
-                        <DialogDescription className="text-sm font-semibold  opacity-60 mt-1">
-                            {editingItem
-                                ? "Modify the project showcase metadata below."
-                                : "Register a new project in the showcase directory."}
+                        <p className="text-sm font-medium text-destructive">{error}</p>
+                        <Button variant="outline" className="rounded-lg" onClick={fetchItems}>Retry</Button>
+                    </CardContent>
+                </Card>
+            ) : filteredItems.length === 0 ? (
+                <Card className="border-border/40">
+                    <CardContent className="flex flex-col items-center justify-center py-16 gap-3">
+                        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                            <Image className="w-7 h-7 text-muted-foreground/50" />
+                        </div>
+                        <p className="text-sm font-medium">No portfolio items found</p>
+                        <p className="text-xs text-muted-foreground">Create your first portfolio item to showcase your work</p>
+                        <Button asChild className="rounded-lg mt-2">
+                            <Link href="/dashboard/portfolio/new"><Plus className="w-4 h-4 mr-2" /> New Item</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            ) : view === "list" ? (
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={filteredItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="w-10">
+                                        <button onClick={handleSelectAll}>
+                                            {selectedIds.size === filteredItems.length && filteredItems.length > 0
+                                                ? <CheckSquare className="w-4 h-4 text-primary" />
+                                                : <Square className="w-4 h-4 text-muted-foreground" />}
+                                        </button>
+                                    </TableHead>
+                                    <TableHead className="cursor-pointer" onClick={() => handleSort("title")}>
+                                        <span className="flex items-center">Project <SortIcon field="title" /></span>
+                                    </TableHead>
+                                    <TableHead className="cursor-pointer" onClick={() => handleSort("category")}>
+                                        <span className="flex items-center">Category <SortIcon field="category" /></span>
+                                    </TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="cursor-pointer" onClick={() => handleSort("createdAt")}>
+                                        <span className="flex items-center">Created <SortIcon field="createdAt" /></span>
+                                    </TableHead>
+                                    <TableHead className="w-10" />
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredItems.map((item) => (
+                                    <SortablePortfolioRow key={item.id} item={item} view="list"
+                                        isSelected={selectedIds.has(item.id)}
+                                        onToggleSelect={handleToggleSelect}
+                                        onToggleFeatured={handleToggleFeatured}
+                                        onToggleStatus={handleToggleStatus}
+                                        onEdit={handleEdit}
+                                        onDelete={(i: PortfolioItem) => setDeleteId(i.id)} />
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </SortableContext>
+                </DndContext>
+            ) : (
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={filteredItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {filteredItems.map((item) => (
+                                <SortablePortfolioRow key={item.id} item={item} view="grid"
+                                    isSelected={selectedIds.has(item.id)}
+                                    onToggleSelect={handleToggleSelect}
+                                    onToggleFeatured={handleToggleFeatured}
+                                    onToggleStatus={handleToggleStatus}
+                                    onEdit={handleEdit}
+                                    onDelete={(i: PortfolioItem) => setDeleteId(i.id)} />
+                            ))}
+                        </div>
+                    </SortableContext>
+                </DndContext>
+            )}
+
+            {/* Quick Edit Dialog */}
+            <Dialog open={isDialogOpen} onOpenChange={(v) => { if (!v) { setIsDialogOpen(false); setEditingItem(null); } }}>
+                <DialogContent className="rounded-xl border-border/50 max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+                    <DialogHeader>
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                            {editingItem ? <Edit3 className="w-5 h-5 text-primary" /> : <Plus className="w-5 h-5 text-primary" />}
+                        </div>
+                        <DialogTitle>{editingItem ? "Edit Portfolio Item" : "New Portfolio Item"}</DialogTitle>
+                        <DialogDescription>
+                            {editingItem ? "Update the portfolio item details below" : "Fill in the details for a new portfolio item"}
                         </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-8 space-y-5 pb-4" data-lenis-prevent>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="title" className="text-sm font-semibold  ml-1 opacity-70">Title</Label>
-                                <Input id="title"
-                                    placeholder="Project Name"
-                                    className="rounded-[1.2rem] h-12 bg-background/50 border-border/50 font-semibold"
-                                    required value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                />
+                    <form onSubmit={handleSave} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Title <span className="text-destructive">*</span></Label>
+                                <Input className="rounded-lg h-9" value={formData.title}
+                                    onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))} />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="slug" className="text-sm font-semibold  ml-1 opacity-70">Slug</Label>
-                                <Input id="slug"
-                                    placeholder="project-name"
-                                    className="rounded-[1.2rem] h-12 bg-background/50 border-border/50 font-semibold"
-                                    required value={formData.slug}
-                                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                                />
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Slug</Label>
+                                <Input placeholder="auto-generated" className="rounded-lg h-9 font-mono text-xs" value={formData.slug}
+                                    onChange={(e) => setFormData(p => ({ ...p, slug: e.target.value }))} />
                             </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="category" className="text-sm font-semibold  ml-1 opacity-70">Category</Label>
-                                <Input id="category"
-                                    placeholder="Web App"
-                                    className="rounded-[1.2rem] h-12 bg-background/50 border-border/50 font-semibold"
-                                    required value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                />
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Category <span className="text-destructive">*</span></Label>
+                                <Input className="rounded-lg h-9" value={formData.category}
+                                    onChange={(e) => setFormData(p => ({ ...p, category: e.target.value }))} />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="client" className="text-sm font-semibold  ml-1 opacity-70">Client</Label>
-                                <Input id="client"
-                                    placeholder="Client Name"
-                                    className="rounded-[1.2rem] h-12 bg-background/50 border-border/50 font-semibold"
-                                    required value={formData.client}
-                                    onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-                                />
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Client <span className="text-destructive">*</span></Label>
+                                <Input className="rounded-lg h-9" value={formData.client}
+                                    onChange={(e) => setFormData(p => ({ ...p, client: e.target.value }))} />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="description" className="text-sm font-semibold  ml-1 opacity-70">Description</Label>
-                            <Textarea id="description"
-                                placeholder="Short project summary..."
-                                className="rounded-[1.2rem] bg-background/50 border-border/50 font-semibold min-h-[80px]"
-                                required value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            />
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium">Description <span className="text-destructive">*</span></Label>
+                            <Textarea className="rounded-lg min-h-[80px] resize-none" value={formData.description}
+                                onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))} />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="longDescription" className="text-sm font-semibold  ml-1 opacity-70">Long Description</Label>
-                            <Textarea id="longDescription"
-                                placeholder="Detailed project overview..."
-                                className="rounded-[1.2rem] bg-background/50 border-border/50 font-semibold min-h-[100px]"
-                                value={formData.longDescription}
-                                onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
-                            />
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium">Long Description</Label>
+                            <Textarea className="rounded-lg min-h-[120px] resize-none" value={formData.longDescription}
+                                onChange={(e) => setFormData(p => ({ ...p, longDescription: e.target.value }))} />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="text-sm font-semibold  ml-1 opacity-70">Image</Label>
-                                <div
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="relative rounded-[1.2rem] h-36 bg-background/50 border-2 border-dashed border-border/50 hover:border-primary/40 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer overflow-hidden"
-                                >
-                                    {previewUrl || formData.image ? (
-                                        <img
-                                            src={previewUrl || formData.image}
-                                            alt="Preview"
-                                            className="absolute inset-0 w-full h-full object-cover"
-                                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Cover Image</Label>
+                                <div onClick={() => fileInputRef.current?.click()}
+                                    className="rounded-xl h-28 bg-background/50 border-2 border-dashed border-border/50 hover:border-primary/40 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer overflow-hidden relative">
+                                    {previewUrl || image ? (
+                                        <img src={previewUrl || image} alt="" className="absolute inset-0 w-full h-full object-cover" />
                                     ) : (
-                                        <>
-                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                                <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-xs font-semibold  text-muted-foreground">Click to upload image</span>
-                                        </>
+                                        <><div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                            <Upload className="w-5 h-5 text-primary" />
+                                        </div><span className="text-xs text-muted-foreground">Click to upload</span></>
                                     )}
                                     {isUploading && (
                                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                            <div className="flex flex-col items-center gap-2">
-                                                <svg className="w-6 h-6 animate-spin text-white" viewBox="0 0 24 24" fill="none">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                                </svg>
-                                                <span className="text-xs font-semibold text-white">{uploadProgress}%</span>
-                                            </div>
+                                            <Loader2 className="w-6 h-6 animate-spin text-white" />
                                         </div>
                                     )}
                                 </div>
-                                {isUploading && (
-                                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                                        <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
-                                    </div>
-                                )}
-                                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImageUpload(file); }} />
-                                {formData.image && !previewUrl && (
-                                    <p className="text-xs text-muted-foreground truncate">{formData.image}</p>
-                                )}
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="gradient" className="text-sm font-semibold  ml-1 opacity-70">Gradient</Label>
-                                <Input id="gradient"
-                                    placeholder="from-blue-500 to-purple-600"
-                                    className="rounded-[1.2rem] h-12 bg-background/50 border-border/50 font-semibold"
-                                    value={formData.gradient}
-                                    onChange={(e) => setFormData({ ...formData, gradient: e.target.value })}
-                                />
+                                <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); }} />
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="tags" className="text-sm font-semibold  ml-1 opacity-70">Tags</Label>
-                                <Input id="tags"
-                                    placeholder="react, node, typescript"
-                                    className="rounded-[1.2rem] h-12 bg-background/50 border-border/50 font-semibold"
-                                    value={formData.tags}
-                                    onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="order" className="text-sm font-semibold  ml-1 opacity-70">Order</Label>
-                                <Input id="order"
-                                    type="number"
-                                    placeholder="0"
-                                    className="rounded-[1.2rem] h-12 bg-background/50 border-border/50 font-semibold"
-                                    value={formData.order}
-                                    onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) })}
-                                />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="status" className="text-sm font-semibold  ml-1 opacity-70">Status</Label>
-                                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                                    <SelectTrigger className="rounded-[1.2rem] h-12 bg-background/50 border-border/50 font-semibold text-sm ">
-                                        <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-2xl p-1">
-                                        <SelectItem value="draft" className="rounded-xl font-semibold text-sm  py-3">Draft</SelectItem>
-                                        <SelectItem value="published" className="rounded-xl font-semibold text-sm  py-3">Published</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2 flex flex-col justify-end pb-2">
-                                <Label className="text-sm font-semibold  ml-1 opacity-70">Featured</Label>
-                                <div className="flex items-center gap-3 h-12 px-1">
-                                    <Switch id="featured" checked={formData.featured} onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })} />
-                                    <span className="text-sm font-semibold">{formData.featured ? "Showcased on homepage" : "Hidden from showcase"}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Tags</Label>
+                                <div className="relative">
+                                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input className="rounded-lg h-9 pl-10" value={formData.tags}
+                                        onChange={(e) => setFormData(p => ({ ...p, tags: e.target.value }))} />
                                 </div>
                             </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Demo URL</Label>
+                                <Input placeholder="https://..." className="rounded-lg h-9" value={formData.demoUrl}
+                                    onChange={(e) => setFormData(p => ({ ...p, demoUrl: e.target.value }))} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium">Order</Label>
+                                <Input type="number" className="rounded-lg h-9" value={formData.order}
+                                    onChange={(e) => setFormData(p => ({ ...p, order: Number(e.target.value) }))} />
+                            </div>
                         </div>
-                        <DialogFooter className="pt-4 flex gap-3">
-                            <Button type="button"
-                                variant="ghost"
-                                className="rounded-[1.2rem] h-12 px-6 font-semibold text-sm  opacity-60 hover:opacity-100"
-                                onClick={() => setIsDialogOpen(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button type="submit"
-                                className="rounded-[1.2rem] h-12 px-10 font-semibold text-sm  shadow-xl shadow-primary/20 bg-primary hover:scale-[1.02] transition-transform"
-                                disabled={isSaving}
-                            >
-                                {isSaving ? "Saving..." : editingItem ? "Update Entry" : "Create Entry"}
+                        <div className="border-t border-border/50 pt-4">
+                            <StatsEditor value={dialogStats} onChange={setDialogStats} />
+                        </div>
+                        <div className="border-t border-border/50 pt-4">
+                            <ScreenshotsUpload screenshots={screenshots} onChange={setScreenshots} />
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-3">
+                                <Switch id="quick-featured" checked={formData.featured}
+                                    onCheckedChange={(v) => setFormData(p => ({ ...p, featured: v }))} />
+                                <Label htmlFor="quick-featured" className="text-sm cursor-pointer">Featured</Label>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Switch id="quick-published" checked={formData.status === "published"}
+                                    onCheckedChange={(v) => setFormData(p => ({ ...p, status: v ? "published" : "draft" }))} />
+                                <Label htmlFor="quick-published" className="text-sm cursor-pointer">Published</Label>
+                            </div>
+                        </div>
+                        <DialogFooter className="flex gap-2">
+                            <Button type="button" variant="ghost" className="rounded-lg h-9"
+                                onClick={() => { setIsDialogOpen(false); setEditingItem(null); }}>Cancel</Button>
+                            <Button type="submit" className="rounded-lg h-9 px-6 shadow-lg shadow-primary/30 font-medium"
+                                disabled={isSaving}>
+                                {isSaving ? "Saving..." : editingItem ? "Update" : "Create"}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -764,36 +789,72 @@ function PortfolioPage() {
 
             {/* Delete Confirmation */}
             <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-                <DialogContent className="rounded-[2rem] border-border/50 max-w-[400px]">
-                    <DialogHeader className="flex flex-col items-center text-center">
-                        <div className="w-16 h-16 rounded-[1.5rem] bg-destructive/10 flex items-center justify-center mb-4">
-                            <Trash2 className="w-8 h-8 text-destructive" />
+                <DialogContent className="rounded-xl border-border/50 max-w-[400px] p-6">
+                    <DialogHeader className="flex flex-col items-center text-center gap-2">
+                        <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+                            <Trash2 className="w-6 h-6 text-destructive" />
                         </div>
-                        <DialogTitle className="text-2xl font-semibold">Purge Entry?</DialogTitle>
-                        <DialogDescription className="font-bold  text-sm text-destructive">
-                            Critical Security Protocol Required
-                        </DialogDescription>
+                        <DialogTitle className="text-lg font-semibold">Delete portfolio item?</DialogTitle>
+                        <DialogDescription className="text-sm text-destructive">This action cannot be undone</DialogDescription>
                     </DialogHeader>
-                    <div className="p-4 text-center">
-                        <p className="text-sm font-medium text-muted-foreground">
-                            This will permanently remove the portfolio entry and all associated metadata. This action cannot be, reversed.
-                        </p>
-                    </div>
-                    <DialogFooter className="flex-col sm:flex-col gap-2 pt-4">
-                        <Button className="w-full bg-destructive hover:bg-destructive/90 rounded-xl h-auto font-semibold shadow-lg shadow-destructive/20"
-                            onClick={handleDelete}
-                        >
-                            CONFIRM PURGE
-                        </Button>
-                        <Button variant="ghost"
-                            className="w-full rounded-xl h-11 font-bold"
-                            onClick={() => setDeleteId(null)}
-                        >
-                            ABORT MISSION
-                        </Button>
+                    <DialogFooter className="flex-col sm:flex-col gap-2">
+                        <Button className="w-full bg-destructive hover:bg-destructive/90 rounded-lg h-9 text-sm font-medium"
+                            onClick={handleDelete}>Delete</Button>
+                        <Button variant="ghost" className="w-full rounded-lg h-9"
+                            onClick={() => setDeleteId(null)}>Cancel</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Bulk Delete */}
+            <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+                <DialogContent className="rounded-xl max-w-[400px] p-6">
+                    <DialogHeader className="flex flex-col items-center text-center gap-2">
+                        <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+                            <Trash2 className="w-6 h-6 text-destructive" />
+                        </div>
+                        <DialogTitle>Delete {selectedIds.size} items?</DialogTitle>
+                        <DialogDescription className="text-destructive">This action cannot be undone</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex-col gap-2">
+                        <Button className="w-full bg-destructive rounded-lg" onClick={handleBulkDelete}>Delete All</Button>
+                        <Button variant="ghost" className="w-full rounded-lg" onClick={() => setBulkDeleteOpen(false)}>Cancel</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Bulk Status */}
+            <Dialog open={!!bulkStatusOpen} onOpenChange={() => setBulkStatusOpen(null)}>
+                <DialogContent className="rounded-xl max-w-[400px] p-6">
+                    <DialogHeader className="flex flex-col items-center text-center gap-2">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                            {bulkStatusOpen === "published" ? <Eye className="w-6 h-6 text-primary" /> : <EyeOff className="w-6 h-6 text-primary" />}
+                        </div>
+                        <DialogTitle>{bulkStatusOpen === "published" ? "Publish" : "Draft"} {selectedIds.size} items?</DialogTitle>
+                    </DialogHeader>
+                    <DialogFooter className="flex-col gap-2">
+                        <Button className="w-full rounded-lg" onClick={() => bulkStatusOpen && handleBulkStatus(bulkStatusOpen)}>
+                            {bulkStatusOpen === "published" ? "Publish All" : "Draft All"}
+                        </Button>
+                        <Button variant="ghost" className="w-full rounded-lg" onClick={() => setBulkStatusOpen(null)}>Cancel</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between py-2">
+                <p className="text-sm text-muted-foreground">{items.length} items</p>
+                <div className="flex gap-1">
+                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg"
+                        disabled={currentPage === 0} onClick={() => setCurrentPage(p => p - 1)}>
+                        <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg"
+                        disabled={items.length < ITEMS_PER_PAGE} onClick={() => setCurrentPage(p => p + 1)}>
+                        <ChevronRight className="w-4 h-4" />
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 }

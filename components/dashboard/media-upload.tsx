@@ -75,13 +75,13 @@ export function MediaUpload({
     return (
         <div className={cn("space-y-3", className)}>
             <div className="flex items-center justify-between">
-                <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">{label}</Label>
+                <Label className="text-micro uppercase font-bold text-muted-foreground tracking-widest">{label}</Label>
                 {value && (
                     <Button 
                         variant="ghost" 
                         size="sm" 
                         onClick={() => onChange('')}
-                        className="h-6 px-2 text-[10px] text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full"
+                        className="h-6 px-2 text-micro text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full"
                     >
                         <Trash2 className="w-3 h-3 mr-1" /> Remove
                     </Button>
@@ -114,7 +114,7 @@ export function MediaUpload({
                         </div>
                         <div className="text-center">
                             <span className="text-xs font-bold block">Upload {type === 'image' ? 'Image' : 'Video'}</span>
-                            <span className="text-[10px] text-muted-foreground">Click to browse or drag & drop</span>
+                            <span className="text-micro text-muted-foreground">Click to browse or drag & drop</span>
                         </div>
                     </Button>
                 )}

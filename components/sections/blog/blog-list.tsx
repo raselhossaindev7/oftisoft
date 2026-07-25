@@ -1,6 +1,6 @@
 "use client"
 import { Animated, AnimatedDiv, AnimatePresence } from "@/lib/animated";
-;
+
 
 import { useState } from "react";
 import { Search, Grid, Code, Smartphone, Brain, Cloud, Briefcase, Clock, Calendar, ArrowUpRight, Filter } from "lucide-react";
@@ -14,7 +14,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 import { useBlogContentStore, type BlogCategory } from "@/lib/store/blog-content";
-import { AdSlot } from "@/components/ads/ad-slot";
+
 
 // Map icon string names to components
 const iconMap: any = {
@@ -52,7 +52,7 @@ export default function BlogList() {
                 {/* Header & Controls */}
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-16">
                     <div className="text-center lg:text-left">
-                        <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 mb-4">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 mb-4">
                             Latest Insights
                         </h2>
                         <p className="text-muted-foreground max-w-md">
@@ -140,8 +140,6 @@ export default function BlogList() {
                     </div>
                 </div>
 
-                <AdSlot position="blog-list-top" />
-
                 {/* Posts Grid */}
                 <AnimatedDiv 
                     layout 
@@ -222,11 +220,7 @@ export default function BlogList() {
                                         </Card>
                                     </Link>
                                 </Animated>
-                                {(index + 1) % 6 === 0 && (
-                                    <div className="col-span-full py-8">
-                                        <AdSlot position="blog-list-middle" />
-                                    </div>
-                                )}
+
                             </div>
                         ))}
                     </AnimatePresence>

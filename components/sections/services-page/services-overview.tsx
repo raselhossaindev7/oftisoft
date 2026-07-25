@@ -74,7 +74,7 @@ export default function ServicesOverview() {
                             transition={{ duration: 0.5 }}
                             className="space-y-6 sticky top-24"
                         >
-                            <h2 className="text-3xl md:text-5xl font-bold mb-8 md:mb-12 tracking-tight">Our Expertise</h2>
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 md:mb-12 tracking-tight">Our Expertise</h2>
                             
                             <div className="flex lg:flex-col overflow-x-auto pb-4 lg:pb-0 gap-4 lg:gap-3 no-scrollbar snap-x touch-pan-x">
                                 {services.map((service: any) => {

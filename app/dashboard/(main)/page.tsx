@@ -365,7 +365,7 @@ function SupportDashboard() {
           value={String(openTickets)}
           change={`${pendingTickets} pending`}
           trend={openTickets > 5 ? "up" : "neutral"}
-          href="/dashboard/tickets"
+          href="/dashboard/support"
           icon={Inbox}
           color="primary"
         />
@@ -373,7 +373,7 @@ function SupportDashboard() {
           value={String(resolvedToday)}
           change="Tickets"
           trend="up"
-          href="/dashboard/tickets"
+          href="/dashboard/support"
           icon={CheckCircle2}
           color="success"
         />
@@ -438,7 +438,7 @@ function SupportDashboard() {
                         {ticket.status}
                       </Badge>
                       <Button size="sm" asChild>
-                        <Link href={`/dashboard/tickets/${ticket.id}`}>
+                        <Link href="/dashboard/support">
                           Respond
                         </Link>
                       </Button>
@@ -462,9 +462,9 @@ function SupportDashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/tickets">
+              <Link href="/dashboard/support">
                 <Ticket className="w-4 h-4 mr-2" />
-                Create Ticket
+                Open Support
               </Link>
             </Button>
             <Button className="w-full justify-start" variant="outline" asChild>

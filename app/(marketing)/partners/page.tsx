@@ -81,14 +81,14 @@ export default function PartnersPage() {
                 {/* Header Section */}
                 <div className="text-center space-y-8 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-[10px] shadow-[0_0_20px_rgba(var(--primary),0.2)]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-[0.3em] text-xs shadow-[0_0_20px_rgba(var(--primary),0.2)]">
                             {header?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
                     <AnimatedH1 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-8xl font-semibold tracking-tighter text-white"
+                        className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter text-white"
                     >
                         {header?.titlePrefix ?? ""} <span className="text-primary underline decoration-white/10 decoration-8 underline-offset-8">{header?.titleHighlight ?? ""}</span>.
                     </AnimatedH1>
@@ -114,16 +114,16 @@ export default function PartnersPage() {
                                         <div className={cn("w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center transition-transform group-hover:scale-110", partner.color)}>
                                             <Icon size={40} />
                                         </div>
-                                        <Badge variant="outline" className="text-[9px] font-semibold tracking-widest px-4 py-1.5 border-white/10 bg-white/5 text-white/40">Tier-1 Node</Badge>
+                                        <Badge variant="outline" className="text-xs font-semibold tracking-widest px-4 py-1.5 border-white/10 bg-white/5 text-white/40">Tier-1 Node</Badge>
                                     </div>
                                     <div className="space-y-4">
                                         <div className="space-y-1">
                                             <h3 className="text-4xl font-semibold text-white tracking-tight leading-none group-hover:text-primary transition-colors">{partner.name}</h3>
-                                            <span className="text-[10px] font-semibold tracking-[0.2em] text-primary">{partner.role}</span>
+                                            <span className="text-xs font-semibold tracking-[0.2em] text-primary">{partner.role}</span>
                                         </div>
                                         <p className="text-xl text-muted-foreground font-medium leading-relaxed">{partner.desc}</p>
                                     </div>
-                                    <Button variant="ghost" className="h-10 text-white/40 font-semibold tracking-widest text-[10px] hover:bg-transparent hover:text-white p-0 group/btn" asChild>
+                                    <Button variant="ghost" className="h-10 text-white/40 font-semibold tracking-widest text-xs hover:bg-transparent hover:text-white p-0 group/btn" asChild>
                                         <Link href="/contact">
                                             Analyze Integration <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-2 transition-transform" />
                                         </Link>
@@ -199,7 +199,7 @@ export default function PartnersPage() {
                                     </form>
                                 </DialogContent>
                             </Dialog>
-                            <p className="text-[10px] font-semibold tracking-[0.2em] text-white/20">
+                            <p className="text-xs font-semibold tracking-[0.2em] text-white/20">
                                 {cta?.subText ?? ""}
                             </p>
                         </div>
@@ -207,7 +207,7 @@ export default function PartnersPage() {
                 </div>
 
                 <div className="pt-24 space-y-12">
-                     <h4 className="text-[10px] font-semibold tracking-[0.4rem] text-muted-foreground text-center">{ecosystem?.title ?? ""}</h4>
+                     <h4 className="text-xs font-semibold tracking-[0.4rem] text-muted-foreground text-center">{ecosystem?.title ?? ""}</h4>
                      <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-30 grayscale hover:grayscale-0 transition-all">
                         {(ecosystem?.brands || []).map((brand) => (
                             <span key={brand.id} className="text-2xl md:text-4xl font-semibold text-white tracking-widest">{brand.name}</span>

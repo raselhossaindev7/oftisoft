@@ -98,6 +98,7 @@ export function mapApiPortfolioToProject(item: any): ProjectItem {
 
     return {
         id: item.id,
+        slug: item.slug ?? item.id,
         title: item.title ?? "",
         category: item.category ?? "",
         image: item.image ?? null,
@@ -105,6 +106,8 @@ export function mapApiPortfolioToProject(item: any): ProjectItem {
         description: item.description ?? "",
         longDescription: item.longDescription ?? "",
         client: item.client ?? "",
+        url: item.demoUrl ?? "",
+        github: "",
         stats: parsedStats,
         gradient: item.gradient ?? "from-primary/20 to-primary/10",
     };

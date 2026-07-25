@@ -57,7 +57,7 @@ export default function ServiceFAQ() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-5xl font-semibold mt-6 mb-4 tracking-tight"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold mt-6 mb-4 tracking-tight"
                     >
                         Got Questions?
                     </AnimatedH2>

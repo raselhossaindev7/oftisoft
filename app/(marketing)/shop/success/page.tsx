@@ -57,7 +57,7 @@ function OrderSuccessContent() {
   const sessionId = searchParams.get("session_id");
   
   const [orderData, setOrderData] = useState<OrderData | null>(null);
-  const [loading, setLoading] = useState(!!orderId || !!sessionId);
+  const [loading, setLoading] = useState(!!orderId);
   const [error, setError] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const { clearCart } = useCart();
@@ -66,7 +66,8 @@ function OrderSuccessContent() {
     if (orderId) {
       fetchOrderData();
     } else if (sessionId) {
-      completeCheckout();
+      clearCart();
+      setLoading(false);
     }
   }, [orderId, sessionId]);
 

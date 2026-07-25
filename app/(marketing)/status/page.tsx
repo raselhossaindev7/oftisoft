@@ -108,7 +108,7 @@ export default function StatusPage() {
                 <div className="text-center space-y-8 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
                         <Badge variant="outline" className={cn(
-                            "px-6 py-2 rounded-full font-semibold tracking-[0.3em] text-[10px] shadow-[0_0_20px_rgba(34,197,94,0.1)]",
+                            "px-6 py-2 rounded-full font-semibold tracking-[0.3em] text-xs shadow-[0_0_20px_rgba(34,197,94,0.1)]",
                             allOperational
                                 ? "border-green-500/30 bg-green-500/5 text-green-400"
                                 : "border-orange-500/30 bg-orange-500/5 text-orange-400"
@@ -119,7 +119,7 @@ export default function StatusPage() {
                     <AnimatedH1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-8xl font-semibold tracking-tighter text-white"
+                        className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tighter text-white"
                     >
                         {"System Status".split(" ").map((word, i) => (
                             <span key={i} className={cn(word.toLowerCase() === "status" ? "text-green-500" : "")}>
@@ -194,7 +194,7 @@ export default function StatusPage() {
                                                     <Loader2 size={14} className="animate-spin text-white/20" />
                                                 ) : (
                                                     <Badge variant="outline" className={cn(
-                                                        "text-[8px] font-black uppercase border-none px-3",
+                                                        "text-xs font-black uppercase border-none px-3",
                                                         isUp ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
                                                     )}>
                                                         {isUp ? "Operational" : "Down"}
@@ -207,7 +207,7 @@ export default function StatusPage() {
                                             <div className="flex items-center justify-between pt-4 border-t border-white/5">
                                                 <div className="flex items-center gap-2">
                                                     <Signal size={12} className={cn(isUp ? "text-green-400" : "text-red-400")} />
-                                                    <span className="text-[10px] font-semibold text-white/40 tracking-widest">Status</span>
+                                                    <span className="text-xs font-semibold text-white/40 tracking-widest">Status</span>
                                                 </div>
                                                 <span className={cn(
                                                     "text-sm font-mono font-bold",
@@ -252,14 +252,14 @@ export default function StatusPage() {
                         All systems are continuously monitored by our automated alerting infrastructure.
                     </p>
                     <div className="flex items-center gap-4 justify-center">
-                        <Badge variant="outline" className="border-white/10 bg-white/5 text-[10px] font-semibold px-4 py-1 flex gap-2 items-center">
+                        <Badge variant="outline" className="border-white/10 bg-white/5 text-xs font-semibold px-4 py-1 flex gap-2 items-center">
                             <RefreshCw size={12} className={cn(loading ? "animate-spin" : "", "text-primary")} />
                             {loading ? "Checking..." : `Last checked: ${health ? new Date(health.timestamp).toLocaleTimeString() : "--"}`}
                         </Badge>
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="text-[10px] font-semibold text-primary"
+                            className="text-xs font-semibold text-primary"
                             onClick={fetchHealth}
                         >
                             Refresh Now

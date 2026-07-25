@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useRole } from "@/hooks/useRole";
 import { PermissionGuard } from "@/components/auth/role-guard";
-import { 
-  LayoutDashboard, 
-  Users, 
-  DollarSign, 
-  Wallet, 
+import {
+  LayoutDashboard,
+  Users,
+  DollarSign,
+  Wallet,
   Settings,
   TrendingUp,
   Search,
@@ -26,6 +26,8 @@ import {
   X,
   ExternalLink,
   BarChart3,
+  History,
+  Shield,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -79,21 +81,26 @@ export default function AffiliateAdminPage() {
   const { hasPermission, isStaff, isAdmin, isSuperAdmin } = useRole();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
-  const 
-{ 
-    dashboardStats, 
-    affiliates, 
-    commissions, 
-    withdrawals, 
+  const
+{
+    dashboardStats,
+    affiliates,
+    commissions,
+    withdrawals,
+    auditLogs,
+    auditStats,
     isLoading,
     isLoadingAffiliates,
     isLoadingCommissions,
     isLoadingWithdrawals,
+    isLoadingAuditLogs,
     pagination,
     fetchDashboard,
     fetchAffiliates,
     fetchCommissions,
     fetchWithdrawals,
+    fetchAuditLogs,
+    fetchAuditStats,
     approveAffiliate,
     suspendAffiliate,
     banAffiliate,
@@ -224,6 +231,9 @@ export default function AffiliateAdminPage() {
           <TabsTrigger value="withdrawals" className="rounded-xl h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md font-bold px-6">
             <Wallet className="w-4 h-4" /> Withdrawals
           </TabsTrigger>
+          <TabsTrigger value="audit" className="rounded-xl h-auto gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md font-bold px-6">
+            <History className="w-4 h-4" /> Audit Log
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -343,7 +353,7 @@ export default function AffiliateAdminPage() {
 
         {/* Withdrawals Tab */}
         <TabsContent value="withdrawals" className="space-y-6">
-          <WithdrawalsList 
+          <WithdrawalsList
             withdrawals={withdrawals}
             isLoading={isLoadingWithdrawals}
             pagination={pagination.withdrawals}
@@ -353,6 +363,21 @@ export default function AffiliateAdminPage() {
             onComplete={completeWithdrawal}
             onProcess={processWithdrawal}
             isAdmin={isAdmin || isSuperAdmin}
+          />
+        </TabsContent>
+
+        {/* Audit Log Tab */}
+        <TabsContent value="audit" className="space-y-6">
+          <AuditLogsList
+            auditLogs={auditLogs}
+            auditStats={auditStats}
+            isLoading={isLoadingAuditLogs}
+            pagination={pagination.auditLogs}
+            onPageChange={(page: number) => fetchAuditLogs({ page })}
+            onRefresh={() => {
+              fetchAuditLogs();
+              fetchAuditStats();
+            }}
           />
         </TabsContent>
       </Tabs>
@@ -874,9 +899,9 @@ function WithdrawalsList({
                           </Button>
                         )}
                         {withdrawal.status === "processing" && (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
+                          <Button
+                            size="sm"
+                            variant="outline"
                             className="h-8 rounded-lg text-green-500 hover:text-green-600 hover:bg-green-500/10"
                             onClick={() => onComplete(withdrawal.id)}
                           >
@@ -918,5 +943,285 @@ function WithdrawalsList({
         </div>
       )}
     </Card>
+  );
+}
+
+// Audit Logs List Component
+function AuditLogsList({
+  auditLogs,
+  auditStats,
+  isLoading,
+  pagination,
+  onPageChange,
+  onRefresh,
+}: any) {
+  const [actionFilter, setActionFilter] = useState("all");
+  const [search, setSearch] = useState("");
+
+  const getActionBadge = (action: string) => {
+    const styles: Record<string, string> = {
+      'affiliate.approved': "bg-green-500/10 text-green-500 border-green-500/20",
+      'affiliate.suspended': "bg-orange-500/10 text-orange-500 border-orange-500/20",
+      'affiliate.banned': "bg-red-500/10 text-red-500 border-red-500/20",
+      'affiliate.tier_changed': "bg-blue-500/10 text-blue-500 border-blue-500/20",
+      'affiliate.rate_changed': "bg-purple-500/10 text-purple-500 border-purple-500/20",
+      'affiliate.note_added': "bg-gray-500/10 text-gray-500 border-gray-500/20",
+      'commission.approved': "bg-green-500/10 text-green-500 border-green-500/20",
+      'commission.rejected': "bg-red-500/10 text-red-500 border-red-500/20",
+      'commission.bulk_approved': "bg-green-500/10 text-green-500 border-green-500/20",
+      'withdrawal.approved': "bg-green-500/10 text-green-500 border-green-500/20",
+      'withdrawal.processed': "bg-blue-500/10 text-blue-500 border-blue-500/20",
+      'withdrawal.completed': "bg-green-500/10 text-green-500 border-green-500/20",
+      'withdrawal.rejected': "bg-red-500/10 text-red-500 border-red-500/20",
+    };
+    return styles[action] || "bg-gray-500/10 text-gray-500";
+  };
+
+  const getActionLabel = (action: string) => {
+    const labels: Record<string, string> = {
+      'affiliate.approved': 'Approved',
+      'affiliate.suspended': 'Suspended',
+      'affiliate.banned': 'Banned',
+      'affiliate.tier_changed': 'Tier Changed',
+      'affiliate.rate_changed': 'Rate Changed',
+      'affiliate.note_added': 'Note Added',
+      'commission.approved': 'Commission Approved',
+      'commission.rejected': 'Commission Rejected',
+      'commission.bulk_approved': 'Bulk Approved',
+      'withdrawal.approved': 'Withdrawal Approved',
+      'withdrawal.processed': 'Withdrawal Processed',
+      'withdrawal.completed': 'Withdrawal Completed',
+      'withdrawal.rejected': 'Withdrawal Rejected',
+    };
+    return labels[action] || action;
+  };
+
+  const getActionIcon = (action: string) => {
+    if (action.includes('approved') || action.includes('completed')) return <CheckCircle className="w-4 h-4 text-green-500" />;
+    if (action.includes('suspended') || action.includes('rejected') || action.includes('banned')) return <XCircle className="w-4 h-4 text-red-500" />;
+    if (action.includes('processed') || action.includes('changed')) return <AlertCircle className="w-4 h-4 text-blue-500" />;
+    return <Clock className="w-4 h-4 text-gray-500" />;
+  };
+
+  const filteredLogs = (auditLogs?.data || []).filter((log: any) => {
+    if (actionFilter !== "all" && log.action !== actionFilter) return false;
+    if (search && !log.description?.toLowerCase().includes(search.toLowerCase()) &&
+        !log.userEmail?.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      {auditStats && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-md rounded-[24px] p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <History className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Actions</p>
+                <p className="text-xl font-bold">{auditStats.totalActions}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur-md rounded-[24px] p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Approvals</p>
+                <p className="text-xl font-bold">
+                  {(auditStats.byAction?.['affiliate.approved'] || 0) +
+                   (auditStats.byAction?.['commission.approved'] || 0) +
+                   (auditStats.byAction?.['withdrawal.approved'] || 0)}
+                </p>
+              </div>
+            </div>
+          </Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur-md rounded-[24px] p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <XCircle className="w-5 h-5 text-red-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Rejections</p>
+                <p className="text-xl font-bold">
+                  {(auditStats.byAction?.['commission.rejected'] || 0) +
+                   (auditStats.byAction?.['withdrawal.rejected'] || 0)}
+                </p>
+              </div>
+            </div>
+          </Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur-md rounded-[24px] p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-orange-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Suspensions</p>
+                <p className="text-xl font-bold">
+                  {(auditStats.byAction?.['affiliate.suspended'] || 0) +
+                   (auditStats.byAction?.['affiliate.banned'] || 0)}
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Audit Logs Table */}
+      <Card className="border-border/50 bg-card/60 backdrop-blur-md rounded-[32px] overflow-hidden">
+        {/* Filters */}
+        <div className="p-6 border-b border-border/50">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search audit logs..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-11 h-12 rounded-2xl"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Select value={actionFilter} onValueChange={setActionFilter}>
+                <SelectTrigger className="w-[200px] h-12 rounded-2xl">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Filter by action" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Actions</SelectItem>
+                  <SelectItem value="affiliate.approved">Affiliate Approved</SelectItem>
+                  <SelectItem value="affiliate.suspended">Affiliate Suspended</SelectItem>
+                  <SelectItem value="affiliate.banned">Affiliate Banned</SelectItem>
+                  <SelectItem value="affiliate.tier_changed">Tier Changed</SelectItem>
+                  <SelectItem value="affiliate.rate_changed">Rate Changed</SelectItem>
+                  <SelectItem value="commission.approved">Commission Approved</SelectItem>
+                  <SelectItem value="commission.rejected">Commission Rejected</SelectItem>
+                  <SelectItem value="withdrawal.approved">Withdrawal Approved</SelectItem>
+                  <SelectItem value="withdrawal.completed">Withdrawal Completed</SelectItem>
+                  <SelectItem value="withdrawal.rejected">Withdrawal Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                onClick={onRefresh}
+                className="h-12 rounded-2xl gap-2"
+              >
+                <RefreshCw className="w-4 h-4" /> Refresh
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-muted/30 border-b border-border/50 text-sm font-semibold text-muted-foreground">
+                <th className="px-6 py-4">Action</th>
+                <th className="px-6 py-4">User</th>
+                <th className="px-6 py-4">Target</th>
+                <th className="px-6 py-4">Description</th>
+                <th className="px-6 py-4">Changes</th>
+                <th className="px-6 py-4">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/30">
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-48" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                  </tr>
+                ))
+              ) : filteredLogs.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                    No audit logs found
+                  </td>
+                </tr>
+              ) : (
+                filteredLogs.map((log: any) => (
+                  <tr key={log.id} className="group hover:bg-primary/[0.02]">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        {getActionIcon(log.action)}
+                        <Badge className={cn("text-xs font-semibold", getActionBadge(log.action))}>
+                          {getActionLabel(log.action)}
+                        </Badge>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="font-bold text-sm">{log.userEmail}</p>
+                        <p className="text-xs text-muted-foreground">{log.userRole}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="font-medium text-sm capitalize">{log.targetType}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{log.targetId?.substring(0, 8)}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-sm max-w-xs truncate">{log.description}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      {log.oldValue && log.newValue && (
+                        <div className="text-xs space-y-1">
+                          {Object.keys(log.newValue).map((key) => (
+                            <div key={key} className="flex items-center gap-1">
+                              <span className="text-muted-foreground">{key}:</span>
+                              <span className="text-red-500 line-through">{JSON.stringify(log.oldValue[key])}</span>
+                              <span className="text-green-500">{JSON.stringify(log.newValue[key])}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {new Date(log.createdAt).toLocaleString()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {pagination && (
+          <div className="p-4 border-t border-border/50 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Page {pagination.page} of {pagination.totalPages}
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline"
+                size="sm"
+                onClick={() => onPageChange(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button variant="outline"
+                size="sm"
+                onClick={() => onPageChange(pagination.page + 1)}
+                disabled={pagination.page >= pagination.totalPages}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 }

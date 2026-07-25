@@ -18,7 +18,7 @@ import {
     BadgeCheck,
     ArrowUpRight,
     Sparkles,
-    LucideIcon
+    SearchX
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -124,56 +124,76 @@ export default function LeadsDashboardPage() {
     }
 
     return (
-        <div className="space-y-8 pb-20">
+        <div className="space-y-8">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Marketing Leads</h1>
-                    <p className="text-muted-foreground font-medium mt-1">Manage and track your customer acquisitions and subscriptions.</p>
+                    <h1 className="text-3xl font-bold">Marketing Leads</h1>
+                    <p className="text-muted-foreground mt-1">Manage and track your customer acquisitions and subscriptions.</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2 rounded-xl h-11 border-border/50 bg-card/50 backdrop-blur-sm font-bold" onClick={exportCsv} disabled={filteredLeads.length === 0}>
+                    <Button variant="outline" className="gap-2 rounded-xl h-10 border-border/50 bg-card/50 font-semibold" onClick={exportCsv} disabled={filteredLeads.length === 0}>
                         <Download className="w-4 h-4" />
                         Export CSV
                     </Button>
                 </div>
             </div>
 
-            {/* Stats Overview - real data only */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard 
-                    title="Total Leads" 
-                    value={stats?.total ?? 0} 
-                    icon={Users} 
-                />
-                <StatCard 
-                    title="New Submissions" 
-                    value={stats?.newLeads ?? 0} 
-                    icon={Sparkles} 
-                />
-                <StatCard 
-                    title="CTA Conversions" 
-                    value={stats?.ctaCount ?? 0} 
-                    icon={MousePointer2} 
-                />
-                <StatCard 
-                    title="Newsletter" 
-                    value={stats?.newsletterCount ?? 0} 
-                    icon={Mail} 
-                />
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats?.total ?? 0}</div>
+                        <p className="text-xs text-muted-foreground">All submissions</p>
+                    </CardContent>
+                </Card>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">New Submissions</CardTitle>
+                        <Sparkles className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats?.newLeads ?? 0}</div>
+                        <p className="text-xs text-muted-foreground">Recent entries</p>
+                    </CardContent>
+                </Card>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">CTA Conversions</CardTitle>
+                        <MousePointer2 className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats?.ctaCount ?? 0}</div>
+                        <p className="text-xs text-muted-foreground">Click-through actions</p>
+                    </CardContent>
+                </Card>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">Newsletter</CardTitle>
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats?.newsletterCount ?? 0}</div>
+                        <p className="text-xs text-muted-foreground">Email signups</p>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Table Card */}
-            <Card className="border-border/50 overflow-hidden bg-card/50 backdrop-blur-sm rounded-[32px] shadow-sm">
-                <CardHeader className="p-6 border-b border-border/50 bg-muted/5">
+            <Card className="border-border/50 overflow-hidden bg-card/50 backdrop-blur-sm">
+                <CardHeader className="bg-muted/20 border-b border-border/50">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="relative flex-1 max-w-md">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <div className="relative flex-1 max-w-sm">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input 
                                 placeholder="Search leads by name or email..." 
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-11 h-12 rounded-2xl bg-background border-border/50 focus:ring-primary/20" 
+                                className="pl-10 h-10 rounded-xl bg-background border-border/50 focus:ring-primary/20" 
                             />
                         </div>
                         <div className="flex items-center gap-2">
@@ -265,8 +285,8 @@ export default function LeadsDashboardPage() {
                                         <TableCell className="text-right pr-8 py-4">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl">
-                                                        <MoreHorizontal size={16} />
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                                        <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-48 rounded-2xl p-2 border-border/50 bg-card/95 backdrop-blur-xl">
@@ -285,12 +305,12 @@ export default function LeadsDashboardPage() {
                             })}
                             {filteredLeads.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-64 text-center">
-                                        <div className="flex flex-col items-center justify-center gap-4 text-muted-foreground">
-                                            <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center">
-                                                <Megaphone className="w-8 h-8 opacity-20" />
-                                            </div>
-                                            <p className="font-medium">No leads found matching your search.</p>
+                                    <TableCell colSpan={6}>
+                                        <div className="flex flex-col items-center justify-center py-20 bg-muted/5">
+                                            <SearchX className="h-12 w-12 text-muted-foreground mb-4" />
+                                            <h3 className="text-xl font-bold">No leads found</h3>
+                                            <p className="text-muted-foreground text-sm max-w-xs text-center">No leads match your current search or filter criteria.</p>
+                                            <Button variant="link" className="mt-2 text-primary font-bold" onClick={() => { setSearchQuery(""); setStatusFilter("all"); setTypeFilter("all"); }}>Clear Search</Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -328,20 +348,3 @@ export default function LeadsDashboardPage() {
     );
 }
 
-function StatCard({ title, value, icon: Icon }: { title: string; value: number | string; icon: LucideIcon }) {
-    return (
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm rounded-[32px] overflow-hidden group hover:border-primary/30 transition-all">
-            <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                        <Icon size={20} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                    </div>
-                </div>
-                <div>
-                    <p className="text-xs font-semibold  text-muted-foreground opacity-50 mb-1">{title}</p>
-                    <h3 className="text-3xl font-semibold">{value}</h3>
-                </div>
-            </CardContent>
-        </Card>
-    );
-}

@@ -19,7 +19,7 @@ import Link from "next/link";
 export default function ShopPage() {
     const { data: apiProducts = [] } = usePublicProducts();
     const { data: apiBundles = [] } = usePublicBundles();
-    const { wishlist, addToWishlist, removeFromWishlist } = useFavorites();
+    const { favorites: wishlist, addToFavorites, removeFromFavorites } = useFavorites();
 
     const { content } = useShopContentStore();
     const [searchQuery, setSearchQuery] = useState("");
@@ -147,9 +147,9 @@ export default function ShopPage() {
                                         isFavorite={favoriteIds.has(product.id)}
                                         onToggleWishlist={() => {
                                             if (favoriteIds.has(product.id)) {
-                                                removeFromWishlist(product.id);
+                                                removeFromFavorites(product.id);
                                             } else {
-                                                addToWishlist(product.id);
+                                                addToFavorites(product.id);
                                             }
                                         }}
                                     />

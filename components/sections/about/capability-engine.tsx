@@ -72,7 +72,7 @@ export default function CapabilityEngine() {
                         transition={{ duration: 0.5 }}
                         style={{ willChange: "transform, opacity" }}
                     >
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-wide text-sm">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-primary/30 bg-primary/5 text-primary font-semibold tracking-wide text-xs">
                             Technical Capability Matrix
                         </Badge>
                     </AnimatedDiv>
@@ -80,7 +80,7 @@ export default function CapabilityEngine() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-6xl font-extrabold tracking-tight text-white"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white"
                         transition={{ duration: 0.5 }}
                         style={{ willChange: "transform, opacity" }}
                     >
@@ -111,7 +111,7 @@ export default function CapabilityEngine() {
                                         <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cap.color} p-4 flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-500`}>
                                             <cap.icon size={32} />
                                         </div>
-                                        <span className="text-sm font-semibold text-primary tracking-wide opacity-60">{cap.badge}</span>
+                                        <span className="text-xs font-semibold text-primary tracking-wide opacity-60">{cap.badge}</span>
                                     </div>
                                     <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{cap.title}</h3>
                                     <p className="text-muted-foreground font-normal leading-relaxed text-base md:text-lg">
@@ -133,7 +133,7 @@ export default function CapabilityEngine() {
                                 <div className="space-y-4 pt-4 border-t border-white/5 mt-auto relative z-20">
                                     <div className="flex justify-between items-center group/title">
                                         <h4 className="text-sm font-semibold text-primary/70 tracking-wide">Protocol Breakdown</h4>
-                                        <div className="h-4 w-4 rounded-full border border-primary/20 flex items-center justify-center text-[8px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">?</div>
+                                        <div className="h-4 w-4 rounded-full border border-primary/20 flex items-center justify-center text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">?</div>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
                                         {cap.features.map((feature, i) => (

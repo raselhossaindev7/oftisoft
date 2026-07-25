@@ -43,7 +43,7 @@ export function usePosts(options?: {
     offset?: number;
 }) {
     return useQuery({
-        queryKey: ['posts', options],
+        queryKey: ['posts', options?.status, options?.type, options?.categoryId, options?.tag, options?.search, options?.limit, options?.offset],
         queryFn: () => api.get<{ posts: Post[]; total: number }>(endpoints.list, { params: options }),
     });
 }

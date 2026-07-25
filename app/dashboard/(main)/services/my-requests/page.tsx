@@ -186,8 +186,8 @@ export default function MyServiceRequestsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<any>(null);
-    
-    const { projects, isLoading, updatePaymentStatus } = useProjects();
+
+    const { projects, isLoading, isError, refetch, updatePaymentStatus } = useProjects();
 
     const handlePaymentComplete = (projectId: string) => {
         updatePaymentStatus(projectId, "Paid");
@@ -221,6 +221,21 @@ export default function MyServiceRequestsPage() {
         return (
             <div className="flex items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                <AlertCircle className="w-16 h-16 text-destructive" />
+                <h2 className="text-2xl font-bold">Failed to Load Projects</h2>
+                <p className="text-muted-foreground">
+                    Something went wrong while fetching your projects.
+                </p>
+                <Button variant="outline" onClick={() => refetch()}>
+                    Try Again
+                </Button>
             </div>
         );
     }

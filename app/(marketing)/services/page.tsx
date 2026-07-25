@@ -7,7 +7,6 @@ import ServicePackages from "@/components/sections/services-page/service-package
 import ServiceProcess from "@/components/sections/services-page/service-process";
 import ServiceFAQ from "@/components/sections/services-page/service-faq";
 import ServiceTechStack from "@/components/sections/services-page/service-tech-stack";
-import TrendingServices from "@/components/sections/services-page/trending-services";
 import { ServicesSidebar } from "@/components/sections/services-page/services-sidebar";
 import { ServiceOfferCard } from "@/components/sections/services-page/service-offer-card";
 import CTA from "@/components/sections/cta";
@@ -19,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useServicesContentStore } from "@/lib/store/services-content";
+import { useServicesContent } from "@/hooks/useServicesContent";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -36,6 +36,7 @@ const categories = [
 
 export default function ServicesPage() {
     const { content } = useServicesContentStore();
+    useServicesContent();
 
     // Inject JSON-LD structured data for SEO
     useEffect(() => {
@@ -208,9 +209,6 @@ export default function ServicesPage() {
                     )} */}
                 </div>
             </section>
-
-            {/* Trending Services */}
-            {!searchQuery && <TrendingServices offers={offers} />}
 
             {/* All Services Grid */}
             <section className="py-16 md:py-24 bg-background relative overflow-hidden">

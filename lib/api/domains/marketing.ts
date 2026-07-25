@@ -67,8 +67,8 @@ export interface SystemConfig {
     maintenanceMode: boolean;
     passwordPolicy: 'low' | 'medium' | 'high';
     allowedIps: string;
-    stripePublishableKey?: string;
-    stripeSecretKey?: string;
+    dodoPaymentsApiKey?: string;
+    dodoPaymentsWebhookKey?: string;
     paypalClientId?: string;
     paypalClientSecret?: string;
     updatedAt: string;
@@ -98,7 +98,7 @@ export const systemAPI = {
         const response = await api.get('/system/config');
         return response.data;
     },
-    getPublicConfig: async (): Promise<{ stripePublishableKey?: string; paypalClientId?: string; shopName: string; currency: string }> => {
+    getPublicConfig: async (): Promise<{ paypalClientId?: string; shopName: string; currency: string }> => {
         const response = await api.get('/system/public/config');
         return response.data;
     },

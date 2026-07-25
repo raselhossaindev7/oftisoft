@@ -4,10 +4,75 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ═══════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY SYSTEM
+   Hybrid approach: Apple.com fluid display + Udemy discrete body scale
+   Viewport range: 390px (iPhone) → 1440px (Desktop)
+   ═══════════════════════════════════════════════════════════════════════ */
+
 :root {
-  /* Premium Dark Theme Palette */
+  /* ── Fluid Display Tokens (Apple-style clamp) ────────────────────── */
+  /* Display Hero: 48px → 64px */
+  --fs-display: clamp(3rem, 2.2857vw + 2.943rem, 4rem);
+  --lh-display: 1.05;
+  --tracking-display: -0.04em;
+
+  /* Heading 1: 36px → 48px */
+  --fs-h1: clamp(2.25rem, 1.5238vw + 2.629rem, 3rem);
+  --lh-h1: 1.1;
+  --tracking-h1: -0.03em;
+
+  /* Heading 2: 28px → 36px */
+  --fs-h2: clamp(1.75rem, 1.0476vw + 2.245rem, 2.25rem);
+  --lh-h2: 1.15;
+  --tracking-h2: -0.025em;
+
+  /* Heading 3: 22px → 28px */
+  --fs-h3: clamp(1.375rem, 0.6667vw + 1.9625rem, 1.75rem);
+  --lh-h3: 1.2;
+  --tracking-h3: -0.02em;
+
+  /* ── Discrete Body Tokens (Udemy-style, breakpoint-stepped) ──────── */
+  --fs-body: 1rem;           /* 16px mobile */
+  --lh-body: 1.6;
+  --tracking-body: 0em;
+
+  --fs-body-lg: 1.125rem;    /* 18px */
+  --lh-body-lg: 1.5;
+  --tracking-body-lg: -0.01em;
+
+  --fs-body-sm: 0.875rem;    /* 14px */
+  --lh-body-sm: 1.5;
+  --tracking-body-sm: 0.01em;
+
+  /* ── Caption & Micro ─────────────────────────────────────────────── */
+  --fs-caption: 0.75rem;     /* 12px mobile */
+  --lh-caption: 1.4;
+  --tracking-caption: 0.02em;
+
+  --fs-micro: 0.6875rem;     /* 11px */
+  --lh-micro: 1.3;
+  --tracking-micro: 0.03em;
+
+  /* ── Subheading ──────────────────────────────────────────────────── */
+  --fs-subheading: 1.125rem; /* 18px mobile → 21px desktop */
+  --lh-subheading: 1.4;
+  --tracking-subheading: -0.01em;
+}
+
+/* Desktop body text upgrade: 16px → 17px (Apple caps body at 17px) */
+@media (min-width: 744px) {
+  :root {
+    --fs-body: 1.0625rem;     /* 17px */
+    --lh-body: 1.47;
+    --fs-caption: 0.8125rem;  /* 13px */
+    --fs-subheading: 1.3125rem; /* 21px */
+  }
+}
+
+:root {
+  /* Premium Dark Theme Palette - 2026 Aurora */
   --background: #030712;
-  /* Rich Dark Background */
   --foreground: #f8fafc;
 
   --primary: #6366f1;
@@ -36,17 +101,14 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  /* Animation Variables */
   --radius: 0.5rem;
 
-  /* Charts - Matching the Indigo/Blue theme */
   --chart-1: #6366f1;
   --chart-2: #0ea5e9;
   --chart-3: #94a3b8;
   --chart-4: #1e293b;
   --chart-5: #0f172a;
 
-  /* Sidebar - Inferred */
   --sidebar: #0f172a;
   --sidebar-foreground: #f8fafc;
   --sidebar-primary: #6366f1;
@@ -72,6 +134,32 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* ── Typography Scale (maps to text-* utilities) ─────────────────── */
+  --font-size-xs: var(--fs-caption);
+  --font-size-sm: var(--fs-body-sm);
+  --font-size-base: var(--fs-body);
+  --font-size-lg: var(--fs-body-lg);
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+  --font-size-7xl: 4.5rem;
+  --font-size-8xl: 6rem;
+  --font-size-9xl: 8rem;
+
+  /* ── Semantic Typography Tokens (use these for consistent design) ── */
+  --font-size-display: var(--fs-display);
+  --font-size-heading-1: var(--fs-h1);
+  --font-size-heading-2: var(--fs-h2);
+  --font-size-heading-3: var(--fs-h3);
+  --font-size-subheading: var(--fs-subheading);
+  --font-size-body-lg: var(--fs-body-lg);
+  --font-size-body-sm: var(--fs-body-sm);
+  --font-size-caption: var(--fs-caption);
+  --font-size-micro: var(--fs-micro);
 
   --animate-float: float 6s ease-in-out infinite;
   --animate-pulse-slow: pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -130,8 +218,75 @@
   66% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
+/* 2026 Aurora Chart Animations */
+@keyframes aurora-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-marquee {
+  animation: marquee-scroll 30s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Lightbox enter/exit */
+@keyframes lightbox-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes lightbox-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.lightbox-enter {
+  animation: lightbox-backdrop-in 0.25s ease-out forwards;
+}
+
+.lightbox-content-enter {
+  animation: lightbox-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.aurora-border {
+  background: linear-gradient(135deg, #6366f1, #0ea5e9, #10b981, #6366f1);
+  background-size: 300% 300%;
+  animation: aurora-shift 8s ease infinite;
+}
+
+.glow-dot {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
 body {
   font-family: var(--font-sans), sans-serif;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--tracking-body);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -158,6 +313,93 @@ body {
 /* Grain texture - inline SVG, no external requests */
 .bg-grain {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SEMANTIC TYPOGRAPHY CLASSES
+   Use these for consistent hierarchy across all components
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.type-display {
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: var(--tracking-display);
+  font-weight: 700;
+}
+
+.type-h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--tracking-h1);
+  font-weight: 700;
+}
+@media (min-width: 1024px) {
+  .type-h1 { font-size: 3.5rem; }
+}
+@media (min-width: 1280px) {
+  .type-h1 { font-size: 4rem; }
+}
+
+.type-h2 {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--tracking-h2);
+  font-weight: 600;
+}
+@media (min-width: 1024px) {
+  .type-h2 { font-size: 2.5rem; }
+}
+
+.type-h3 {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--tracking-h3);
+  font-weight: 600;
+}
+
+.type-subheading {
+  font-size: var(--fs-subheading);
+  line-height: var(--lh-subheading);
+  letter-spacing: var(--tracking-subheading);
+  font-weight: 500;
+}
+
+.type-body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--tracking-body);
+  font-weight: 400;
+}
+
+.type-body-lg {
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body-lg);
+  letter-spacing: var(--tracking-body-lg);
+  font-weight: 400;
+}
+
+.type-body-sm {
+  font-size: var(--fs-body-sm);
+  line-height: var(--lh-body-sm);
+  letter-spacing: var(--tracking-body-sm);
+  font-weight: 400;
+}
+@media (min-width: 768px) {
+  .type-body-sm { font-size: 1rem; }
+}
+
+.type-caption {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--tracking-caption);
+  font-weight: 400;
+}
+
+.type-micro {
+  font-size: var(--fs-micro);
+  line-height: var(--lh-micro);
+  letter-spacing: var(--tracking-micro);
+  font-weight: 400;
 }
 
 @layer base {

@@ -330,7 +330,7 @@ export default function ServiceOrderDetailsPage() {
   const id = params?.id as string;
 
   const queryClient = useQueryClient();
-  const { project, isLoading, deleteProject, isDeleting, updateProject, updatePaymentStatus } =
+  const { project, isLoading, isError, refetch, deleteProject, isDeleting, updateProject, updatePaymentStatus } =
     useProjects(id);
   const { user } = useAuth();
 
@@ -559,6 +559,28 @@ export default function ServiceOrderDetailsPage() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+        <AlertCircle className="w-16 h-16 text-destructive" />
+        <h2 className="text-2xl font-bold">Failed to Load Project</h2>
+        <p className="text-muted-foreground">
+          Something went wrong while fetching the project details.
+        </p>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => refetch()}>
+            Try Again
+          </Button>
+          <Button asChild>
+            <Link href="/dashboard/services/my-requests">
+              <ArrowLeft className="w-4 h-4 mr-2" /> Back to Projects
+            </Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -811,7 +833,7 @@ export default function ServiceOrderDetailsPage() {
                         {m.title}
                       </h4>
                       <div className="flex items-center gap-1 shrink-0">
-                        <Badge variant="outline" className={`text-[10px] h-5 px-1.5 ${
+                        <Badge variant="outline" className={`text-micro h-5 px-1.5 ${
                           m.status === 'pending' ? 'text-muted-foreground' :
                           m.status === 'in_progress' ? 'text-blue-500 border-blue-500/20' :
                           m.status === 'review' ? 'text-amber-500 border-amber-500/20' :
@@ -839,7 +861,7 @@ export default function ServiceOrderDetailsPage() {
                       </div>
                     </div>
                     {m.description && <p className="text-xs text-muted-foreground mt-0.5">{m.description}</p>}
-                    {m.dueDate && <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(m.dueDate).toLocaleDateString()}</p>}
+                    {m.dueDate && <p className="text-micro text-muted-foreground mt-1 flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(m.dueDate).toLocaleDateString()}</p>}
                   </div>
                 </div>
               )) : (
@@ -1053,7 +1075,7 @@ export default function ServiceOrderDetailsPage() {
                       {project.paymentStatus || "Pending"}
                     </Badge>
                     {(project.paymentStatus === "Unpaid" || project.paymentStatus === "pending") && (
-                      <Button size="sm" className="h-6 text-[10px] rounded-lg px-2" onClick={() => setSelectedProject(project)}>
+                      <Button size="sm" className="h-6 text-micro rounded-lg px-2" onClick={() => setSelectedProject(project)}>
                         Pay Now
                       </Button>
                     )}

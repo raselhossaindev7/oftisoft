@@ -134,7 +134,7 @@ function SystemSettingsContent() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
-      toast.success("Operative invited to the grid.");
+      toast.success("Staff invited.");
     },
   });
 
@@ -142,7 +142,7 @@ function SystemSettingsContent() {
     mutationFn: (id: string) => systemAPI.removeStaff(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
-      toast.success("Staff member removed from roster.");
+      toast.success("Staff member removed.");
     },
   });
 
@@ -160,7 +160,7 @@ function SystemSettingsContent() {
     mutationFn: (name: string) => systemAPI.createApiKey(name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["api-keys"] });
-      toast.success("New API key generated.");
+      toast.success("API key created.");
     },
   });
 
@@ -195,13 +195,13 @@ function SystemSettingsContent() {
       systemAPI.updateConfig(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["system-config"] });
-      toast.success("Global Architecture Synchronized");
+      toast.success("Settings saved");
     },
     onError: (err: any) => {
-      toast.error("Synchronization Failed", {
+      toast.error("Failed to save", {
         description:
           err.response?.data?.message ||
-          "Internal protocol interference detected.",
+          "An error occurred while saving settings.",
       });
     },
   });
@@ -214,66 +214,65 @@ function SystemSettingsContent() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <Loader2 className="w-12 h-auto animate-spin text-primary opacity-20" />
-        <p className="text-muted-foreground font-semibold animate-pulse">
-          Accessing Core Architecture...
+        <p className="text-muted-foreground animate-pulse">
+          Loading settings...
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-12 pb-20  mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-border/50 pb-10">
+    <div className="space-y-8 pb-20 mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl md:text-3xl font-semibold  bg-gradient-to-r from-foreground via-foreground to-foreground/40 bg-clip-text text-transparent">
-            System Architecture
+          <h1 className="text-3xl font-semibold">
+            System Settings
           </h1>
-          <p className="text-muted-foreground font-medium mt-3 max-w-2xl leading-relaxed">
-            Manage core platform configuration, staff permissions, and global
-            architectural nodes with industrial precision.
+          <p className="text-muted-foreground text-sm mt-1">
+            Manage platform configuration, staff, and security settings.
           </p>
         </div>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex gap-2">
           <Button
             variant="outline"
-            className="h-14 px-8 rounded-2xl gap-3 font-semibold underline decoration-primary/30 underline-offset-8 decoration-2 hover:bg-muted transition-all"
+            className="h-9 rounded-lg gap-2"
             onClick={() =>
-              toast.info("Reset staging: run from your deployment pipeline.")
+              toast.info("Reset using your deployment pipeline.")
             }
           >
-            <RefreshCcw className="w-5 h-5 opacity-40" /> Reset Staging
+            <RefreshCcw className="w-4 h-4" /> Reset
           </Button>
           <Button
             onClick={handleSync}
             disabled={updateMutation.isPending}
-            className="h-14 px-10 rounded-2xl gap-3 font-semibold bg-primary text-white shadow-2xl shadow-primary/25 hover:scale-[1.03] active:scale-[0.97] transition-all"
+            className="h-9 rounded-lg gap-2"
           >
             {updateMutation.isPending ? (
-              <RefreshCw className="w-5 h-5 animate-spin" />
+              <RefreshCw className="w-4 h-4 animate-spin" />
             ) : (
-              <Save className="w-5 h-5" />
+              <Save className="w-4 h-4" />
             )}
-            Sync Architecture
+            Save
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-10">
-        <TabsList className="bg-muted/30 p-2 rounded-[32px] h-20 w-fit border border-border/50 backdrop-blur-3xl shadow-2xl">
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="bg-muted/30 p-1 rounded-lg h-10 w-fit border border-border/50">
           {[
-            { value: "general", label: "Shop Logic", icon: Globe },
-            { value: "staff", label: "Operative Roster", icon: Users },
-            { value: "email", label: "Signal Templates", icon: Mail },
-            { value: "api", label: "Neural Bridge", icon: Key },
-            { value: "security", label: "Core Hardening", icon: ShieldCheck },
+            { value: "general", label: "General", icon: Globe },
+            { value: "staff", label: "Staff", icon: Users },
+            { value: "email", label: "Email", icon: Mail },
+            { value: "api", label: "API Keys", icon: Key },
+            { value: "security", label: "Security", icon: ShieldCheck },
           ].map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="rounded-[24px] h-16 gap-3 data-[state=active]:bg-background data-[state=active]:shadow-2xl data-[state=active]:text-primary font-semibold px-8 transition-all duration-500"
+              className="rounded-md h-8 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium text-xs px-4 transition-all"
             >
-              <tab.icon className="w-5 h-5" />
-              <span className="md:inline hidden">{tab.label}</span>
+              <tab.icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
             </TabsTrigger>
           ))}
         </TabsList>
@@ -281,30 +280,31 @@ function SystemSettingsContent() {
         {/* General Shop Config */}
         <TabsContent
           value="general"
-          className="space-y-8 animate-in fade-in zoom-in-95 duration-500"
+          className="space-y-6"
         >
-          <div className="grid lg:grid-cols-3 gap-10">
-            <div className="lg:col-span-2 space-y-8">
-              <Card className="border-none rounded-[48px] bg-muted/10 backdrop-blur-xl border border-border/40 overflow-hidden shadow-sm">
-                <CardHeader className="p-10 border-b border-border/30 bg-muted/20">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                      <Globe className="w-5 h-5" />
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="rounded-xl bg-card border border-border/50 overflow-hidden shadow-sm">
+                <CardHeader className="p-5 border-b border-border/50 bg-muted/5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                      <Globe className="w-4 h-4" />
                     </div>
-                    <CardTitle className="text-2xl font-semibold ">
-                      Global Identity
-                    </CardTitle>
+                    <div>
+                      <CardTitle className="text-base font-semibold">
+                        General
+                      </CardTitle>
+                      <CardDescription className="text-sm text-muted-foreground">
+                        Public-facing information for your marketplace.
+                      </CardDescription>
+                    </div>
                   </div>
-                  <CardDescription className="font-medium text-muted-foreground mt-2">
-                    Public facing metadata for your marketplace nodes across the
-                    grid.
-                  </CardDescription>
                 </CardHeader>
-                <CardContent className="p-10 space-y-8">
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                      <Label className="text-sm font-semibold uppercase  text-muted-foreground/60 ml-2">
-                        Marketplace Labeling
+                <CardContent className="p-5 space-y-5">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium">
+                        Shop Name
                       </Label>
                       <Input
                         value={formState.shopName || config?.shopName || ""}
@@ -314,12 +314,12 @@ function SystemSettingsContent() {
                             shopName: e.target.value,
                           })
                         }
-                        className="h-14 px-6 rounded-2xl border-none bg-muted/30 focus-visible:ring-primary/20 font-semibold text-base"
+                        className="h-9 rounded-lg"
                       />
                     </div>
-                    <div className="space-y-3">
-                      <Label className="text-sm font-semibold uppercase  text-muted-foreground/60 ml-2">
-                        System Support Vector
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium">
+                        Support Email
                       </Label>
                       <Input
                         value={
@@ -331,16 +331,16 @@ function SystemSettingsContent() {
                             supportEmail: e.target.value,
                           })
                         }
-                        className="h-14 px-6 rounded-2xl border-none bg-muted/30 focus-visible:ring-primary/20 font-semibold text-base"
+                        className="h-9 rounded-lg"
                       />
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    <Label className="text-sm font-semibold uppercase  text-muted-foreground/60 ml-2">
-                      Platform Meta-Lexicon
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium">
+                      Description
                     </Label>
                     <Textarea
-                      rows={4}
+                      rows={3}
                       value={formState.description || config?.description || ""}
                       onChange={(e) =>
                         setFormState({
@@ -348,56 +348,51 @@ function SystemSettingsContent() {
                           description: e.target.value,
                         })
                       }
-                      className="rounded-3xl border-none bg-muted/30 p-6 text-base focus-visible:ring-primary/20 transition-all font-bold resize-none"
+                      className="rounded-lg text-sm resize-none"
                     />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-none rounded-[48px] bg-muted/10 backdrop-blur-xl border border-border/40 overflow-hidden shadow-sm">
-                <CardHeader className="p-10 border-b border-border/30 bg-muted/20">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                      <Layout className="w-5 h-5" />
+              <Card className="rounded-xl bg-card border border-border/50 overflow-hidden shadow-sm">
+                <CardHeader className="p-5 border-b border-border/50 bg-muted/5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                      <Layout className="w-4 h-4" />
                     </div>
-                    <CardTitle className="text-2xl font-semibold ">
-                      Fiscal Standardization
-                    </CardTitle>
+                    <div>
+                      <CardTitle className="text-base font-semibold">
+                        Localization
+                      </CardTitle>
+                      <CardDescription className="text-sm text-muted-foreground">
+                        Currency, timezone, and date format settings.
+                      </CardDescription>
+                    </div>
                   </div>
-                  <CardDescription className="font-medium text-muted-foreground mt-2">
-                    Normalization protocols for global transactions and temporal
-                    logging.
-                  </CardDescription>
                 </CardHeader>
-                <CardContent className="p-10 grid md:grid-cols-3 gap-8">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold uppercase  text-muted-foreground/60 ml-2">
-                      Base Settlement Node
-                    </Label>
+                <CardContent className="p-5 grid md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium">Currency</Label>
                     <Input
                       value={formState.currency || config?.currency || ""}
                       onChange={(e) =>
                         setFormState({ ...formState, currency: e.target.value })
                       }
-                      className="h-14 px-6 rounded-2xl border-none bg-muted/30 font-semibold"
+                      className="h-9 rounded-lg"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold uppercase  text-muted-foreground/60 ml-2">
-                      Temporal Node
-                    </Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium">Timezone</Label>
                     <Input
                       value={formState.timezone || config?.timezone || ""}
                       onChange={(e) =>
                         setFormState({ ...formState, timezone: e.target.value })
                       }
-                      className="h-14 px-6 rounded-2xl border-none bg-muted/30 font-semibold"
+                      className="h-9 rounded-lg"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold uppercase  text-muted-foreground/60 ml-2">
-                      Chronological Mask
-                    </Label>
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium">Date Format</Label>
                     <Input
                       value={formState.dateFormat || config?.dateFormat || ""}
                       onChange={(e) =>
@@ -406,57 +401,46 @@ function SystemSettingsContent() {
                           dateFormat: e.target.value,
                         })
                       }
-                      className="h-14 px-6 rounded-2xl border-none bg-muted/30 font-semibold"
+                      className="h-9 rounded-lg"
                     />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="space-y-8">
-              <Card className="border-none rounded-[48px] bg-primary/[0.03] border-2 border-primary/20 overflow-hidden relative shadow-2xl group">
-                <div className="absolute top-10 right-10 group-hover:rotate-12 transition-transform duration-700">
-                  <Server size={32} className="text-primary opacity-20" />
-                </div>
-                <CardHeader className="p-10">
-                  <CardTitle className="text-2xl font-semibold  flex items-center gap-3">
-                    <Database className="w-7 h-7 text-primary" /> Staging Node
+            <div className="space-y-6">
+              <Card className="rounded-xl bg-primary/[0.03] border-2 border-primary/20 overflow-hidden shadow-sm">
+                <CardHeader className="p-5">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Database className="w-5 h-5 text-primary" /> Deployment
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-10 pt-0 space-y-8">
-                  <p className="text-xs text-muted-foreground leading-relaxed font-bold">
-                    Your platform is currently synchronized with the Oftisoft
-                    Edge Proxy Node. Changes will propagate globally after a
-                    manual deployment cycle.
-                  </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed font-bold">
-                    Deploy your config to edge nodes via your CI/CD or run a
-                    manual sync from your hosting provider.
+                <CardContent className="p-5 pt-0 space-y-4">
+                  <p className="text-xs text-muted-foreground">
+                    Configuration changes propagate globally after a deployment cycle. Use your CI/CD pipeline to deploy.
                   </p>
                   <Button
                     type="button"
-                    className="w-full h-16 rounded-3xl font-semibold text-lg bg-primary text-white shadow-2xl shadow-primary/30 transition-all hover:scale-[1.05] active:scale-[0.95]"
+                    className="w-full h-9 rounded-lg text-sm"
                     onClick={() =>
                       toast.info(
-                        "Propagate: use your deployment pipeline to push config.",
+                        "Use your deployment pipeline to push config.",
                       )
                     }
                   >
-                    Propagate to Edge Nodes
+                    Deploy Config
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card className="border-none rounded-[48px] bg-muted/5 border border-border/40 p-10 flex flex-col items-center text-center space-y-6 group">
-                <div className="w-20 h-20 rounded-[30px] bg-background border border-border/50 flex items-center justify-center text-muted-foreground group-hover:scale-110 group-hover:rotate-12 group-hover:text-primary transition-all shadow-xl">
-                  <Lock size={32} />
+              <Card className="rounded-xl bg-muted/5 border border-border/50 p-5 flex flex-col items-center text-center space-y-4">
+                <div className="w-12 h-12 rounded-xl bg-background border border-border/50 flex items-center justify-center text-muted-foreground shadow-sm">
+                  <Lock size={20} />
                 </div>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-lg ">
-                    System Lock Engaged
-                  </h4>
-                  <p className="text-sm text-muted-foreground font-bold uppercase  opacity-60">
-                    High-level Administrative Integrity Active
+                <div className="space-y-1">
+                  <h4 className="font-medium text-sm">Admin Mode Active</h4>
+                  <p className="text-xs text-muted-foreground">
+                    High-level administrative access is enabled.
                   </p>
                 </div>
               </Card>
@@ -467,66 +451,65 @@ function SystemSettingsContent() {
         {/* Staff & Roles */}
         <TabsContent
           value="staff"
-          className="space-y-10 animate-in fade-in zoom-in-95 duration-500"
+          className="space-y-6"
         >
-          <Card className="border-none rounded-[48px] bg-muted/10 backdrop-blur-xl border border-border/40 overflow-hidden shadow-sm">
-            <CardHeader className="p-10 md:p-12 border-b border-border/30 bg-muted/20 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <Card className="rounded-xl bg-card border border-border/50 overflow-hidden shadow-sm">
+            <CardHeader className="p-5 border-b border-border/50 bg-muted/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <CardTitle className="text-3xl font-semibold ">
-                  Operative Roster
+                <CardTitle className="text-base font-semibold">
+                  Staff
                 </CardTitle>
-                <CardDescription className="font-medium mt-2 text-muted-foreground">
-                  Grant high-level permissions to authorized staff and manage
-                  node access keys.
+                <CardDescription className="text-sm text-muted-foreground mt-0.5">
+                  Manage staff members and their roles.
                 </CardDescription>
               </div>
               <Button
                 onClick={() => {
-                  const email = prompt("Operative Email:");
-                  const name = prompt("Operative Name:");
+                  const email = prompt("Email:");
+                  const name = prompt("Name:");
                   if (email && name)
                     inviteStaffMutation.mutate({ email, name });
                 }}
-                className="h-14 px-10 rounded-2xl gap-3 font-semibold bg-primary text-white shadow-2xl shadow-primary/30 transition-all hover:scale-[1.05]"
+                className="h-9 rounded-lg gap-2"
               >
-                <UserPlus className="w-5 h-5" /> Invite Operative
+                <UserPlus className="w-4 h-4" /> Invite Staff
               </Button>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/30 h-20 border-border/20">
-                    <TableHead className="px-12 font-semibold text-sm uppercase  text-muted-foreground/60">
-                      Operative Identity
+                  <TableRow className="bg-muted/5 border-border/50">
+                    <TableHead className="px-5 text-xs font-medium uppercase text-muted-foreground h-10">
+                      User
                     </TableHead>
-                    <TableHead className="font-semibold text-sm uppercase  text-muted-foreground/60">
-                      Matrix Role
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">
+                      Role
                     </TableHead>
-                    <TableHead className="font-semibold text-sm uppercase  text-muted-foreground/60">
-                      Presence Status
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">
+                      Status
                     </TableHead>
-                    <TableHead className="font-semibold text-sm uppercase  text-muted-foreground/60">
-                      Last Sync
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">
+                      Last Active
                     </TableHead>
-                    <TableHead className="text-right px-12"></TableHead>
+                    <TableHead className="text-right px-5"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {staff?.map((staff) => (
                     <TableRow
                       key={staff.id}
-                      className="group hover:bg-primary/[0.04] transition-all border-border/20 h-24"
+                      className="group hover:bg-primary/[0.02] transition-all border-border/50"
                     >
-                      <TableCell className="px-12">
-                        <div className="flex items-center gap-5">
-                          <div className="w-12 h-auto rounded-2xl bg-muted border border-border/50 flex items-center justify-center font-semibold text-sm group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner group-hover:shadow-primary/30 group-hover:-rotate-3">
+                      <TableCell className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-muted border border-border/50 flex items-center justify-center font-medium text-sm group-hover:bg-primary group-hover:text-white transition-all">
                             {(staff.name || '?').charAt(0)}
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-semibold text-base  group-hover:text-primary transition-colors">
+                            <span className="font-medium text-sm group-hover:text-primary transition-colors">
                               {staff.name || '—'}
                             </span>
-                            <span className="text-sm text-muted-foreground font-semibold uppercase  opacity-60 mt-0.5">
+                            <span className="text-xs text-muted-foreground">
                               {staff.email}
                             </span>
                           </div>
@@ -535,50 +518,43 @@ function SystemSettingsContent() {
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className="text-xs font-semibold uppercase  border-primary/30 text-primary bg-primary/5 px-4 h-8 rounded-full"
+                          className="text-xs font-medium border-primary/30 text-primary bg-primary/5 px-3 h-7 rounded-md"
                         >
                           {staff.role}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-3 bg-muted/30 px-4 py-2 rounded-xl w-fit border border-border/30 shadow-inner">
+                        <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-md w-fit border border-border/30">
                           <div
                             className={cn(
                               "w-2 h-2 rounded-full",
                               staff.isActive
-                                ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)] animate-pulse"
-                                : "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.8)]",
+                                ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+                                : "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]",
                             )}
                           />
-                          <span
-                            className={cn(
-                              "text-xs font-semibold uppercase ",
-                              staff.isActive
-                                ? "text-green-500"
-                                : "text-orange-500",
-                            )}
-                          >
-                            {staff.isActive ? "active" : "inactive"}
+                          <span className="text-xs font-medium">
+                            {staff.isActive ? "Active" : "Inactive"}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs text-muted-foreground font-semibold ">
+                      <TableCell className="text-xs text-muted-foreground">
                         {new Date(staff.updatedAt).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="text-right px-12">
+                      <TableCell className="text-right px-5">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-auto w-12 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/10 hover:text-primary active:scale-90"
+                              className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/10 hover:text-primary"
                             >
-                              <MoreVertical size={20} />
+                              <MoreVertical size={16} />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
                             align="end"
-                            className="rounded-2xl bg-card/90 backdrop-blur-xl border border-border/40 shadow-2xl p-2 min-w-[160px]"
+                            className="rounded-xl bg-card/90 backdrop-blur-xl border border-border/40 shadow-lg p-1 min-w-[140px]"
                           >
                             <DropdownMenuItem
                               onClick={() =>
@@ -587,9 +563,9 @@ function SystemSettingsContent() {
                                   role: "Admin",
                                 })
                               }
-                              className="rounded-xl font-semibold  gap-3 p-3 cursor-pointer hover:bg-primary/10 transition-all"
+                              className="rounded-lg font-medium gap-2 p-2.5 text-xs cursor-pointer hover:bg-primary/10 transition-all"
                             >
-                              <Shield size={16} /> Make Admin
+                              <Shield size={14} /> Make Admin
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
@@ -598,17 +574,17 @@ function SystemSettingsContent() {
                                   role: "Editor",
                                 })
                               }
-                              className="rounded-xl font-semibold  gap-3 p-3 cursor-pointer hover:bg-primary/10 transition-all"
+                              className="rounded-lg font-medium gap-2 p-2.5 text-xs cursor-pointer hover:bg-primary/10 transition-all"
                             >
-                              <Edit size={16} /> Make Editor
+                              <Edit size={14} /> Make Editor
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
                                 removeStaffMutation.mutate(staff.id)
                               }
-                              className="rounded-xl font-semibold  gap-3 p-3 cursor-pointer text-red-500 hover:bg-red-500/10 transition-all"
+                              className="rounded-lg font-medium gap-2 p-2.5 text-xs cursor-pointer text-red-500 hover:bg-red-500/10 transition-all"
                             >
-                              <Trash2 size={16} /> Revoke Access
+                              <Trash2 size={14} /> Remove
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -618,19 +594,17 @@ function SystemSettingsContent() {
                 </TableBody>
               </Table>
             </CardContent>
-            <CardFooter className="p-10 md:p-12 border-t border-border/30 bg-muted/20 flex justify-center">
+            <CardFooter className="p-5 border-t border-border/50 bg-muted/5 flex justify-center">
               <Button
                 variant="ghost"
-                className="text-sm font-semibold uppercase  text-muted-foreground/60 hover:text-primary hover:bg-transparent transition-all group"
+                className="text-xs font-medium text-muted-foreground/60 hover:text-primary hover:bg-transparent transition-all"
                 onClick={() =>
                   toast.info(
-                    "Export staff list: use Reports or API when available.",
+                    "Export not yet available.",
                   )
                 }
               >
-                <span className="group-hover:scale-110 transition-transform">
-                  Download Roster
-                </span>
+                Export
               </Button>
             </CardFooter>
           </Card>
@@ -639,61 +613,61 @@ function SystemSettingsContent() {
         {/* Email Templates Content */}
         <TabsContent
           value="email"
-          className="animate-in fade-in zoom-in-95 duration-500"
+          className="space-y-6"
         >
-          <Card className="border-none rounded-[48px] bg-muted/10 backdrop-blur-xl border border-border/40 overflow-hidden shadow-sm">
-            <CardHeader className="p-10 border-b border-border/30 bg-muted/20 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <Card className="rounded-xl bg-card border border-border/50 overflow-hidden shadow-sm">
+            <CardHeader className="p-5 border-b border-border/50 bg-muted/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <CardTitle className="text-3xl font-semibold ">
-                  Signal Template Hub
+                <CardTitle className="text-base font-semibold">
+                  Email Templates
                 </CardTitle>
-                <CardDescription className="font-medium mt-2 text-muted-foreground">
-                  Manage high-fidelity transactional signal templates.
+                <CardDescription className="text-sm text-muted-foreground mt-0.5">
+                  Manage email notification templates.
                 </CardDescription>
               </div>
               <Button
-                className="h-14 px-10 rounded-2xl gap-3 font-semibold bg-primary text-white shadow-2xl transition-all hover:scale-[1.05]"
+                className="h-9 rounded-lg gap-2"
                 onClick={() =>
                   toast.info(
-                    "Open the template editor or add a dialog to create a new template.",
+                    "Template editor not yet implemented.",
                   )
                 }
               >
-                <Plus className="w-5 h-5" /> New Template
+                <Plus className="w-4 h-4" /> New Template
               </Button>
             </CardHeader>
-            <CardContent className="p-10">
+            <CardContent className="p-5">
               {emailTemplates?.length === 0 ? (
-                <div className="py-20 text-center text-muted-foreground font-bold">
-                  No signal templates found. Initializing node required.
+                <div className="py-12 text-center text-sm text-muted-foreground">
+                  No email templates yet.
                 </div>
               ) : (
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-3">
                   {emailTemplates?.map((t) => (
                     <Card
                       key={t.id}
-                      className="rounded-3xl border-border/30 bg-background/50 p-6 flex items-center justify-between group"
+                      className="rounded-lg border-border/30 bg-background/50 p-4 flex items-center justify-between group"
                     >
                       <div>
-                        <h4 className="font-semibold ">{t.name}</h4>
-                        <p className="text-xs text-muted-foreground uppercase  font-bold mt-1">
+                        <h4 className="font-medium text-sm">{t.name}</h4>
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {t.subject}
                         </p>
                       </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="rounded-full h-10 w-10"
+                          className="rounded-lg h-8 w-8"
                         >
-                          <Edit size={16} />
+                          <Edit size={14} />
                         </Button>
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="rounded-full h-10 w-10 text-red-500"
+                          className="rounded-lg h-8 w-8 text-red-500"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={14} />
                         </Button>
                       </div>
                     </Card>
@@ -707,51 +681,51 @@ function SystemSettingsContent() {
         {/* API Keys Content */}
         <TabsContent
           value="api"
-          className="animate-in fade-in zoom-in-95 duration-500"
+          className="space-y-6"
         >
-          <Card className="border-none rounded-[48px] bg-muted/10 backdrop-blur-xl border border-border/40 overflow-hidden shadow-sm">
-            <CardHeader className="p-10 border-b border-border/30 bg-muted/20 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <Card className="rounded-xl bg-card border border-border/50 overflow-hidden shadow-sm">
+            <CardHeader className="p-5 border-b border-border/50 bg-muted/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <CardTitle className="text-3xl font-semibold ">
-                  Neural Bridge Gateway
+                <CardTitle className="text-base font-semibold">
+                  API Keys
                 </CardTitle>
-                <CardDescription className="font-medium mt-2 text-muted-foreground">
-                  Govern cryptographically signed API keys for integrations.
+                <CardDescription className="text-sm text-muted-foreground mt-0.5">
+                  Manage API keys for integrations.
                 </CardDescription>
               </div>
               <Button
                 onClick={() => {
-                  const name = prompt("Key Alias:");
+                  const name = prompt("Key name:");
                   if (name) createKeyMutation.mutate(name);
                 }}
-                className="h-14 px-10 rounded-2xl gap-3 font-semibold bg-primary text-white shadow-2xl shadow-primary/30 transition-all hover:scale-[1.05]"
+                className="h-9 rounded-lg gap-2"
               >
-                <Plus className="w-5 h-5" /> Generate Key
+                <Plus className="w-4 h-4" /> Add Key
               </Button>
             </CardHeader>
-            <CardContent className="p-10">
+            <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/30 border-none">
-                    <TableHead className="font-semibold text-sm uppercase ">
-                      Key Alias
+                  <TableRow className="bg-muted/5 border-border/50">
+                    <TableHead className="px-5 text-xs font-medium uppercase text-muted-foreground h-10">
+                      Name
                     </TableHead>
-                    <TableHead className="font-semibold text-sm uppercase ">
-                      Master Key
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">
+                      Key
                     </TableHead>
-                    <TableHead className="font-semibold text-sm uppercase ">
+                    <TableHead className="text-xs font-medium uppercase text-muted-foreground h-10">
                       Status
                     </TableHead>
-                    <TableHead className="text-right px-6"></TableHead>
+                    <TableHead className="text-right px-5"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {apiKeys?.map((key) => (
-                    <TableRow key={key.id} className="border-border/10 h-20">
-                      <TableCell className="font-semibold">
+                    <TableRow key={key.id} className="border-border/50">
+                      <TableCell className="px-5 py-4 font-medium text-sm">
                         {key.name}
                       </TableCell>
-                      <TableCell className="font-mono text-xs opacity-50 ">
+                      <TableCell className="font-mono text-xs text-muted-foreground">
                         {(key.key || '—').slice(0, 10)}*****************
                       </TableCell>
                       <TableCell>
@@ -759,16 +733,16 @@ function SystemSettingsContent() {
                           variant={
                             key.status === "active" ? "default" : "outline"
                           }
-                          className="text-sm font-semibold uppercase"
+                          className="text-xs font-medium"
                         >
                           {key.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right px-6">
+                      <TableCell className="text-right px-5">
                         {key.status === "active" && (
                           <Button
                             variant="ghost"
-                            className="text-red-500 font-semibold text-xs uppercase"
+                            className="text-red-500 font-medium text-xs"
                             onClick={() => revokeKeyMutation.mutate(key.id)}
                           >
                             Revoke
@@ -786,27 +760,27 @@ function SystemSettingsContent() {
         {/* Core Hardening (Security) Content */}
         <TabsContent
           value="security"
-          className="animate-in fade-in zoom-in-95 duration-500"
+          className="space-y-6"
         >
-          <div className="grid lg:grid-cols-2 gap-10">
-            <Card className="border-none rounded-[48px] bg-muted/10 border border-border/40 p-10 space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-auto rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                  <ShieldCheck size={24} />
+          <div className="grid lg:grid-cols-2 gap-6">
+            <Card className="rounded-xl bg-card border border-border/50 p-5 space-y-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <ShieldCheck size={18} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-semibold ">Access Control</h3>
-                  <p className="text-sm text-muted-foreground font-medium">
-                    Harden the perimeter nodes.
+                  <h3 className="text-base font-semibold">Access Control</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Manage access and security settings.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="p-6 rounded-3xl bg-background/50 border border-border/30 flex items-center justify-between">
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-background/50 border border-border/30 flex items-center justify-between">
                   <div>
-                    <p className="font-semibold ">Mainframe Maintenance Mode</p>
-                    <p className="text-xs text-muted-foreground font-medium">
+                    <p className="font-medium text-sm">Maintenance Mode</p>
+                    <p className="text-xs text-muted-foreground">
                       Suspend public access temporarily.
                     </p>
                   </div>
@@ -818,44 +792,42 @@ function SystemSettingsContent() {
                         maintenanceMode: !formState.maintenanceMode,
                       })
                     }
-                    className="rounded-xl font-semibold text-sm uppercase"
+                    className="rounded-lg text-xs font-medium h-8"
                   >
-                    {formState.maintenanceMode ? "Deactivate" : "Activate"}
+                    {formState.maintenanceMode ? "Disable" : "Enable"}
                   </Button>
                 </div>
 
-                <div className="space-y-3">
-                  <Label className="text-sm font-semibold uppercase  text-muted-foreground ml-2">
-                    Whitelisted Deployment IPs
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">
+                    Allowed IPs
                   </Label>
                   <Textarea
                     value={formState.allowedIps}
                     onChange={(e) =>
                       setFormState({ ...formState, allowedIps: e.target.value })
                     }
-                    className="rounded-3xl border-none bg-muted/30 p-6 font-bold"
+                    className="rounded-lg text-sm"
                     placeholder="127.0.0.1, 192.168.1.1..."
                   />
                 </div>
               </div>
             </Card>
 
-            <Card className="border-none rounded-[48px] bg-muted/10 border border-border/40 p-10 space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-auto rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                  <Lock size={24} />
+            <Card className="rounded-xl bg-card border border-border/50 p-5 space-y-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <Lock size={18} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-semibold ">
-                    Credential Hierarchy
-                  </h3>
-                  <p className="text-sm text-muted-foreground font-medium">
-                    Configure global security entropy.
+                  <h3 className="text-base font-semibold">Password Policy</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Set password complexity requirements.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-3">
                 {["low", "medium", "high"].map((level) => (
                   <div
                     key={level}
@@ -866,27 +838,27 @@ function SystemSettingsContent() {
                       })
                     }
                     className={cn(
-                      "p-6 rounded-3xl border cursor-pointer transition-all",
+                      "p-4 rounded-lg border cursor-pointer transition-all",
                       formState.passwordPolicy === level
-                        ? "bg-primary/10 border-primary shadow-xl"
-                        : "bg-background/50 border-border/30 opacity-50 grayscale",
+                        ? "bg-primary/10 border-primary"
+                        : "bg-background/50 border-border/30 opacity-60",
                     )}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold uppercase  text-sm">
-                        {level} Security Protocol
+                      <span className="font-medium text-sm capitalize">
+                        {level}
                       </span>
                       {formState.passwordPolicy === level && (
-                        <CheckCircle2 className="text-primary w-5 h-5" />
+                        <CheckCircle2 className="text-primary w-4 h-4" />
                       )}
                     </div>
-                    <p className="text-sm font-bold text-muted-foreground mt-2 uppercase ">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {level === "low" &&
                         "Minimum 6 characters, no complexity requirements."}
                       {level === "medium" &&
-                        "Minimum 8 characters + numeric integration."}
+                        "Minimum 8 characters + numeric."}
                       {level === "high" &&
-                        "12+ characters + numeric + symbolic + case sensitivity."}
+                        "12+ characters + numeric + symbols."}
                     </p>
                   </div>
                 ))}

@@ -118,11 +118,11 @@ export default function Testimonials() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[400px] lg:w-[600px] h-[300px] sm:h-[400px] lg:h-[600px] bg-primary/5 rounded-full blur-[60px] sm:blur-[80px] lg:blur-[100px] pointer-events-none" />
 
             <div ref={headerRef} className="container px-4 mx-auto mb-16 md:mb-20">
-                <Badge variant="outline" className="mb-6 px-4 py-2 border-white/10 bg-white/5 backdrop-blur-md text-white/90 gap-2 hover:bg-white/10 transition-colors">
+                <Badge variant="outline" className="mb-6 px-4 py-2 border-white/10 bg-white/5 backdrop-blur-md text-white/90 gap-2 hover:bg-white/10 transition-colors text-xs">
                     <Star className="w-4 h-4 text-yellow-500 fill-current" />
                     {testimonialsContent.badge}
                 </Badge>
-                <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 tracking-tight">
+                <h2 className="type-h1 text-white mb-6">
                     {testimonialsContent.title} <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                         {testimonialsContent.subtitle}
@@ -168,7 +168,7 @@ function TestimonialCard({ data, index }: { data: TestimonialData, index: number
                                 <Star key={i} className="w-4 h-4 text-yellow-500/50 fill-current group-hover:text-yellow-500 transition-colors" />
                             ))}
                         </div>
-                        <p className="text-base md:text-lg text-muted-foreground/90 leading-relaxed font-normal whitespace-normal">
+                        <p className="type-body-lg text-muted-foreground/90 font-normal whitespace-normal">
                             &ldquo;{data.quote}&rdquo;
                         </p>
                     </div>
@@ -182,8 +182,8 @@ function TestimonialCard({ data, index }: { data: TestimonialData, index: number
                         </Avatar>
 
                         <div className="text-left flex-1 min-w-0">
-                            <h4 className="text-white font-bold text-sm tracking-wide truncate">{data.name}</h4>
-                            <p className="text-xs text-muted-foreground font-medium tracking-wide truncate">{data.role}</p>
+                            <h4 className="text-white font-bold type-body-sm tracking-wide truncate">{data.name}</h4>
+                            <p className="text-caption text-muted-foreground font-medium tracking-wide truncate">{data.role}</p>
                         </div>
 
                         <Quote className="w-8 h-8 text-white/5 ml-auto group-hover:text-white/10 transition-colors shrink-0" />

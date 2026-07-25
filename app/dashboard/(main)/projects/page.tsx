@@ -1,17 +1,19 @@
 "use client"
 import { Animated, AnimatedDiv, AnimatePresence } from "@/lib/animated";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Search, Filter, Plus, LayoutGrid, List, MoreVertical,
     Calendar, Users, AlertCircle, CheckCircle2, Clock,
-    CreditCard, Wallet, X, ChevronRight, Lock
+    CreditCard, Wallet, X, ChevronRight, Lock,
+    FolderOpen, TrendingUp, PauseCircle, Ban
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useProjects } from "@/hooks/useProjects";
 import { Project } from "@/lib/api";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { PaymentModal } from "@/components/projects/payment-modal";
 import { STATUS_COLORS, PAYMENT_STATUS_COLORS } from "@/lib/projects";
@@ -25,7 +27,11 @@ export default function ProjectsOverview() {
     const [search, setSearch] = useState("");
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-    const { projects, isLoading, updatePaymentStatus } = useProjects(undefined, filter === "All" ? undefined : filter);
+    const { projects, isLoading, isError, stats, fetchStats, updatePaymentStatus } = useProjects(undefined, filter === "All" ? undefined : filter);
+
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats]);
 
     const handlePaymentComplete = (projectId: string) => {
         updatePaymentStatus(projectId, "Paid");
@@ -40,8 +46,15 @@ export default function ProjectsOverview() {
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     };
+
+    const statCards = [
+        { label: "Total Projects", value: stats?.total || 0, icon: FolderOpen, color: "bg-primary/10 text-primary" },
+        { label: "In Progress", value: stats?.inProgress || 0, icon: TrendingUp, color: "bg-blue-500/10 text-blue-500" },
+        { label: "Completed", value: stats?.completed || 0, icon: CheckCircle2, color: "bg-green-500/10 text-green-500" },
+        { label: "Delayed", value: stats?.delayed || 0, icon: Clock, color: "bg-orange-500/10 text-orange-500" },
+    ];
 
     return (
         <RoleGuard allowedRoles={["Editor", "Admin", "SuperAdmin"]}>
@@ -64,13 +77,42 @@ export default function ProjectsOverview() {
                 </Link>
             </div>
 
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {statCards.map((stat) => (
+                    <div key={stat.label} className="bg-card border border-border rounded-2xl p-5 hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
+                            <div className={cn("p-2 rounded-xl", stat.color)}>
+                                <stat.icon className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-bold">
+                            {isLoading ? <Skeleton className="h-8 w-16" /> : stat.value}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
             {/* Spotlight Carousel */}
             <div className="space-y-4">
                 <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground uppercase">
                     <AlertCircle className="w-4 h-4 text-orange-500" /> Urgent Attention
                 </div>
                 <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
-                    {urgentProjects.map((p, i) => (
+                    {isLoading ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="min-w-[300px] snap-center bg-card border border-border rounded-3xl p-6">
+                                <div className="flex justify-between items-start mb-4">
+                                    <Skeleton className="h-10 w-10 rounded-xl" />
+                                    <Skeleton className="h-6 w-20 rounded-full" />
+                                </div>
+                                <Skeleton className="h-5 w-32 mb-2" />
+                                <Skeleton className="h-4 w-24 mb-4" />
+                                <Skeleton className="h-1.5 w-full rounded-full" />
+                            </div>
+                        ))
+                    ) : urgentProjects.map((p, i) => (
                          <AnimatedDiv key={p.id}
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -93,7 +135,7 @@ export default function ProjectsOverview() {
                                     <span className="text-orange-500">{p.progress}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                                    <AnimatedDiv 
+                                    <AnimatedDiv
                                         initial={{ width: 0 }}
                                         animate={{ width: `${p.progress}%` }}
                                         className="h-full bg-orange-500 rounded-full"
@@ -103,9 +145,9 @@ export default function ProjectsOverview() {
                          </AnimatedDiv>
                     ))}
                     {/* Add Placeholder if no urgent projects */}
-                    {urgentProjects.length === 0 && (
+                    {!isLoading && urgentProjects.length === 0 && (
                         <div className="w-full p-8 text-center border border-dashed border-border rounded-3xl text-muted-foreground">
-                            No urgent projects right now. Good job! 🎉
+                            No urgent projects right now. Good job!
                         </div>
                     )}
                 </div>
@@ -127,7 +169,7 @@ export default function ProjectsOverview() {
 
                 {/* Filters */}
                 <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-                    {["All", "In Progress", "Completed", "Delayed"].map(status => (
+                    {["All", "In Progress", "Review", "Completed", "Delayed", "On Hold", "Cancelled"].map(status => (
                         <button key={status}
                             onClick={() => setFilter(status)}
                             className={cn(
@@ -163,15 +205,46 @@ export default function ProjectsOverview() {
                 </div>
             </div>
 
+            {/* Error State */}
+            {isError && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 text-center">
+                    <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
+                    <h3 className="text-lg font-bold mb-2">Failed to load projects</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Something went wrong while fetching your projects.</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-destructive text-white rounded-lg text-sm font-medium hover:bg-destructive/90 transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            )}
+
             {/* Loading State */}
             {isLoading && (
-                <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="bg-card border border-border rounded-3xl p-6">
+                            <div className="flex justify-between items-start mb-4">
+                                <Skeleton className="h-6 w-20 rounded-full" />
+                                <Skeleton className="h-6 w-6 rounded" />
+                            </div>
+                            <Skeleton className="h-5 w-32 mb-2" />
+                            <Skeleton className="h-4 w-24 mb-6" />
+                            <div className="space-y-4">
+                                <Skeleton className="h-1.5 w-full rounded-full" />
+                                <div className="flex justify-between">
+                                    <Skeleton className="h-4 w-16" />
+                                    <Skeleton className="h-4 w-16" />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
             {/* Content Area */}
-            {!isLoading && (
+            {!isLoading && !isError && (
                 <AnimatePresence mode="wait">
 
                     {/* Grid View */}
@@ -215,7 +288,7 @@ export default function ProjectsOverview() {
                                                     <AlertCircle size={12} /> Unpaid Invoice
                                                 </span>
                                                 {isAdmin && (
-                                                    <button 
+                                                    <button
                                                         onClick={() => setSelectedProject(project)}
                                                         className="text-xs font-bold bg-white text-black px-3 py-1.5 rounded-lg hover:alpha-90 transition-opacity"
                                                     >
@@ -304,7 +377,7 @@ export default function ProjectsOverview() {
                                                         {project.paymentStatus}
                                                     </span>
                                                     {project.paymentStatus === "Unpaid" && isAdmin && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => setSelectedProject(project)}
                                                             className="text-xs text-primary font-bold hover:underline"
                                                         >
@@ -344,15 +417,15 @@ export default function ProjectsOverview() {
             {/* Payment Modal Render */}
             <AnimatePresence>
                 {selectedProject && (
-                    <PaymentModal 
-                        project={selectedProject} 
+                    <PaymentModal
+                        project={selectedProject}
                         onClose={() => setSelectedProject(null)}
                         onPaymentComplete={handlePaymentComplete}
                     />
                 )}
             </AnimatePresence>
 
-            {filteredProjects.length === 0 && !isLoading && (
+            {!isLoading && !isError && filteredProjects.length === 0 && (
                 <div className="text-center py-20 bg-card border border-border rounded-2xl border-dashed">
                     <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-bold mb-2">No Projects Found</h3>

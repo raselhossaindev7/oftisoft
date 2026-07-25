@@ -59,7 +59,7 @@ export default function ServiceTechStack() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-5xl font-semibold mb-4 md:mb-6 tracking-tight"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold mb-4 md:mb-6 tracking-tight"
                     >
                         Powerful <span className="text-primary">Technology Stack</span>
                     </AnimatedH2>

@@ -83,5 +83,8 @@ export const ordersAPI = {
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
+    },
+    deleteOrder: async (id: string): Promise<void> => {
+        await api.delete(`/orders/${id}`);
     }
 };

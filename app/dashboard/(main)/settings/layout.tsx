@@ -107,7 +107,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
             </div>
 
             <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-                {/* Desktop Sidebar */}
+                {/* Desktop Sidebar - hidden on system and profile pages */}
+                {!pathname.startsWith("/dashboard/settings/system") && !pathname.startsWith("/dashboard/settings/profile") && (
                 <aside className="hidden md:block w-72 shrink-0 space-y-2">
                     <div className="flex items-center gap-3 mb-10 px-4">
                         <div className="w-12 h-auto rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white shadow-xl shadow-primary/20 group hover:scale-110 transition-transform duration-500">
@@ -165,7 +166,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                         </button>
                     </div>
                 </aside>
-
+                )}
                 {/* Content Area */}
                 <main className="flex-1 bg-card/10 backdrop-blur-3xl border border-border/50 rounded-[40px] p-6 md:p-12 shadow-sm min-h-[700px] relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 blur-[120px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-colors duration-1000" />

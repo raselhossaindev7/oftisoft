@@ -4,7 +4,6 @@ import { AnimatedDiv, AnimatedSpan, AnimatedAside } from "@/lib/animated";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
   FolderKanban,
   MessageSquare,
   PieChart,
@@ -15,6 +14,8 @@ import {
   ChevronRight,
   LogOut,
   Code2,
+  Bot,
+  User,
   Users,
   Package,
   Briefcase,
@@ -28,7 +29,6 @@ import {
   TrendingUp,
   Star,
   FileText,
-  Layout,
   Tag,
   Folder,
   ShoppingCart,
@@ -40,7 +40,7 @@ import {
   Calendar,
   ScrollText,
   Store,
-  Ticket,
+
   Flag,
   Key,
   Download,
@@ -63,75 +63,77 @@ import { useUIStore } from "@/lib/store";
 
 const NAV_GROUPS = [
   {
-    label: "Overview",
+    label: "Main",
     items: [
       { icon: HomeIcon, label: "Home", href: "/dashboard", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
-      { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
-      { icon: PieChart, label: "Analytics", href: "/dashboard/analytics", roles: ["Editor", "Admin", "SuperAdmin"] },
       { icon: MessageSquare, label: "Messages", href: "/dashboard/messages", badgeKey: "messages", roles: ["Viewer", "Editor", "Support", "Admin", "SuperAdmin"] },
       { icon: FolderKanban, label: "Projects", href: "/dashboard/projects", roles: ["Editor", "Admin", "SuperAdmin"] },
-    ]
+      { icon: PieChart, label: "Analytics", href: "/dashboard/analytics", roles: ["Editor", "Admin", "SuperAdmin"] },
+    ],
   },
   {
     label: "Commerce",
     items: [
       { icon: ShoppingCart, label: "Orders", href: "/dashboard/orders", badgeKey: "orders", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
       { icon: Package, label: "Products", href: "/dashboard/products", roles: ["Admin", "Editor", "SuperAdmin"] },
-      { icon: ClipboardCheck, label: "Service Queue", href: "/dashboard/service-orders", roles: ["Admin", "Editor", "SuperAdmin"] },
       { icon: Briefcase, label: "Services", href: "/dashboard/services", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
-      { icon: FileText, label: "Quotes", href: "/dashboard/quotes", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
+      { icon: ClipboardCheck, label: "Service Queue", href: "/dashboard/service-orders", roles: ["Admin", "Editor", "SuperAdmin"] },
       { icon: ShoppingBag, label: "Purchases", href: "/dashboard/purchases", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
+      { icon: FileText, label: "Quotes", href: "/dashboard/quotes", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
       { icon: Flag, label: "Disputes", href: "/dashboard/disputes", roles: ["Admin", "SuperAdmin"] },
-    ]
-
+    ],
   },
   {
     label: "Marketing",
     items: [
-      { icon: Megaphone, label: "Campaigns", href: "/dashboard/marketing/campaigns", roles: ["Admin", "Editor", "SuperAdmin"] },
-      { icon: Layout, label: "Ads", href: "/dashboard/marketing/ads", roles: ["Admin", "Editor", "SuperAdmin"] },
       { icon: Users, label: "Leads", href: "/dashboard/marketing/leads", badgeKey: "leads", roles: ["Admin", "Editor", "SuperAdmin", "Support"] },
-    ]
-  },
-  {
-    label: "Personal",
-
-    items: [
-      { icon: Library, label: "Downloads", href: "/dashboard/downloads", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
-      { icon: Heart, label: "Favorites", href: "/dashboard/favorites", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
-      { icon: Star, label: "Reviews", href: "/dashboard/reviews", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
+      { icon: Tag, label: "Pricing", href: "/dashboard/marketing/pricing", roles: ["Admin", "Editor", "SuperAdmin"] },
       { icon: TrendingUp, label: "Affiliate", href: "/dashboard/affiliate", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
-    ]
+    ],
   },
   {
-    label: "Management",
+    label: "Content",
+    items: [
+      { icon: FileText, label: "Posts", href: "/dashboard/posts", roles: ["Admin", "Editor", "SuperAdmin"] },
+      { icon: Folder, label: "Categories", href: "/dashboard/posts/categories", roles: ["Admin", "Editor", "SuperAdmin"] },
+      { icon: Tag, label: "Tags", href: "/dashboard/posts/tags", roles: ["Admin", "Editor", "SuperAdmin"] },
+      { icon: MessageCircle, label: "Comments", href: "/dashboard/posts/comments", roles: ["Admin", "Editor", "SuperAdmin"] },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { icon: CreditCard, label: "Billing", href: "/dashboard/billing", roles: ["Editor", "Admin", "SuperAdmin"] },
+      { icon: Key, label: "Licenses", href: "/dashboard/licenses", roles: ["Admin", "SuperAdmin"] },
+      { icon: Heart, label: "Favorites", href: "/dashboard/favorites", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
+      { icon: Library, label: "Downloads", href: "/dashboard/downloads", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
+      { icon: Star, label: "Reviews", href: "/dashboard/reviews", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
+    ],
+  },
+  {
+    label: "Administration",
     items: [
       { icon: Users, label: "Users", href: "/dashboard/users", roles: ["Admin", "SuperAdmin"] },
+      { icon: UserCircle, label: "Team", href: "/dashboard/team", roles: ["Admin", "SuperAdmin"] },
       { icon: Wallet, label: "Finance", href: "/dashboard/finance", roles: ["Admin", "SuperAdmin"] },
-      { icon: FileText, label: "Posts", href: "/dashboard/posts", roles: ["Admin", "Editor", "SuperAdmin"] },
-      { icon: MessageCircle, label: "Comments", href: "/dashboard/posts/comments", roles: ["Admin", "Editor", "SuperAdmin"] },
-      { icon: Tag, label: "Tags", href: "/dashboard/posts/tags", roles: ["Admin", "Editor", "SuperAdmin"] },
-      { icon: Folder, label: "Categories", href: "/dashboard/posts/categories", roles: ["Admin", "Editor", "SuperAdmin"] },
-      { icon: ShieldCheck, label: "System", href: "/dashboard/settings/system", roles: ["Admin", "SuperAdmin"] },
-      { icon: CreditCard, label: "Billing", href: "/dashboard/billing", roles: ["Editor", "Admin", "SuperAdmin"] },
-      { icon: Settings, label: "Settings", href: "/dashboard/settings", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
-      { icon: MessageCircle, label: "Support", href: "/dashboard/support", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
-      { icon: Key, label: "Licenses", href: "/dashboard/licenses", roles: ["Admin", "SuperAdmin"] },
-    ]
+      { icon: GalleryVerticalEnd, label: "Portfolio", href: "/dashboard/portfolio", roles: ["Admin", "SuperAdmin"] },
+      { icon: Star, label: "Testimonials", href: "/dashboard/testimonials", roles: ["Admin", "SuperAdmin"] },
+      { icon: Calendar, label: "Events", href: "/dashboard/events", roles: ["Admin", "SuperAdmin"] },
+      { icon: Code2, label: "Services Content", href: "/dashboard/services/manage", roles: ["Admin", "SuperAdmin"] },
+      { icon: Download, label: "Download Analytics", href: "/dashboard/analytics/downloads", roles: ["Admin", "SuperAdmin"] },
+    ],
   },
   {
-    label: "Admin",
+    label: "System",
     items: [
-      { icon: Download, label: "Download Analytics", href: "/dashboard/analytics/downloads", roles: ["Admin", "SuperAdmin"] },
-      { icon: GalleryVerticalEnd, label: "Portfolio", href: "/dashboard/portfolio", roles: ["Admin", "SuperAdmin"] },
-      { icon: UserCircle, label: "Team", href: "/dashboard/team", roles: ["Admin", "SuperAdmin"] },
-      { icon: Star, label: "Testimonials", href: "/dashboard/testimonials", roles: ["Admin", "SuperAdmin"] },
-      { icon: Ticket, label: "Tickets", href: "/dashboard/tickets", roles: ["Admin", "SuperAdmin"] },
-      { icon: Calendar, label: "Events", href: "/dashboard/events", roles: ["Admin", "SuperAdmin"] },
+      { icon: Settings, label: "Settings", href: "/dashboard/settings", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
+      { icon: User, label: "Profile", href: "/dashboard/settings/profile", roles: ["Viewer", "Editor", "Admin", "SuperAdmin"] },
+      { icon: ShieldCheck, label: "System", href: "/dashboard/settings/system", roles: ["Admin", "SuperAdmin"] },
       { icon: ScrollText, label: "Audit", href: "/dashboard/audit", roles: ["Admin", "SuperAdmin"] },
-      { icon: Megaphone, label: "Marketing", href: "/dashboard/marketing", roles: ["Admin", "SuperAdmin"] },
-    ]
-  }
+      { icon: Bot, label: "AI Agent", href: "/dashboard/ai-agent", roles: ["Admin", "SuperAdmin"] },
+      { icon: MessageCircle, label: "Support", href: "/dashboard/support", roles: ["Viewer", "Editor", "Admin", "SuperAdmin", "Support"] },
+    ],
+  },
 ];
 
 type SidebarContentProps = {
@@ -157,6 +159,14 @@ function SidebarContent({ collapsed = false, onNavClick }: SidebarContentProps) 
 
   const badgeCounts = useBadgeCounts();
 
+  const allVisibleItems = NAV_GROUPS.flatMap(g => g.items).filter(item => hasAccess(item.roles));
+  const matchingItems = allVisibleItems.filter(
+    item => pathname === item.href || pathname.startsWith(`${item.href}/`)
+  );
+  const activeHref = matchingItems.length > 0
+    ? matchingItems.reduce((a, b) => a.href.length >= b.href.length ? a : b).href
+    : null;
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div data-lenis-prevent className="flex-1 min-h-0 px-3 overflow-y-auto overflow-x-hidden overscroll-contain">
@@ -167,6 +177,9 @@ function SidebarContent({ collapsed = false, onNavClick }: SidebarContentProps) 
 
             return (
               <div key={group.label} className="space-y-2">
+                {group.label === "System" && !collapsed && (
+                  <div className="mx-4 my-2 border-t border-border/40" />
+                )}
                 {!collapsed && (
                   <h4 className="px-4 text-xs font-semibold uppercase text-muted-foreground/60 mb-3">
                     {group.label}
@@ -174,7 +187,7 @@ function SidebarContent({ collapsed = false, onNavClick }: SidebarContentProps) 
                 )}
                 <nav className="space-y-1">
                   {filteredItems.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                    const isActive = item.href === activeHref;
                     const badgeCount = (item as any).badgeKey ? badgeCounts[(item as any).badgeKey as keyof typeof badgeCounts] : 0;
                     const hasBadge = badgeCount > 0;
 
@@ -206,7 +219,7 @@ function SidebarContent({ collapsed = false, onNavClick }: SidebarContentProps) 
 
                         {hasBadge && !collapsed && (
                           <Badge className={cn(
-                              "text-[10px] font-semibold px-1.5 py-0 h-4 min-w-[16px] flex items-center justify-center rounded-full border-none",
+                              "text-micro font-semibold px-1.5 py-0 h-4 min-w-[16px] flex items-center justify-center rounded-full border-none",
                               isActive ? "bg-primary text-white" : "bg-muted text-muted-foreground"
                             )}
                           >

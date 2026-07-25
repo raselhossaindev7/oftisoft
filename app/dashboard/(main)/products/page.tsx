@@ -1,16 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
-import { 
-    Plus, 
-    Search, 
-    Filter, 
-    MoreHorizontal, 
-    Edit, 
-    Trash2, 
-    ExternalLink, 
-    Download, 
+import { useState, useRef, useMemo } from "react";
+import {
+    Plus,
+    Search,
+    Filter,
+    MoreHorizontal,
+    Edit,
+    Trash2,
+    ExternalLink,
+    Download,
     Upload,
     Package,
     Tag,
@@ -19,16 +19,22 @@ import {
     SearchX,
     FileArchive,
     Rocket,
+    AlertCircle,
+    ChevronLeft,
+    ChevronRight,
+    ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableHead, 
-    TableHeader, 
-    TableRow 
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
 } from "@/components/ui/table";
 import {
     DropdownMenu,
@@ -58,6 +64,7 @@ import { RoleGuard } from "@/components/auth/role-guard";
 import { Product } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminAPI } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Dialog,
     DialogContent,
@@ -78,6 +85,8 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+const PRODUCTS_PER_PAGE = 10;
+
 export default function ProductManagementPage() {
     const { isAdmin } = useRole();
     const [searchQuery, setSearchQuery] = useState("");
@@ -86,6 +95,9 @@ export default function ProductManagementPage() {
     const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
     const [versionTarget, setVersionTarget] = useState<Product | null>(null);
     const [versionForm, setVersionForm] = useState({ version: "", changelog: "", importance: "minor" });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [sortField, setSortField] = useState<string>("createdAt");
+    const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -95,14 +107,14 @@ export default function ProductManagementPage() {
             adminAPI.createVersion(data.productId, { version: data.version, changelog: data.changelog, importance: data.importance }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
-            toast.success("New version released! All owners will be notified.");
+            toast.success("New version released");
             setVersionTarget(null);
             setVersionForm({ version: "", changelog: "", importance: "minor" });
         },
         onError: () => toast.error("Failed to create version"),
     });
-    
-    const { products, stats, isLoading, isStatsLoading, deleteProduct, isDeleting } = useProducts(
+
+    const { products, stats, isLoading, isError, isStatsLoading, refetch, deleteProduct, isDeleting } = useProducts(
         undefined,
         searchQuery,
         categoryFilter === "all" ? undefined : categoryFilter
@@ -153,15 +165,68 @@ export default function ProductManagementPage() {
         }
     };
 
-    const filteredProducts = products || [];
+    const handleSort = (field: string) => {
+        if (sortField === field) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortField(field);
+            setSortDirection("asc");
+        }
+        setCurrentPage(1);
+    };
+
+    const SortIcon = ({ field }: { field: string }) => {
+        if (sortField !== field) return <ArrowUpDown className="w-3 h-3 opacity-50" />;
+        return sortDirection === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />;
+    };
+
+    const filteredProducts = useMemo(() => {
+        const items = products || [];
+
+        // Sort
+        const sorted = [...items].sort((a, b) => {
+            let aVal: any = a[sortField as keyof Product];
+            let bVal: any = b[sortField as keyof Product];
+
+            if (sortField === "price" || sortField === "rating" || sortField === "reviews") {
+                aVal = Number(aVal) || 0;
+                bVal = Number(bVal) || 0;
+            } else if (sortField === "name") {
+                aVal = (aVal || "").toLowerCase();
+                bVal = (bVal || "").toLowerCase();
+            } else if (sortField === "category") {
+                aVal = (aVal || "").toLowerCase();
+                bVal = (bVal || "").toLowerCase();
+            } else if (sortField === "status") {
+                aVal = (aVal || "").toLowerCase();
+                bVal = (bVal || "").toLowerCase();
+            } else {
+                aVal = aVal || "";
+                bVal = bVal || "";
+            }
+
+            if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
+            if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+            return 0;
+        });
+
+        return sorted;
+    }, [products, sortField, sortDirection]);
+
+    // Pagination
+    const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+    const paginatedProducts = useMemo(() => {
+        const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+        return filteredProducts.slice(start, start + PRODUCTS_PER_PAGE);
+    }, [filteredProducts, currentPage]);
 
     return (
         <RoleGuard allowedRoles={["Editor", "Admin", "SuperAdmin"]}>
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold">Product Management</h1>
-                    <p className="text-muted-foreground">Manage your marketplace inventory, categories, and digital assets.</p>
+                    <h1 className="text-3xl font-bold">Products</h1>
+                    <p className="text-sm text-muted-foreground">Manage your marketplace inventory, categories, and digital assets.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                     <Dialog>
@@ -184,7 +249,7 @@ export default function ProductManagementPage() {
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     <FileArchive className="w-8 h-8 text-primary mb-2" />
-                                    <p className="text-sm font-bold">Drop CSV here or click to browse</p>
+                                    <p className="text-sm font-medium">Drop CSV here or click to browse</p>
                                     <p className="text-sm text-muted-foreground">Maximum file size: 10MB</p>
                                 </div>
                                 <input 
@@ -224,7 +289,7 @@ export default function ProductManagementPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isStatsLoading ? "..." : stats?.totalProducts || 0}
+                            {isStatsLoading ? <Skeleton className="h-8 w-16" /> : stats?.totalProducts || 0}
                         </div>
                         <p className="text-xs text-muted-foreground">All products</p>
                     </CardContent>
@@ -236,7 +301,7 @@ export default function ProductManagementPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isStatsLoading ? "..." : stats?.activeCategories || 0}
+                            {isStatsLoading ? <Skeleton className="h-8 w-16" /> : stats?.activeCategories || 0}
                         </div>
                         <p className="text-xs text-muted-foreground">Categories with products</p>
                     </CardContent>
@@ -248,7 +313,7 @@ export default function ProductManagementPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {isStatsLoading ? "..." : stats?.stockWarnings || 0}
+                            {isStatsLoading ? <Skeleton className="h-8 w-16" /> : stats?.stockWarnings || 0}
                         </div>
                         <p className="text-xs text-orange-500 font-medium leading-none">Items need attention</p>
                     </CardContent>
@@ -260,27 +325,39 @@ export default function ProductManagementPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            ${isStatsLoading ? "..." : stats?.totalSales?.toLocaleString() || "0"}
+                            {isStatsLoading ? <Skeleton className="h-8 w-16" /> : `$${stats?.totalSales?.toLocaleString() || "0"}`}
                         </div>
                         <p className="text-xs text-muted-foreground">Completed orders</p>
                     </CardContent>
                 </Card>
             </div>
 
+            {/* Error State */}
+            {isError && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 text-center">
+                    <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
+                    <h3 className="text-lg font-bold mb-2">Failed to load products</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Something went wrong while fetching your products.</p>
+                    <Button variant="outline" onClick={() => refetch()}>
+                        Try Again
+                    </Button>
+                </div>
+            )}
+
             <Card className="border-border/50 overflow-hidden">
                 <CardHeader className="bg-muted/20 border-b border-border/50">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="relative flex-1 max-w-sm">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input 
-                                placeholder="Search products, categories..." 
+                            <Input
+                                placeholder="Search products, categories..."
                                 className="pl-10 h-10 rounded-xl"
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                             />
                         </div>
                         <div className="flex items-center gap-2">
-                            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                            <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setCurrentPage(1); }}>
                                 <SelectTrigger className="w-[180px] h-10 rounded-xl">
                                     <SelectValue placeholder="Category" />
                                 </SelectTrigger>
@@ -296,25 +373,46 @@ export default function ProductManagementPage() {
                 </CardHeader>
                 <CardContent className="p-0">
                     {isLoading ? (
-                        <div className="flex items-center justify-center py-20">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <div className="p-4 space-y-3">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <div key={i} className="flex items-center gap-4 p-3">
+                                    <Skeleton className="h-12 w-12 rounded-lg" />
+                                    <div className="flex-1">
+                                        <Skeleton className="h-4 w-32 mb-2" />
+                                        <Skeleton className="h-3 w-20" />
+                                    </div>
+                                    <Skeleton className="h-4 w-16" />
+                                    <Skeleton className="h-4 w-12" />
+                                    <Skeleton className="h-6 w-16 rounded-full" />
+                                </div>
+                            ))}
                         </div>
                     ) : filteredProducts.length > 0 ? (
                         <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow className="bg-muted/10 hover:bg-transparent">
-                                        <TableHead className="w-[80px]">Image</TableHead>
-                                        <TableHead className="min-w-[200px]">Product</TableHead>
-                                        <TableHead>Category</TableHead>
-                                        <TableHead>Price</TableHead>
-                                        <TableHead>Rating</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
+                                        <TableHead className="w-[80px] text-xs font-medium uppercase tracking-wider text-muted-foreground">Image</TableHead>
+                                        <TableHead className="min-w-[200px] text-xs font-medium uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("name")}>
+                                            <div className="flex items-center gap-1">Product <SortIcon field="name" /></div>
+                                        </TableHead>
+                                        <TableHead className="text-xs font-medium uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("category")}>
+                                            <div className="flex items-center gap-1">Category <SortIcon field="category" /></div>
+                                        </TableHead>
+                                        <TableHead className="text-xs font-medium uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("price")}>
+                                            <div className="flex items-center gap-1">Price <SortIcon field="price" /></div>
+                                        </TableHead>
+                                        <TableHead className="text-xs font-medium uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("rating")}>
+                                            <div className="flex items-center gap-1">Rating <SortIcon field="rating" /></div>
+                                        </TableHead>
+                                        <TableHead className="text-xs font-medium uppercase tracking-wider text-muted-foreground cursor-pointer select-none" onClick={() => handleSort("status")}>
+                                            <div className="flex items-center gap-1">Status <SortIcon field="status" /></div>
+                                        </TableHead>
+                                        <TableHead className="text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {filteredProducts.map((p) => (
+                                    {paginatedProducts.map((p) => (
                                         <TableRow key={p.id} className="group hover:bg-primary/5 transition-colors">
                                             <TableCell>
                                                 <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-border">
@@ -323,25 +421,25 @@ export default function ProductManagementPage() {
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-sm leading-none mb-1">{p.name}</span>
-                                                    <span className="text-sm text-muted-foreground  font-mono">{p.slug}</span>
+                                                    <span className="text-sm font-medium leading-none mb-1">{p.name}</span>
+                                                    <span className="text-xs text-muted-foreground font-mono">{p.slug}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <Badge variant="outline" className="text-sm font-medium bg-muted/50">
+                                                <Badge variant="outline" className="text-xs font-medium bg-muted/50">
                                                     {p.category || "—"}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="font-bold text-primary">${p.price ?? 0}</TableCell>
+                                            <TableCell className="font-medium text-primary">${p.price ?? 0}</TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-1">
-                                                    <span className="text-sm font-medium">{p.rating || "—"}</span>
+                                                    <span className="text-sm">{p.rating || "—"}</span>
                                                     <span className="text-xs text-muted-foreground">({p.reviews ?? 0})</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
                                                 <Badge className={cn(
-                                                    "text-sm",
+                                                    "text-xs font-medium",
                                                     p.status === 'approved' ? "bg-green-500/10 text-green-500 border-green-500/20" :
                                                     p.status === 'rejected' ? "bg-red-500/10 text-red-500 border-red-500/20" :
                                                     "bg-orange-500/10 text-orange-500 border-orange-500/20"
@@ -356,21 +454,21 @@ export default function ProductManagementPage() {
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-48 rounded-xl">
-                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        <DropdownMenuItem asChild>
+                                                    <DropdownMenuContent align="end" className="w-48 rounded-lg p-1">
+                                                        <DropdownMenuLabel className="text-xs font-medium text-muted-foreground px-2 py-1.5">Actions</DropdownMenuLabel>
+                                                        <DropdownMenuItem asChild className="rounded-md py-2 text-sm">
                                                             <Link href={`/dashboard/products/${p.id}/edit`} className="flex items-center gap-2 cursor-pointer">
-                                                                <Edit className="w-4 h-4" /> Edit Product
+                                                                <Edit className="w-4 h-4" /> Edit
                                                             </Link>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/dashboard/products/inventory")}>
+                                                        <DropdownMenuItem className="rounded-md py-2 text-sm cursor-pointer" onClick={() => router.push("/dashboard/products/inventory")}>
                                                             <Download className="w-4 h-4" /> Manage Assets
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer" onClick={() => window.open(`/products/${p.id}`, "_blank")}>
+                                                        <DropdownMenuItem className="rounded-md py-2 text-sm cursor-pointer" onClick={() => window.open(`/products/${p.id}`, "_blank")}>
                                                             <ExternalLink className="w-4 h-4" /> View Live
                                                         </DropdownMenuItem>
                                                         {isAdmin && (
-                                                        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-primary"
+                                                        <DropdownMenuItem className="rounded-md py-2 text-sm cursor-pointer text-primary"
                                                             onClick={() => { setVersionTarget(p); setVersionForm({ version: "", changelog: "", importance: "minor" }); }}>
                                                             <Rocket className="w-4 h-4" /> New Version
                                                         </DropdownMenuItem>
@@ -379,7 +477,7 @@ export default function ProductManagementPage() {
                                                         <>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem 
-                                                            className="flex items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
+                                                            className="rounded-md py-2 text-sm text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
                                                             onClick={() => setDeleteTarget(p)}
                                                             disabled={isDeleting}
                                                         >
@@ -398,9 +496,41 @@ export default function ProductManagementPage() {
                     ) : (
                         <div className="flex flex-col items-center justify-center py-20 bg-muted/5">
                             <SearchX className="h-12 w-12 text-muted-foreground mb-4" />
-                            <h3 className="text-xl font-bold">No products found</h3>
-                            <p className="text-muted-foreground text-sm max-w-xs text-center">We couldn't find any products matching your search. Try adjusting your filters.</p>
-                            <Button variant="link" className="mt-2 text-primary font-bold" onClick={() => setSearchQuery("")}>Clear Search</Button>
+                            <h3 className="text-xl font-semibold">No results</h3>
+                            <p className="text-muted-foreground text-sm max-w-xs text-center mt-1">Try a different search or filter.</p>
+                            <Button variant="link" className="mt-2 text-sm font-medium" onClick={() => setSearchQuery("")}>Reset Filters</Button>
+                        </div>
+                    )}
+
+                    {/* Pagination */}
+                    {filteredProducts.length > PRODUCTS_PER_PAGE && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t border-border/50">
+                            <p className="text-xs text-muted-foreground">
+                                Showing {((currentPage - 1) * PRODUCTS_PER_PAGE) + 1}&ndash;{Math.min(currentPage * PRODUCTS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
+                            </p>
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </Button>
+                                <span className="text-xs text-muted-foreground px-2">
+                                    {currentPage} / {totalPages}
+                                </span>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </CardContent>
@@ -419,8 +549,8 @@ export default function ProductManagementPage() {
                                 <div className="flex items-center gap-3">
                                     <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
                                     <div>
-                                        <p className="text-sm font-bold">{p.name}</p>
-                                        <p className="text-sm text-muted-foreground ">Digital</p>
+                                    <p className="text-sm font-medium">{p.name}</p>
+                                    <p className="text-xs text-muted-foreground">Digital</p>
                                     </div>
                                 </div>
                                 <Badge variant="outline" className="text-sm bg-background">Available</Badge>
@@ -444,7 +574,7 @@ export default function ProductManagementPage() {
                     <CardContent className="space-y-4">
                         {categories?.slice(0, 5).map((cat) => (
                             <div key={cat.id} className="flex items-center justify-between p-3 rounded-xl bg-card border border-border shadow-sm">
-                                <span className="text-sm font-bold">{cat.name}</span>
+                                <span className="text-sm font-medium">{cat.name}</span>
                                 <Badge className="rounded-full h-5 min-w-[20px] justify-center px-2">{cat.productCount ?? 0}</Badge>
                             </div>
                         ))}
@@ -459,29 +589,29 @@ export default function ProductManagementPage() {
             </div>
 
             <Dialog open={!!versionTarget} onOpenChange={(o) => { if (!o) setVersionTarget(null); }}>
-                <DialogContent className="rounded-[2rem] border-border/50 max-w-lg">
+                <DialogContent className="rounded-xl border-border/50 max-w-lg p-6">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                            <Rocket className="w-6 h-6 text-primary" /> Release New Version
+                        <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+                            <Rocket className="w-5 h-5 text-primary" /> New Version
                         </DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground">
-                            Push a new build for &quot;{versionTarget?.name}&quot;. All owners will receive an update notification.
+                            Push a new build for &quot;{versionTarget?.name}&quot;.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <label className="text-sm font-bold mb-1 block">Version Tag</label>
+                            <label className="text-xs font-medium text-muted-foreground mb-1 block">Version Tag</label>
                             <Input
                                 placeholder="e.g. 2.0.0"
-                                className="h-10 rounded-xl font-mono font-bold"
+                                className="h-9 rounded-lg font-mono"
                                 value={versionForm.version}
                                 onChange={(e) => setVersionForm({ ...versionForm, version: e.target.value })}
                             />
                         </div>
                         <div>
-                            <label className="text-sm font-bold mb-1 block">Importance</label>
+                            <label className="text-xs font-medium text-muted-foreground mb-1 block">Importance</label>
                             <select
-                                className="w-full h-10 rounded-xl border border-border/50 bg-background px-3 text-sm font-bold"
+                                className="w-full h-9 rounded-lg border border-border/50 bg-background px-3 text-sm"
                                 value={versionForm.importance}
                                 onChange={(e) => setVersionForm({ ...versionForm, importance: e.target.value })}
                             >
@@ -491,9 +621,9 @@ export default function ProductManagementPage() {
                             </select>
                         </div>
                         <div>
-                            <label className="text-sm font-bold mb-1 block">Changelog</label>
+                            <label className="text-xs font-medium text-muted-foreground mb-1 block">Changelog</label>
                             <textarea
-                                className="w-full min-h-[120px] rounded-xl border border-border/50 bg-background p-3 text-sm font-medium resize-y"
+                                className="w-full min-h-[100px] rounded-lg border border-border/50 bg-background p-3 text-sm resize-y"
                                 placeholder="Describe what changed in this release..."
                                 value={versionForm.changelog}
                                 onChange={(e) => setVersionForm({ ...versionForm, changelog: e.target.value })}
@@ -501,8 +631,8 @@ export default function ProductManagementPage() {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" className="rounded-xl font-bold" onClick={() => setVersionTarget(null)}>Cancel</Button>
-                        <Button className="rounded-xl font-bold gap-2"
+                        <Button variant="outline" className="rounded-lg h-9" onClick={() => setVersionTarget(null)}>Cancel</Button>
+                        <Button className="rounded-lg h-9 gap-2"
                             onClick={() => versionTarget && createVersionMutation.mutate({ productId: versionTarget.id, ...versionForm })}
                             disabled={!versionForm.version || !versionForm.changelog || createVersionMutation.isPending}
                         >

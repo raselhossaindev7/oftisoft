@@ -127,7 +127,7 @@ export default function Header() {
                   <X className="w-3 h-3" />
                 </Button>
               ) : (
-                <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+                <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-micro font-medium text-muted-foreground">
                   <span className="text-xs">Ctrl</span>K
                 </kbd>
               )}
@@ -186,7 +186,7 @@ export default function Header() {
           >
             <ShoppingCart className="w-5 h-5" />
             {cartItemCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[10px] font-semibold rounded-full flex items-center justify-center">
+              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-primary text-primary-foreground text-micro font-semibold rounded-full flex items-center justify-center">
                 {cartItemCount > 9 ? '9+' : cartItemCount}
               </span>
             )}

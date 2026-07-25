@@ -1,12 +1,12 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
 
-import { Check, Zap, Shield, ArrowLeft, Loader2, Sparkles, RefreshCw, AlertCircle, Lock, CreditCard } from "lucide-react";
+import { Check, Zap, Shield, ArrowLeft, Loader2, Sparkles, RefreshCw, AlertCircle, Lock } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useRole } from "@/hooks/useRole";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import {
     Dialog,
     DialogContent,
@@ -17,79 +17,21 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { stripePromise as defaultStripePromise } from "@/lib/stripe";
-import { systemAPI, billingAPI } from "@/lib/api";
+import { billingAPI } from "@/lib/api";
 import type { SubscriptionPlan } from "@/lib/api/domains/billing";
 import { useQuery } from "@tanstack/react-query";
-
-function PaymentForm({ clientSecret, onSuccess, onBack }: { clientSecret: string; onSuccess: (paymentIntentId: string) => void; onBack: () => void }) {
-    const stripe = useStripe();
-    const elements = useElements();
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!stripe || !elements) return;
-
-        setIsProcessing(true);
-        setErrorMessage(null);
-
-        const { error, paymentIntent } = await stripe.confirmPayment({
-            elements,
-            clientSecret,
-            redirect: 'if_required',
-        });
-
-        if (error) {
-            setErrorMessage(error.message || "Payment failed");
-            setIsProcessing(false);
-        } else if (paymentIntent?.status === 'succeeded') {
-            onSuccess(paymentIntent.id);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <PaymentElement />
-            {errorMessage && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-600 font-medium">
-                    {errorMessage}
-                </div>
-            )}
-            <div className="flex gap-3">
-                <Button type="button" variant="ghost" className="rounded-xl flex-1" onClick={onBack} disabled={isProcessing}>
-                    Back
-                </Button>
-                <Button type="submit" disabled={!stripe || isProcessing} className="rounded-xl flex-1 shadow-lg shadow-primary/20">
-                    {isProcessing ? (
-                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-                    ) : (
-                        <><Lock className="w-4 h-4 mr-2" /> Pay & Upgrade</>
-                    )}
-                </Button>
-            </div>
-        </form>
-    );
-}
 
 function parseFeatures(val: string): string[] {
   try { return JSON.parse(val); } catch { return val.split('\n').filter(Boolean); }
 }
 
 export default function SubscriptionPage() {
-    const { subscription, isLoading, isError, updateSubscription, refetch } = useSubscription();
+    const { subscription, isLoading, isError, refetch } = useSubscription();
     const { hasPermission } = useRole();
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [stripePromise, setStripePromise] = useState<Promise<any> | null>(defaultStripePromise);
-    const [stripeLoading, setStripeLoading] = useState(true);
-    const [stripeError, setStripeError] = useState(false);
-    const [paymentStep, setPaymentStep] = useState<'confirm' | 'pay'>('confirm');
-    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
     const { data: dbPlans, isError: isPlansError, isLoading: isPlansLoading } = useQuery({
         queryKey: ['billing-plans'],
@@ -99,18 +41,6 @@ export default function SubscriptionPage() {
     });
 
     const canManageBilling = hasPermission("billing.manage");
-
-    useEffect(() => {
-        systemAPI.getPublicConfig().then(config => {
-            if (config.stripePublishableKey) {
-                setStripePromise(loadStripe(config.stripePublishableKey));
-            }
-            setStripeLoading(false);
-        }).catch(() => {
-            setStripeError(true);
-            setStripeLoading(false);
-        });
-    }, []);
 
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
@@ -156,47 +86,40 @@ export default function SubscriptionPage() {
             return;
         }
         setSelectedPlan(planName);
-        setPaymentStep('confirm');
-        setClientSecret(null);
         setIsConfirmOpen(true);
     };
 
-    const handleStartPayment = async () => {
+    const handleStartCheckout = async () => {
         if (!selectedPlan) return;
+        setIsRedirecting(true);
         try {
-            const result = await updateSubscription(selectedPlan);
-            if (result?.requiresPayment && result?.clientSecret) {
-                setClientSecret(result.clientSecret);
-                setPaymentStep('pay');
+            const planObj = dbPlans?.find(p => p.name === selectedPlan);
+            if (!planObj) {
+                toast.error("Plan not found");
+                setIsRedirecting(false);
+                return;
             }
-        } catch {
-            // error toast handled by mutation
-        }
-    };
 
-    const handlePaymentSuccess = async (paymentIntentId: string) => {
-        if (!selectedPlan) return;
-        try {
-            await updateSubscription(selectedPlan, paymentIntentId);
-            toast.success(`${selectedPlan} Tier successfully deployed`, {
-                description: "Your new computational capacity is now online."
+            const result = await billingAPI.createSubscriptionCheckout(planObj.id, {
+                trialPeriodDays: 0,
             });
-            setIsConfirmOpen(false);
-            setSelectedPlan(null);
-            setClientSecret(null);
-            setPaymentStep('confirm');
-        } catch {
-            toast.error("Provisioning failed", {
-                description: "Rolling back changes. Please try again."
-            });
+
+            if (result?.checkoutUrl) {
+                window.location.href = result.checkoutUrl;
+            } else {
+                toast.error("Failed to create checkout session");
+                setIsRedirecting(false);
+            }
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Failed to initiate checkout");
+            setIsRedirecting(false);
         }
     };
 
     const handleDialogClose = (open: boolean) => {
         if (!open) {
             setIsConfirmOpen(false);
-            setClientSecret(null);
-            setPaymentStep('confirm');
+            setIsRedirecting(false);
         }
     };
 
@@ -351,84 +274,49 @@ export default function SubscriptionPage() {
             {/* Confirm Upgrade Dialog */}
             <Dialog open={isConfirmOpen} onOpenChange={handleDialogClose}>
                 <DialogContent className="sm:max-w-md rounded-[2.5rem] border-border/50">
-                    {paymentStep === 'pay' && clientSecret && !stripeLoading ? (
-                        stripePromise ? (
-                            <>
-                                <DialogHeader>
-                                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-                                        <CreditCard className="w-7 h-7 text-primary" />
-                                    </div>
-                                    <DialogTitle className="text-3xl font-semibold">Enter Payment</DialogTitle>
-                                    <DialogDescription className="text-lg">
-                                        Complete payment to upgrade to <span className="text-primary font-bold">{selectedPlan}</span>.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <div className="py-6">
-                                    <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'night' } }}>
-                                        <PaymentForm
-                                            clientSecret={clientSecret}
-                                            onSuccess={handlePaymentSuccess}
-                                            onBack={() => setPaymentStep('confirm')}
-                                        />
-                                    </Elements>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex flex-col items-center gap-4 py-12">
-                                <AlertCircle className="w-12 h-12 text-muted-foreground" />
-                                <p className="text-muted-foreground text-center">Stripe is not configured. Please set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.</p>
-                                <Button variant="ghost" onClick={() => setIsConfirmOpen(false)} className="rounded-xl">Close</Button>
-                            </div>
-                        )
-                    ) : paymentStep === 'pay' && stripeLoading ? (
-                        <div className="flex flex-col items-center gap-4 py-12">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                            <p className="text-muted-foreground">Initializing payment system...</p>
+                    <DialogHeader>
+                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+                            <Zap className="w-7 h-7 text-primary" />
                         </div>
-                    ) : paymentStep === 'pay' && stripeError ? (
-                        <div className="flex flex-col items-center gap-4 py-12">
-                            <AlertCircle className="w-12 h-12 text-red-500" />
-                            <p className="text-muted-foreground text-center">Failed to initialize payment system. Please try again later.</p>
-                            <Button variant="ghost" onClick={() => setIsConfirmOpen(false)} className="rounded-xl">Close</Button>
-                        </div>
-                    ) : (
-                        <>
-                            <DialogHeader>
-                                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-                                    <Zap className="w-7 h-7 text-primary" />
-                                </div>
-                                <DialogTitle className="text-3xl font-semibold">Confirm Tier Upgrade</DialogTitle>
-                                <DialogDescription className="text-lg">
-                                    You are about to switch your computational tier to <span className="text-primary font-bold">{selectedPlan}</span>.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="py-6 space-y-4">
-                                <div className="p-6 rounded-3xl bg-muted/20 border border-border/50">
-                                    <p className="text-xs font-bold text-muted-foreground mb-2">UPGRADE SUMMARY</p>
-                                    <div className="flex justify-between items-center bg-background p-4 rounded-2xl border border-border/50">
-                                        <span className="font-bold text-muted-foreground">Monthly Billing</span>
-                                        <span className="text-xl font-semibold text-primary">
-                                            ${selectedPlanData?.price}
-                                        </span>
-                                    </div>
-                                </div>
-                                <p className="text-xs text-muted-foreground px-2">
-                                    Note: Subscription changes are processed immediately. Any remaining credit from your current tier will be pro-rated.
-                                </p>
+                        <DialogTitle className="text-3xl font-semibold">Confirm Tier Upgrade</DialogTitle>
+                        <DialogDescription className="text-lg">
+                            You are about to switch your computational tier to <span className="text-primary font-bold">{selectedPlan}</span>.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-6 space-y-4">
+                        <div className="p-6 rounded-3xl bg-muted/20 border border-border/50">
+                            <p className="text-xs font-bold text-muted-foreground mb-2">UPGRADE SUMMARY</p>
+                            <div className="flex justify-between items-center bg-background p-4 rounded-2xl border border-border/50">
+                                <span className="font-bold text-muted-foreground">Monthly Billing</span>
+                                <span className="text-xl font-semibold text-primary">
+                                    ${selectedPlanData?.price}
+                                </span>
                             </div>
-                            <DialogFooter className="gap-3 sm:gap-0">
-                                <Button variant="ghost" className="rounded-xl h-auto font-bold flex-1" onClick={() => setIsConfirmOpen(false)}>
-                                    Abort
-                                </Button>
-                                <Button
-                                    className="rounded-xl h-auto px-8 font-semibold flex-1 shadow-lg shadow-primary/20"
-                                    onClick={() => ['Pro', 'Business'].includes(selectedPlan || '') ? handleStartPayment() : handlePaymentSuccess('')}
-                                >
-                                    {['Pro', 'Business'].includes(selectedPlan || '') ? 'Proceed to Payment' : 'Confirm Upgrade'}
-                                </Button>
-                            </DialogFooter>
-                        </>
-                    )}
+                        </div>
+                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-4">
+                            <Shield className="w-5 h-5 text-primary mt-0.5" />
+                            <p className="text-sm text-muted-foreground font-medium leading-relaxed">SECURE CHECKOUT POWERED BY DODO PAYMENTS.</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground px-2">
+                            Note: Subscription changes are processed immediately. Any remaining credit from your current tier will be pro-rated.
+                        </p>
+                    </div>
+                    <DialogFooter className="gap-3 sm:gap-0">
+                        <Button variant="ghost" className="rounded-xl h-auto font-bold flex-1" onClick={() => setIsConfirmOpen(false)} disabled={isRedirecting}>
+                            Abort
+                        </Button>
+                        <Button
+                            className="rounded-xl h-auto px-8 font-semibold flex-1 shadow-lg shadow-primary/20"
+                            onClick={handleStartCheckout}
+                            disabled={isRedirecting}
+                        >
+                            {isRedirecting ? (
+                                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecting...</>
+                            ) : (
+                                'Proceed to Checkout'
+                            )}
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 

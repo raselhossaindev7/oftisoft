@@ -5,13 +5,13 @@ import { toast } from 'sonner';
 export function useProducts(productId?: string, search?: string, category?: string) {
     const queryClient = useQueryClient();
 
-    const { data: products = [], isLoading: productsLoading } = useQuery({
+    const { data: products = [], isLoading: productsLoading, isError: productsError, refetch: refetchProducts } = useQuery({
         queryKey: ['products', search, category],
         queryFn: () => productsAPI.getProducts(search, category),
         enabled: !productId
     });
 
-    const { data: product, isLoading: productLoading } = useQuery({
+    const { data: product, isLoading: productLoading, isError: productError, refetch: refetchProduct } = useQuery({
         queryKey: ['products', productId],
         queryFn: () => productsAPI.getProduct(productId!),
         enabled: !!productId
@@ -65,7 +65,9 @@ export function useProducts(productId?: string, search?: string, category?: stri
         product: product as Product,
         stats,
         isLoading: productId ? productLoading : productsLoading,
+        isError: productId ? productError : productsError,
         isStatsLoading: statsLoading,
+        refetch: productId ? refetchProduct : refetchProducts,
         createProduct: (data: Partial<Product>, options?: { onSuccess?: () => void }) => {
             createProductMutation.mutate(data, {
                 onSuccess: () => {

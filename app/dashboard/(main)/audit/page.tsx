@@ -33,6 +33,7 @@ import {
     Code2,
     Loader2,
     ChevronRight,
+    Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,14 +79,13 @@ interface AuditLog {
     userEmail: string;
     userRole: string;
     action: string;
-    entity: string;
-    entityId: string;
-    oldValues?: any;
-    newValues?: any;
-    description: string;
+    targetType: string;
+    targetId?: string;
+    oldValue?: any;
+    newValue?: any;
+    description?: string;
     ipAddress?: string;
     userAgent?: string;
-    metadata?: any;
     createdAt: string;
 }
 
@@ -102,21 +102,30 @@ interface AuditStats {
 type DatePreset = "24h" | "7d" | "30d" | "90d";
 
 const ACTION_TYPES: { value: string; label: string; icon: typeof ShieldCheck }[] = [
-    { value: "", label: "All Actions", icon: Activity },
-    { value: "create", label: "Create", icon: FileEdit },
-    { value: "update", label: "Update", icon: FileEdit },
-    { value: "delete", label: "Delete", icon: Trash2 },
-    { value: "login", label: "Login", icon: LogIn },
+    { value: "all", label: "All Actions", icon: Activity },
+    { value: "user.created", label: "User Created", icon: UserPlus },
+    { value: "user.updated", label: "User Updated", icon: FileEdit },
+    { value: "user.deleted", label: "User Deleted", icon: Trash2 },
+    { value: "user.role_changed", label: "Role Changed", icon: ShieldCheck },
+    { value: "user.banned", label: "User Banned", icon: Ban },
+    { value: "user.unbanned", label: "User Unbanned", icon: CheckCircle2 },
+    { value: "product.created", label: "Product Created", icon: FileEdit },
+    { value: "product.updated", label: "Product Updated", icon: FileEdit },
+    { value: "product.deleted", label: "Product Deleted", icon: Trash2 },
+    { value: "product.approved", label: "Product Approved", icon: CheckCircle2 },
+    { value: "product.rejected", label: "Product Rejected", icon: XCircle },
+    { value: "settings.changed", label: "Settings Changed", icon: Settings },
+    { value: "login.success", label: "Login Success", icon: LogIn },
+    { value: "login.failed", label: "Login Failed", icon: XCircle },
     { value: "logout", label: "Logout", icon: LogOut },
-    { value: "register", label: "Register", icon: UserPlus },
-    { value: "suspend", label: "Suspend", icon: Ban },
-    { value: "activate", label: "Activate", icon: CheckCircle2 },
-    { value: "deactivate", label: "Deactivate", icon: XCircle },
-    { value: "role_change", label: "Role Change", icon: ShieldCheck },
-    { value: "permission", label: "Permission", icon: Key },
-    { value: "settings", label: "Settings", icon: Settings },
-    { value: "export", label: "Export", icon: Database },
-    { value: "import", label: "Import", icon: Database },
+    { value: "password.changed", label: "Password Changed", icon: Key },
+    { value: "affiliate.approved", label: "Affiliate Approved", icon: CheckCircle2 },
+    { value: "affiliate.suspended", label: "Affiliate Suspended", icon: Ban },
+    { value: "affiliate.banned", label: "Affiliate Banned", icon: Ban },
+    { value: "commission.approved", label: "Commission Approved", icon: CheckCircle2 },
+    { value: "commission.rejected", label: "Commission Rejected", icon: XCircle },
+    { value: "withdrawal.approved", label: "Withdrawal Approved", icon: CheckCircle2 },
+    { value: "withdrawal.rejected", label: "Withdrawal Rejected", icon: XCircle },
 ];
 
 const DATE_PRESETS: { value: DatePreset; label: string }[] = [
@@ -129,42 +138,50 @@ const DATE_PRESETS: { value: DatePreset; label: string }[] = [
 const LOGS_PER_PAGE = 25;
 
 function getActionBadge(action: string | undefined) {
-    const actionLower = (action || '').toLowerCase().replace(/\s+/g, "_");
     const configs: Record<string, { className: string; icon: typeof ShieldCheck }> = {
-        create: { className: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", icon: FileEdit },
-        update: { className: "bg-sky-500/10 text-sky-500 border-sky-500/20", icon: FileEdit },
-        delete: { className: "bg-rose-500/10 text-rose-500 border-rose-500/20", icon: Trash2 },
-        login: { className: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: LogIn },
-        logout: { className: "bg-amber-500/10 text-amber-500 border-amber-500/20", icon: LogOut },
-        register: { className: "bg-violet-500/10 text-violet-500 border-violet-500/20", icon: UserPlus },
-        suspend: { className: "bg-red-500/10 text-red-500 border-red-500/20", icon: Ban },
-        activate: { className: "bg-green-500/10 text-green-500 border-green-500/20", icon: CheckCircle2 },
-        deactivate: { className: "bg-orange-500/10 text-orange-500 border-orange-500/20", icon: XCircle },
-        role_change: { className: "bg-purple-500/10 text-purple-500 border-purple-500/20", icon: ShieldCheck },
-        permission: { className: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20", icon: Key },
-        settings: { className: "bg-gray-500/10 text-gray-500 border-gray-500/20", icon: Settings },
-        export: { className: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20", icon: Database },
-        import: { className: "bg-teal-500/10 text-teal-500 border-teal-500/20", icon: Database },
+        "user.created": { className: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", icon: UserPlus },
+        "user.updated": { className: "bg-sky-500/10 text-sky-500 border-sky-500/20", icon: FileEdit },
+        "user.deleted": { className: "bg-rose-500/10 text-rose-500 border-rose-500/20", icon: Trash2 },
+        "user.role_changed": { className: "bg-purple-500/10 text-purple-500 border-purple-500/20", icon: ShieldCheck },
+        "user.banned": { className: "bg-red-500/10 text-red-500 border-red-500/20", icon: Ban },
+        "user.unbanned": { className: "bg-green-500/10 text-green-500 border-green-500/20", icon: CheckCircle2 },
+        "product.created": { className: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20", icon: FileEdit },
+        "product.updated": { className: "bg-sky-500/10 text-sky-500 border-sky-500/20", icon: FileEdit },
+        "product.deleted": { className: "bg-rose-500/10 text-rose-500 border-rose-500/20", icon: Trash2 },
+        "product.approved": { className: "bg-green-500/10 text-green-500 border-green-500/20", icon: CheckCircle2 },
+        "product.rejected": { className: "bg-red-500/10 text-red-500 border-red-500/20", icon: XCircle },
+        "settings.changed": { className: "bg-gray-500/10 text-gray-500 border-gray-500/20", icon: Settings },
+        "login.success": { className: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: LogIn },
+        "login.failed": { className: "bg-red-500/10 text-red-500 border-red-500/20", icon: XCircle },
+        "logout": { className: "bg-amber-500/10 text-amber-500 border-amber-500/20", icon: LogOut },
+        "password.changed": { className: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20", icon: Key },
+        "affiliate.approved": { className: "bg-green-500/10 text-green-500 border-green-500/20", icon: CheckCircle2 },
+        "affiliate.suspended": { className: "bg-orange-500/10 text-orange-500 border-orange-500/20", icon: Ban },
+        "affiliate.banned": { className: "bg-red-500/10 text-red-500 border-red-500/20", icon: Ban },
+        "commission.approved": { className: "bg-green-500/10 text-green-500 border-green-500/20", icon: CheckCircle2 },
+        "commission.rejected": { className: "bg-red-500/10 text-red-500 border-red-500/20", icon: XCircle },
+        "withdrawal.approved": { className: "bg-green-500/10 text-green-500 border-green-500/20", icon: CheckCircle2 },
+        "withdrawal.rejected": { className: "bg-red-500/10 text-red-500 border-red-500/20", icon: XCircle },
     };
 
-    const config = configs[actionLower];
+    const config = configs[action || ''];
     if (!config) {
         return (
-            <Badge className="bg-muted/30 text-muted-foreground border-border/20 gap-1.5 rounded-lg text-xs font-semibold ">
+            <Badge className="bg-muted/30 text-muted-foreground border-border/20 gap-1.5 rounded-lg text-xs font-semibold">
                 <Info className="w-3 h-3" /> {action}
             </Badge>
         );
     }
     const Icon = config.icon;
-    const label = ACTION_TYPES.find((a) => a.value === actionLower)?.label || action;
+    const label = ACTION_TYPES.find((a) => a.value === action)?.label || action;
     return (
-        <Badge className={`${config.className} gap-1.5 rounded-lg text-xs font-semibold `}>
+        <Badge className={`${config.className} gap-1.5 rounded-lg text-xs font-semibold`}>
             <Icon className="w-3 h-3" /> {label}
         </Badge>
     );
 }
 
-function truncateId(id: string, chars = 8) {
+function truncateId(id: string | undefined | null, chars = 8) {
     if (!id || id.length <= chars * 2 + 3) return id || "—";
     return `${id.slice(0, chars)}...${id.slice(-chars)}`;
 }
@@ -218,22 +235,24 @@ function getRoleBadge(role: string) {
     }
 }
 
-function JsonDiffView({ oldValues, newValues }: { oldValues?: any; newValues?: any }) {
+function JsonDiffView({ oldValue, newValue }: { oldValue?: any; newValue?: any }) {
     const [showRaw, setShowRaw] = useState(false);
 
-    if (!oldValues && !newValues) {
+    if (!oldValue && !newValue) {
         return (
             <div className="text-center py-8">
                 <div className="w-14 h-14 rounded-2xl bg-muted/20 flex items-center justify-center mx-auto mb-4">
                     <Code2 className="w-6 h-6 text-muted-foreground/40" />
                 </div>
-                <p className="text-sm font-semibold text-muted-foreground/60  text-sm">No change data recorded</p>
+                <p className="text-sm font-semibold text-muted-foreground/60">No change data recorded</p>
             </div>
         );
     }
 
-    const oldEntries = oldValues ? Object.entries(oldValues) : [];
-    const newEntries = newValues ? Object.entries(newValues) : [];
+    const oldData = typeof oldValue === 'object' ? oldValue : (oldValue ? { value: oldValue } : {});
+    const newData = typeof newValue === 'object' ? newValue : (newValue ? { value: newValue } : {});
+    const oldEntries = Object.entries(oldData);
+    const newEntries = Object.entries(newData);
     const allKeys = Array.from(new Set([...oldEntries.map(([k]) => k), ...newEntries.map(([k]) => k)]));
 
     return (
@@ -254,19 +273,19 @@ function JsonDiffView({ oldValues, newValues }: { oldValues?: any; newValues?: a
 
             {showRaw ? (
                 <div className="space-y-3">
-                    {oldValues && (
+                    {oldValue && (
                         <div className="space-y-1.5">
-                            <p className="text-xs font-semibold  text-rose-500">Old Values</p>
+                            <p className="text-xs font-semibold text-rose-500">Old Values</p>
                             <pre className="bg-black/20 rounded-2xl p-4 text-sm font-mono leading-relaxed overflow-x-auto max-h-48 scrollbar-thin whitespace-pre-wrap break-all">
-                                {JSON.stringify(oldValues, null, 2)}
+                                {JSON.stringify(oldData, null, 2)}
                             </pre>
                         </div>
                     )}
-                    {newValues && (
+                    {newValue && (
                         <div className="space-y-1.5">
-                            <p className="text-xs font-semibold  text-emerald-500">New Values</p>
+                            <p className="text-xs font-semibold text-emerald-500">New Values</p>
                             <pre className="bg-black/20 rounded-2xl p-4 text-sm font-mono leading-relaxed overflow-x-auto max-h-48 scrollbar-thin whitespace-pre-wrap break-all">
-                                {JSON.stringify(newValues, null, 2)}
+                                {JSON.stringify(newData, null, 2)}
                             </pre>
                         </div>
                     )}
@@ -274,12 +293,12 @@ function JsonDiffView({ oldValues, newValues }: { oldValues?: any; newValues?: a
             ) : (
                 <div className="rounded-2xl border border-border/30 overflow-hidden">
                     <div className="grid grid-cols-[80px_1fr_1fr] gap-px bg-border/20">
-                        <div className="bg-muted/10 px-3 py-2 text-xs font-semibold  text-muted-foreground">Field</div>
-                        <div className="bg-muted/10 px-3 py-2 text-xs font-semibold  text-rose-500">Old</div>
-                        <div className="bg-muted/10 px-3 py-2 text-xs font-semibold  text-emerald-500">New</div>
+                        <div className="bg-muted/10 px-3 py-2 text-xs font-semibold text-muted-foreground">Field</div>
+                        <div className="bg-muted/10 px-3 py-2 text-xs font-semibold text-rose-500">Old</div>
+                        <div className="bg-muted/10 px-3 py-2 text-xs font-semibold text-emerald-500">New</div>
                         {allKeys.map((key) => {
-                            const oldVal = oldValues?.[key];
-                            const newVal = newValues?.[key];
+                            const oldVal = oldData[key];
+                            const newVal = newData[key];
                             const changed = JSON.stringify(oldVal) !== JSON.stringify(newVal);
                             return (
                                 <div key={key} className={cn("contents", changed && "bg-primary/[0.02]")}>
@@ -315,7 +334,8 @@ function AuditLogPage() {
     const [isStatsLoading, setIsStatsLoading] = useState(true);
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [actionFilter, setActionFilter] = useState("");
+    const [actionFilter, setActionFilter] = useState("all");
+    const [entityFilter, setEntityFilter] = useState("all");
     const [datePreset, setDatePreset] = useState<DatePreset>("30d");
 
     const [page, setPage] = useState(1);
@@ -353,7 +373,7 @@ function AuditLogPage() {
                 offset: (pageNum - 1) * LOGS_PER_PAGE,
                 since,
             };
-            if (actionFilter) params.action = actionFilter;
+            if (actionFilter && actionFilter !== "all") params.action = actionFilter;
 
             const response = await api.get("/audit/logs", { params });
             const data = response.data;
@@ -398,19 +418,49 @@ function AuditLogPage() {
     }, []);
 
     const filteredLogs = logs.filter((l) => {
+        if (entityFilter !== "all" && l.targetType?.toLowerCase() !== entityFilter.toLowerCase()) return false;
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
         return (
             l.userEmail?.toLowerCase().includes(q) ||
             l.description?.toLowerCase().includes(q) ||
-            l.entity?.toLowerCase().includes(q) ||
-            l.entityId?.toLowerCase().includes(q) ||
+            l.targetType?.toLowerCase().includes(q) ||
+            l.targetId?.toLowerCase().includes(q) ||
             l.action?.toLowerCase().includes(q) ||
             l.ipAddress?.toLowerCase().includes(q)
         );
     });
 
-    const hasActiveFilters = actionFilter !== "" || searchQuery !== "" || datePreset !== "30d";
+    const hasActiveFilters = actionFilter !== "all" || entityFilter !== "all" || searchQuery !== "" || datePreset !== "30d";
+
+    const entityTypes = [...new Set(logs.map(l => l.targetType).filter(Boolean))];
+
+    const handleExportCSV = () => {
+        if (filteredLogs.length === 0) {
+            toast.info("No records to export");
+            return;
+        }
+        const headers = ["Timestamp", "User", "Role", "Action", "Entity", "Entity ID", "Description", "IP Address"];
+        const rows = filteredLogs.map(l => [
+            l.createdAt,
+            l.userEmail,
+            l.userRole,
+            l.action,
+            l.targetType || "",
+            l.targetId || "",
+            (l.description || "").replace(/"/g, '""'),
+            l.ipAddress || "",
+        ].map(c => `"${c}"`).join(","));
+        const csv = [headers.join(","), ...rows].join("\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success("Audit log exported");
+    };
 
     return (
         <div className="space-y-8">
@@ -431,95 +481,82 @@ function AuditLogPage() {
                         <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
                         Sync
                     </Button>
+                    <Button variant="outline"
+                        className="gap-2 rounded-xl h-11 border-border/50 bg-card/50 backdrop-blur-sm"
+                        onClick={handleExportCSV}
+                    >
+                        <Download className="w-4 h-4" />
+                        Export CSV
+                    </Button>
                 </div>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="border-border/50 bg-card/40 backdrop-blur-md rounded-[2.5rem] overflow-hidden group hover:border-primary/30 transition-all h-full flex flex-col">
-                    <CardHeader className="flex flex-row items-center justify-between pb-1 p-5">
-                        <CardTitle className="text-sm font-semibold  text-muted-foreground">Total Events</CardTitle>
-                        <div className="p-1.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
-                            <Activity className="h-4 w-4" />
-                        </div>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">Total Events</CardTitle>
+                        <Activity className="h-4 w-4 text-primary" />
                     </CardHeader>
-                    <CardContent className="p-5 pt-0 flex-1">
+                    <CardContent>
                         {isStatsLoading ? (
-                            <div className="flex items-center gap-3">
-                                <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
-                                <span className="text-xs font-semibold  text-muted-foreground/60">Loading...</span>
-                            </div>
+                            <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
                         ) : (
                             <>
-                                <div className="text-3xl font-semibold">{stats?.totalEvents ?? totalCount}</div>
-                                <p className="text-xs text-muted-foreground  mt-2 font-semibold opacity-60">Recorded events</p>
+                                <div className="text-2xl font-bold">{stats?.totalEvents ?? totalCount}</div>
+                                <p className="text-xs text-muted-foreground">Recorded events</p>
                             </>
                         )}
                     </CardContent>
                 </Card>
-                <Card className="border-border/50 bg-card/40 backdrop-blur-md rounded-[2.5rem] overflow-hidden group hover:border-sky-500/30 transition-all h-full flex flex-col">
-                    <CardHeader className="flex flex-row items-center justify-between pb-1 p-5">
-                        <CardTitle className="text-sm font-semibold  text-muted-foreground">Unique Users</CardTitle>
-                        <div className="p-1.5 rounded-xl bg-sky-500/10 text-sky-500 group-hover:scale-110 transition-transform">
-                            <Users className="h-4 w-4" />
-                        </div>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">Unique Users</CardTitle>
+                        <Users className="h-4 w-4 text-sky-500" />
                     </CardHeader>
-                    <CardContent className="p-5 pt-0 flex-1">
+                    <CardContent>
                         {isStatsLoading ? (
-                            <div className="flex items-center gap-3">
-                                <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
-                                <span className="text-xs font-semibold  text-muted-foreground/60">Loading...</span>
-                            </div>
+                            <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
                         ) : (
                             <>
-                                <div className="text-3xl font-semibold text-sky-500">{stats?.uniqueUsers ?? "—"}</div>
-                                <p className="text-xs text-sky-500/60  mt-2 font-semibold">Active participants</p>
+                                <div className="text-2xl font-bold text-sky-500">{stats?.uniqueUsers ?? "—"}</div>
+                                <p className="text-xs text-muted-foreground">Active participants</p>
                             </>
                         )}
                     </CardContent>
                 </Card>
-                <Card className="border-border/50 bg-card/40 backdrop-blur-md rounded-[2.5rem] overflow-hidden group hover:border-amber-500/30 transition-all h-full flex flex-col">
-                    <CardHeader className="flex flex-row items-center justify-between pb-1 p-5">
-                        <CardTitle className="text-sm font-semibold  text-muted-foreground">Actions Today</CardTitle>
-                        <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-500 group-hover:scale-110 transition-transform">
-                            <Clock className="h-4 w-4" />
-                        </div>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">Actions Today</CardTitle>
+                        <Clock className="h-4 w-4 text-amber-500" />
                     </CardHeader>
-                    <CardContent className="p-5 pt-0 flex-1">
+                    <CardContent>
                         {isStatsLoading ? (
-                            <div className="flex items-center gap-3">
-                                <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
-                                <span className="text-xs font-semibold  text-muted-foreground/60">Loading...</span>
-                            </div>
+                            <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
                         ) : (
                             <>
-                                <div className="text-3xl font-semibold text-amber-500">{stats?.actionsToday ?? "—"}</div>
-                                <p className="text-xs text-amber-500/60  mt-2 font-semibold">Events recorded today</p>
+                                <div className="text-2xl font-bold text-amber-500">{stats?.actionsToday ?? "—"}</div>
+                                <p className="text-xs text-muted-foreground">Events recorded today</p>
                             </>
                         )}
                     </CardContent>
                 </Card>
-                <Card className="border-border/50 bg-card/40 backdrop-blur-md rounded-[2.5rem] overflow-hidden group hover:border-violet-500/30 transition-all h-full flex flex-col">
-                    <CardHeader className="flex flex-row items-center justify-between pb-1 p-5">
-                        <CardTitle className="text-sm font-semibold  text-muted-foreground">Date Range</CardTitle>
-                        <div className="p-1.5 rounded-xl bg-violet-500/10 text-violet-500 group-hover:scale-110 transition-transform">
-                            <CalendarRange className="h-4 w-4" />
-                        </div>
+                <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">Date Range</CardTitle>
+                        <CalendarRange className="h-4 w-4 text-violet-500" />
                     </CardHeader>
-                    <CardContent className="p-5 pt-0 flex-1">
+                    <CardContent>
                         {isStatsLoading ? (
-                            <div className="flex items-center gap-3">
-                                <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
-                                <span className="text-xs font-semibold  text-muted-foreground/60">Loading...</span>
-                            </div>
+                            <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
                         ) : (
                             <>
-                                <div className="text-lg font-semibold leading-tight">
+                                <div className="text-lg font-bold leading-tight">
                                     {stats?.dateRange?.earliest ? formatDateRange(stats.dateRange.earliest) : "—"}
                                     <span className="text-muted-foreground/40 mx-1">→</span>
                                     {stats?.dateRange?.latest ? formatDateRange(stats.dateRange.latest) : "—"}
                                 </div>
-                                <p className="text-xs text-muted-foreground  mt-2 font-semibold opacity-60">Audit window span</p>
+                                <p className="text-xs text-muted-foreground">Audit window span</p>
                             </>
                         )}
                     </CardContent>
@@ -667,11 +704,11 @@ function AuditLogPage() {
                                             </TableCell>
                                             <TableCell className="py-5">{getActionBadge(log.action)}</TableCell>
                                             <TableCell className="py-5">
-                                                <span className="text-sm font-semibold ">{log.entity}</span>
+                                                <span className="text-sm font-semibold">{log.targetType}</span>
                                             </TableCell>
                                             <TableCell className="py-5">
-                                                <span className="text-sm font-mono font-bold text-muted-foreground bg-muted/20 px-2 py-1 rounded-lg" title={log.entityId}>
-                                                    {truncateId(log.entityId)}
+                                                <span className="text-sm font-mono font-bold text-muted-foreground bg-muted/20 px-2 py-1 rounded-lg" title={log.targetId}>
+                                                    {truncateId(log.targetId)}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="py-5 max-w-[240px]">
@@ -755,8 +792,8 @@ function AuditLogPage() {
                                     <div>{getActionBadge(selectedLog.action)}</div>
                                 </div>
                                 <div className="p-4 rounded-2xl bg-muted/10 space-y-1">
-                                    <p className="text-xs font-semibold  text-muted-foreground">Entity</p>
-                                    <p className="text-sm font-semibold ">{selectedLog.entity}</p>
+                                    <p className="text-xs font-semibold text-muted-foreground">Target Type</p>
+                                    <p className="text-sm font-semibold">{selectedLog.targetType}</p>
                                 </div>
                             </div>
 
@@ -811,40 +848,27 @@ function AuditLogPage() {
 
                             {/* Description */}
                             <div className="space-y-3">
-                                <p className="text-sm font-semibold  text-muted-foreground">Description</p>
+                                <p className="text-sm font-semibold text-muted-foreground">Description</p>
                                 <div className="p-4 rounded-2xl bg-muted/10">
                                     <p className="text-sm font-medium">{selectedLog.description || "No description provided."}</p>
                                 </div>
-                                {selectedLog.entityId && (
+                                {selectedLog.targetId && (
                                     <div className="flex items-center gap-2 text-sm font-mono font-bold text-muted-foreground">
-                                        <span className="text-xs font-semibold  text-muted-foreground/60">Entity ID:</span>
-                                        <span className="bg-muted/20 px-2 py-0.5 rounded-lg">{selectedLog.entityId}</span>
+                                        <span className="text-xs font-semibold text-muted-foreground/60">Target ID:</span>
+                                        <span className="bg-muted/20 px-2 py-0.5 rounded-lg">{selectedLog.targetId}</span>
                                     </div>
                                 )}
                             </div>
 
                             {/* Old/New Values */}
-                            {(selectedLog.oldValues || selectedLog.newValues) && (
+                            {(selectedLog.oldValue || selectedLog.newValue) && (
                                 <>
                                     <Separator className="bg-border/30" />
                                     <div className="space-y-3">
-                                        <p className="text-sm font-semibold  text-muted-foreground">Data Changes</p>
-                                        <JsonDiffView oldValues={selectedLog.oldValues}
-                                            newValues={selectedLog.newValues}
+                                        <p className="text-sm font-semibold text-muted-foreground">Data Changes</p>
+                                        <JsonDiffView oldValue={selectedLog.oldValue}
+                                            newValue={selectedLog.newValue}
                                         />
-                                    </div>
-                                </>
-                            )}
-
-                            {/* Metadata */}
-                            {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 && (
-                                <>
-                                    <Separator className="bg-border/30" />
-                                    <div className="space-y-3">
-                                        <p className="text-sm font-semibold  text-muted-foreground">Metadata</p>
-                                        <pre className="bg-black/20 rounded-2xl p-4 text-sm font-mono leading-relaxed overflow-x-auto max-h-40 whitespace-pre-wrap break-all">
-                                            {JSON.stringify(selectedLog.metadata, null, 2)}
-                                        </pre>
                                     </div>
                                 </>
                             )}

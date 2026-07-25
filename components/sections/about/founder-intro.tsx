@@ -1,6 +1,7 @@
 "use client"
-import { AnimatedDiv, AnimatedSpan, useSpring, useTransform, Animated } from "@/lib/animated";
-import { useRef, useState } from "react";
+import { AnimatedDiv, AnimatedSpan } from "@/lib/animated";
+import { useRef, useEffect, useCallback } from "react";
+import gsap from "gsap";
 import CountUp from "react-countup";
 import { Code2, Brain, Sparkles, Send, Github, Linkedin, Twitter } from "lucide-react";
 import Image from "next/image";
@@ -12,11 +13,50 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function FounderIntro({ data }: { data?: any }) {
     const founder = data;
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-    const mouseX = useSpring(mousePos.x, { stiffness: 150, damping: 15 });
-    const mouseY = useSpring(mousePos.y, { stiffness: 150, damping: 15 });
-    const rotateX = useTransform(mouseY, [-300, 300], [8, -8]);
-    const rotateY = useTransform(mouseX, [-300, 300], [-8, 8]);
+    const cardRef = useRef<HTMLDivElement>(null);
+    const innerCardRef = useRef<HTMLDivElement>(null);
+    const tiltRef = useRef({ x: 0, y: 0 });
+    const rafRef = useRef<number | null>(null);
+    const activeRef = useRef(false);
+
+    useEffect(() => {
+        activeRef.current = true;
+        return () => { activeRef.current = false; };
+    }, []);
+
+    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (!cardRef.current || !activeRef.current) return;
+        const { left, top, width, height } = cardRef.current.getBoundingClientRect();
+        const centerX = left + width / 2;
+        const centerY = top + height / 2;
+        tiltRef.current = {
+            x: (e.clientX - centerX) / (width / 2),
+            y: (e.clientY - centerY) / (height / 2)
+        };
+        if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+        rafRef.current = requestAnimationFrame(() => {
+            if (!innerCardRef.current || !activeRef.current) return;
+            gsap.to(innerCardRef.current, {
+                rotateY: tiltRef.current.x * 8,
+                rotateX: -tiltRef.current.y * 8,
+                duration: 0.4,
+                ease: "power2.out",
+                overwrite: "auto"
+            });
+        });
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        if (!innerCardRef.current) return;
+        tiltRef.current = { x: 0, y: 0 };
+        gsap.to(innerCardRef.current, {
+            rotateY: 0,
+            rotateX: 0,
+            duration: 0.6,
+            ease: "power2.out",
+            overwrite: "auto"
+        });
+    }, []);
 
     return (
         <section className="py-24 bg-transparent relative overflow-visible z-10">
@@ -24,15 +64,14 @@ export default function FounderIntro({ data }: { data?: any }) {
             <div className="container px-4 mx-auto">
                 <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
 
-<AnimatedDiv onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
-                        const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-                        setMousePos({ x: e.clientX - left - width / 2, y: e.clientY - top - height / 2 });
-                    }}
-                        onMouseLeave={() => setMousePos({ x: 0, y: 0 })}
+<AnimatedDiv
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMouseLeave}
                         className="relative perspective-1000 w-full max-w-md mx-auto"
                     >
-                        <AnimatedDiv style={{ transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`, transformStyle: "preserve-3d" }}
+                        <div ref={innerCardRef}
                             className="relative aspect-[3/4] rounded-3xl bg-[#0a0a0a]/80 backdrop-blur-xl border border-white/10 p-2 shadow-2xl overflow-hidden group will-change-transform"
+                            style={{ transformStyle: "preserve-3d" }}
                         >
                             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-purple-500/20 opacity-50 rounded-3xl -z-10 group-hover:opacity-100 transition-opacity duration-700" />
                             <div className="relative w-full h-full rounded-2xl overflow-hidden bg-neutral-900 border border-white/5">
@@ -45,13 +84,13 @@ export default function FounderIntro({ data }: { data?: any }) {
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80" />
                             </div>
-                            <AnimatedDiv style={{ transform: "translateZ(40px)" }} className="absolute bottom-8 left-8 right-8">
+                            <div style={{ transform: "translateZ(40px)" }} className="absolute bottom-8 left-8 right-8">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <Badge variant="secondary" className="px-3 py-1 bg-primary/20 border-primary/20 text-primary text-sm font-semibold tracking-wide backdrop-blur-md">
+                                    <Badge variant="secondary" className="px-3 py-1 bg-primary/20 border-primary/20 text-primary text-xs font-semibold tracking-wide backdrop-blur-md">
                                         {founder?.role ?? ""}
                                     </Badge>
                                 </div>
-                                <h3 className="text-3xl font-bold text-white mb-1">{founder?.name ?? ""}</h3>
+                                <h3 className="text-2xl md:text-3xl font-bold text-white mb-1">{founder?.name ?? ""}</h3>
                                 <p className="text-white/60 text-base md:text-lg mb-6">{founder?.tagline ?? ""}</p>
                                 <div className="flex gap-3">
                                     {[
@@ -64,24 +103,22 @@ export default function FounderIntro({ data }: { data?: any }) {
                                         </Button>
                                     ))}
                                 </div>
-                            </AnimatedDiv>
-                        </AnimatedDiv>
-                        <AnimatedDiv animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                            className="absolute -top-12 -right-12 w-64 h-64 border border-dashed border-white/10 rounded-full -z-10 pointer-events-none" />
-                        <AnimatedDiv animate={{ rotate: -360 }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                            className="absolute -bottom-12 -left-12 w-80 h-80 border border-dashed border-white/5 rounded-full -z-10 pointer-events-none" />
+                            </div>
+                        </div>
+                        <div aria-hidden="true" className="absolute -top-12 -right-12 w-64 h-64 border border-dashed border-white/10 rounded-full -z-10 pointer-events-none" style={{ animation: "spin 20s linear infinite" }} />
+                        <div aria-hidden="true" className="absolute -bottom-12 -left-12 w-80 h-80 border border-dashed border-white/5 rounded-full -z-10 pointer-events-none" style={{ animation: "spin 30s linear infinite reverse" }} />
                     </AnimatedDiv>
 
                     <div className="space-y-8">
                         <div>
                             <AnimatedDiv initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.5 }} className="mb-4">
-                                <Badge variant="outline" className="gap-2 border-primary/20 text-primary tracking-wide px-3 py-1 bg-primary/5 font-semibold text-sm">
+                                <Badge variant="outline" className="gap-2 border-primary/20 text-primary tracking-wide px-3 py-1 bg-primary/5 font-semibold text-xs">
                                     <Sparkles className="w-4 h-4 text-primary animate-pulse" />
                                     {founder?.badgeTitle ?? ""}
                                 </Badge>
                             </AnimatedDiv>
-                            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
                                 {founder?.titleLine1 ?? ""} <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                                     {founder?.titleLine2 ?? ""}
@@ -107,7 +144,7 @@ export default function FounderIntro({ data }: { data?: any }) {
                                         stroke="white" strokeWidth="3" strokeLinecap="round"
                                         className="opacity-70"
                                     />
-                                    <text x="50" y="55" className="fill-white text-[10px] font-mono tracking-wide opacity-50">Founder's Signature</text>
+                                    <text x="50" y="55" className="fill-white text-xs font-mono tracking-wide opacity-50">Founder's Signature</text>
                                 </svg>
                             </div>
                             <Link href="#contact" className="group flex items-center gap-2 text-white font-medium hover:text-primary transition-colors">

@@ -1,8 +1,10 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
-    CreditCard, Download, AlertCircle, Shield, FileText, Plus, Lock, Loader2, Trash2, RefreshCw, Zap, Check
+    CreditCard, Download, AlertCircle, Shield, FileText, Plus, Lock, Loader2, Trash2, RefreshCw, Zap, Check,
+    CheckCircle2, XCircle, DollarSign, Calendar, ArrowRight, ChevronLeft, ChevronRight, Tag, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -21,101 +23,12 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { billingAPI, SubscriptionPlan } from "@/lib/api";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { stripePromise as defaultStripePromise } from "@/lib/stripe";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-function AddCardForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
-    const stripe = useStripe();
-    const elements = useElements();
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!stripe || !elements) return;
-        setIsProcessing(true);
-        setErrorMessage(null);
-        try {
-            const { clientSecret } = await billingAPI.createSetupIntent();
-            const { error, setupIntent } = await stripe.confirmSetup({
-                elements,
-                clientSecret,
-                redirect: 'if_required',
-            });
-            if (error) { setErrorMessage(error.message || "Failed to save payment method"); return; }
-            if (setupIntent?.payment_method) {
-                await billingAPI.attachPaymentMethod(setupIntent.payment_method as string);
-                toast.success("Payment method added successfully");
-                onSuccess();
-            }
-        } catch (err: unknown) {
-            setErrorMessage(err instanceof Error ? err.message : "Failed to save payment method");
-        } finally { setIsProcessing(false); }
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <PaymentElement />
-            {errorMessage && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-600 font-medium">{errorMessage}</div>
-            )}
-            <div className="flex gap-3">
-                <Button type="button" variant="ghost" className="rounded-xl flex-1" onClick={onCancel} disabled={isProcessing}>Cancel</Button>
-                <Button type="submit" disabled={!stripe || isProcessing} className="rounded-xl flex-1 shadow-lg shadow-primary/20">
-                    {isProcessing ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</> : <><Lock className="w-4 h-4 mr-2" /> Save Card</>}
-                </Button>
-            </div>
-        </form>
-    );
-}
-
-function PlanPaymentForm({ clientSecret, plan, interval, onSuccess, onCancel }: { clientSecret: string; plan: string; interval: string; onSuccess: () => void; onCancel: () => void }) {
-    const stripe = useStripe();
-    const elements = useElements();
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!stripe || !elements) return;
-        setIsProcessing(true);
-        setErrorMessage(null);
-        try {
-            const { error, paymentIntent } = await stripe.confirmPayment({
-                elements,
-                clientSecret,
-                redirect: 'if_required',
-            });
-            if (error) { setErrorMessage(error.message || "Payment failed"); return; }
-            if (paymentIntent?.status === 'succeeded') {
-                await billingAPI.updateSubscription(plan, paymentIntent.id, interval);
-                toast.success(`Switched to ${plan} plan!`);
-                onSuccess();
-            }
-        } catch (err: unknown) {
-            setErrorMessage(err instanceof Error ? err.message : "Payment failed");
-        } finally { setIsProcessing(false); }
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <PaymentElement />
-            {errorMessage && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-600 font-medium">{errorMessage}</div>
-            )}
-            <div className="flex gap-3">
-                <Button type="button" variant="ghost" className="rounded-xl flex-1" onClick={onCancel} disabled={isProcessing}>Cancel</Button>
-                <Button type="submit" disabled={!stripe || isProcessing} className="rounded-xl flex-1 shadow-lg shadow-primary/20">
-                    {isProcessing ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</> : <><Lock className="w-4 h-4 mr-2" /> Pay &amp; Upgrade</>}
-                </Button>
-            </div>
-        </form>
-    );
-}
+import { Skeleton } from "@/components/ui/skeleton";
 
 const planDetails: Record<string, { product: string; free: string; pro: string; business: string }[]> = {
     snippets: [
@@ -138,29 +51,35 @@ const planDetails: Record<string, { product: string; free: string; pro: string; 
 };
 
 export default function BillingOverview() {
+    const searchParams = useSearchParams();
+    const paymentStatus = searchParams.get('payment');
     const { invoices, isLoading: isLoadingInvoices, isError: isInvoicesError, refetch: refetchInvoices } = useInvoices();
-    const { subscription, refetch: refetchSubscription, updateSubscription, isUpdating } = useSubscription();
-    const { paymentMethods, isLoading: isLoadingMethods, refetch: refetchPaymentMethods, setDefaultMethod, deleteMethod } = usePaymentMethods();
+    const { subscription, refetch: refetchSubscription } = useSubscription();
+    const { paymentMethods, isLoading: isLoadingMethods, refetch: refetchPaymentMethods, deleteMethod, setDefaultMethod } = usePaymentMethods();
     const { hasPermission } = useRole();
 
-    const [isAddCardOpen, setIsAddCardOpen] = useState(false);
     const [usage, setUsage] = useState<any>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [stripeReady, setStripeReady] = useState<boolean | null>(null);
     const [billingInterval, setBillingInterval] = useState<string>('month');
     const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
     const [isPlansLoading, setIsPlansLoading] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-    const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null);
+    const [isRedirecting, setIsRedirecting] = useState(false);
     const [currentPlanPrice, setCurrentPlanPrice] = useState(0);
+    const [isCancelOpen, setIsCancelOpen] = useState(false);
+    const [discountCode, setDiscountCode] = useState("");
+    const [isDiscountOpen, setIsDiscountOpen] = useState(false);
+    const [invoicePage, setInvoicePage] = useState(1);
+    const [isSettingDefault, setIsSettingDefault] = useState<string | null>(null);
 
     useEffect(() => {
         if (subscription?.plan && subscription?.interval) {
-            billingAPI.getPlans(subscription.interval).then(plans => {
-                const p = plans.find(pl => pl.name === subscription.plan);
-                if (p) setCurrentPlanPrice(p.price);
+            billingAPI.getPlans().then((plans: any) => {
+                if (Array.isArray(plans)) {
+                    const p = plans.find((pl: any) => pl.name === subscription.plan);
+                    if (p) setCurrentPlanPrice(p.price);
+                }
             }).catch(() => {});
         }
     }, [subscription?.plan, subscription?.interval]);
@@ -174,8 +93,12 @@ export default function BillingOverview() {
     const fetchPlans = useCallback(async (interval: string) => {
         setIsPlansLoading(true);
         try {
-            const data = await billingAPI.getPlans(interval);
-            setPlans(data);
+            const data = await billingAPI.getPlans();
+            if (Array.isArray(data)) {
+                setPlans(data);
+            } else {
+                setPlans([]);
+            }
         } catch { setPlans([]); }
         finally { setIsPlansLoading(false); }
     }, []);
@@ -190,10 +113,6 @@ export default function BillingOverview() {
 
     useEffect(() => { fetchUsage(); }, [fetchUsage, subscription?.plan]);
 
-    useEffect(() => {
-        defaultStripePromise.then(() => setStripeReady(true), () => setStripeReady(false));
-    }, []);
-
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
         try { await Promise.all([refetchInvoices(), refetchSubscription(), refetchPaymentMethods()]); fetchUsage(); }
@@ -202,18 +121,28 @@ export default function BillingOverview() {
 
     const handlePlanChange = async () => {
         if (!selectedPlan) return;
+        setIsRedirecting(true);
         try {
-            const result = await updateSubscription(selectedPlan, undefined, billingInterval);
-            if (result.requiresPayment && result.clientSecret) {
-                setPaymentClientSecret(result.clientSecret);
-                setIsConfirmOpen(false);
-                setIsPaymentOpen(true);
+            const planObj = plans.find(p => p.name === selectedPlan);
+            if (!planObj) {
+                toast.error("Plan not found");
+                setIsRedirecting(false);
+                return;
+            }
+
+            const result = await billingAPI.createSubscriptionCheckout(planObj.id, {
+                trialPeriodDays: 0,
+            });
+
+            if (result?.checkoutUrl) {
+                window.location.href = result.checkoutUrl;
             } else {
-                setIsConfirmOpen(false);
-                toast.success(`Switched to ${selectedPlan} plan!`);
+                toast.error("Failed to create checkout session");
+                setIsRedirecting(false);
             }
         } catch (err: any) {
-            toast.error(err?.response?.data?.message || "Failed to update plan");
+            toast.error(err?.response?.data?.message || "Failed to initiate checkout");
+            setIsRedirecting(false);
         }
     };
 
@@ -257,37 +186,176 @@ export default function BillingOverview() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
                 <AlertCircle className="w-16 h-16 text-red-500/80" />
-                <h3 className="text-xl font-bold">Failed to load billing data</h3>
+                <h3 className="text-xl font-semibold">Failed to load billing data</h3>
                 <p className="text-muted-foreground text-sm text-center max-w-sm">Something went wrong. Please try again.</p>
-                <Button onClick={handleRefresh} className="gap-2 rounded-xl"><RefreshCw className="w-4 h-4" /> Retry</Button>
+                <Button onClick={handleRefresh} className="gap-2 rounded-lg"><RefreshCw className="w-4 h-4" /> Retry</Button>
             </div>
         );
     }
 
+    // Handle payment success/failure banner
+    useEffect(() => {
+        if (paymentStatus === 'success') {
+            toast.success("Payment successful! Your subscription has been updated.");
+            refetchSubscription();
+            refetchInvoices();
+        } else if (paymentStatus === 'failed') {
+            toast.error("Payment failed. Please try again.");
+        }
+    }, [paymentStatus, refetchSubscription, refetchInvoices]);
+
+    const handleCancelSubscription = async () => {
+        try {
+            await billingAPI.cancelSubscription();
+            toast.success("Subscription cancelled successfully");
+            setIsCancelOpen(false);
+            refetchSubscription();
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Failed to cancel subscription");
+        }
+    };
+
+    const handleSetDefault = async (methodId: string) => {
+        setIsSettingDefault(methodId);
+        try {
+            await setDefaultMethod(methodId);
+            toast.success("Default payment method updated");
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Failed to update default method");
+        } finally {
+            setIsSettingDefault(null);
+        }
+    };
+
+    const handleApplyDiscount = async () => {
+        if (!discountCode.trim()) {
+            toast.error("Please enter a discount code");
+            return;
+        }
+        try {
+            const result = await billingAPI.validateDiscount(discountCode);
+            if (result?.valid) {
+                toast.success(`Discount applied: ${result.discount}% off`);
+                setIsDiscountOpen(false);
+            } else {
+                toast.error("Invalid discount code");
+            }
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Failed to validate discount");
+        }
+    };
+
+    const INVOICES_PER_PAGE = 4;
+    const paginatedInvoices = useMemo(() => {
+        const start = (invoicePage - 1) * INVOICES_PER_PAGE;
+        return invoices.slice(start, start + INVOICES_PER_PAGE);
+    }, [invoices, invoicePage]);
+    const totalInvoicePages = Math.ceil(invoices.length / INVOICES_PER_PAGE);
+
+    // Stats
+    const totalSpent = invoices.filter(inv => inv.status === 'completed').reduce((acc, inv) => {
+        const amt = parseFloat((inv.amount || "0").replace(/[^0-9.-]+/g, ""));
+        return acc + (isNaN(amt) ? 0 : amt);
+    }, 0);
+    const pendingInvoices = invoices.filter(inv => inv.status === 'pending').length;
+
     return (
         <div className="space-y-8 mx-auto">
+            {/* Payment Success/Failure Banner */}
+            {paymentStatus && (
+                <AnimatedDiv initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className={cn(
+                    "rounded-lg p-4 flex items-center gap-4",
+                    paymentStatus === 'success' ? "bg-green-500/10 border border-green-500/20" : "bg-destructive/10 border border-destructive/20"
+                )}>
+                    {paymentStatus === 'success' ? (
+                        <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />
+                    ) : (
+                        <XCircle className="w-6 h-6 text-destructive shrink-0" />
+                    )}
+                    <div className="flex-1">
+                    <p className="text-sm font-semibold">
+                        {paymentStatus === 'success' ? "Payment Successful" : "Payment Failed"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                            {paymentStatus === 'success' ? "Your subscription has been updated." : "Please try again or contact support."}
+                        </p>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => window.history.replaceState({}, '', '/dashboard/billing')}>
+                        <X className="w-4 h-4" />
+                    </Button>
+                </AnimatedDiv>
+            )}
+
             <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
-                    <h1 className="text-3xl font-semibold">Billing & Usage</h1>
-                    <p className="text-muted-foreground font-medium">Manage your subscription, payment methods and monitor usage.</p>
+                    <h1 className="text-3xl font-semibold">Billing</h1>
+                    <p className="text-muted-foreground text-sm">Manage your subscription, payment methods and monitor usage.</p>
                 </div>
-                <div className="flex gap-3">
-                    <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} className="rounded-2xl font-bold gap-2">
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} className="rounded-lg gap-2">
                         <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} /> Refresh
                     </Button>
-                    <a href="/dashboard/billing/invoices" className="px-5 py-2.5 border border-border/50 bg-card rounded-2xl font-bold hover:bg-muted transition-all text-sm shadow-sm inline-flex items-center">
-                        View Ledger
+                    <a href="/dashboard/billing/invoices" className="px-4 py-2 border border-border/50 bg-card rounded-lg hover:bg-muted transition-all text-sm inline-flex items-center">
+                        Invoices
                     </a>
+                </div>
+            </div>
+
+            {/* Stat Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-xl p-5">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground font-medium">Current Plan</p>
+                            <p className="text-lg font-semibold mt-0.5">{currentPlan}</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Zap className="w-5 h-5 text-primary" />
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-xl p-5">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground font-medium">Total Spent</p>
+                            <p className="text-lg font-semibold text-green-500 mt-0.5">${totalSpent.toFixed(2)}</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                            <DollarSign className="w-5 h-5 text-green-500" />
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-xl p-5">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground font-medium">Next Payment</p>
+                            <p className="text-lg font-semibold mt-0.5">{nextBillingDate}</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                            <Calendar className="w-5 h-5 text-orange-500" />
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-xl p-5">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground font-medium">Pending</p>
+                            <p className="text-lg font-semibold mt-0.5">{pendingInvoices}</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-blue-500" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
             {/* ── Plan Interval Toggle ── */}
             <AnimatedDiv initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-center gap-4">
-                <Tabs value={billingInterval} onValueChange={setBillingInterval} className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl p-1.5 shadow-sm">
+                <Tabs value={billingInterval} onValueChange={setBillingInterval} className="bg-card/50 border border-border/50 rounded-lg p-1 shadow-sm">
                     <TabsList className="bg-transparent h-auto gap-1">
-                        <TabsTrigger value="month" className="px-6 py-2 rounded-xl text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20">Monthly</TabsTrigger>
-                        <TabsTrigger value="year" className="px-6 py-2 rounded-xl text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20">
-                            Yearly <Badge variant="outline" className="ml-2 text-xs bg-green-500/10 text-green-600 border-green-500/20">Save 17%</Badge>
+                        <TabsTrigger value="month" className="px-4 py-1.5 rounded-md text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Monthly</TabsTrigger>
+                        <TabsTrigger value="year" className="px-4 py-1.5 rounded-md text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">
+                            Yearly <Badge variant="outline" className="ml-1.5 text-xs bg-green-500/10 text-green-600 border-green-500/20">Save 17%</Badge>
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
@@ -305,24 +373,24 @@ export default function BillingOverview() {
                             const features = Array.isArray(featuresRaw) ? featuresRaw : [];
                             return (
                                 <div key={plan.id} className={cn(
-                                    "relative rounded-3xl border p-8 transition-all duration-500 flex flex-col",
+                                    "relative rounded-xl border p-6 transition-all duration-500 flex flex-col",
                                     isCurrent
                                         ? "bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30 shadow-xl shadow-primary/10 scale-[1.02]"
-                                        : "bg-card/50 backdrop-blur-xl border-border/50 hover:border-primary/20 hover:shadow-lg"
+                                        : "bg-card/50 border-border/50 hover:border-primary/20 hover:shadow-lg"
                                 )}>
                                     {isCurrent && (
-                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full shadow-lg">
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full shadow-lg">
                                             Current Plan
                                         </div>
                                     )}
                                     <div className="mb-6">
-                                        <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                                        <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
                                         <div className="flex items-baseline gap-1 mb-1">
-                                            <span className="text-4xl font-black">${plan.price}</span>
-                                            <span className="text-muted-foreground font-medium">/{plan.interval === 'year' ? 'yr' : 'mo'}</span>
+                                            <span className="text-3xl font-semibold">${plan.price}</span>
+                                            <span className="text-muted-foreground text-sm">/{plan.interval === 'year' ? 'yr' : 'mo'}</span>
                                         </div>
                                         {plan.interval === 'year' && plan.price > 0 && (
-                                            <p className="text-xs text-green-600 font-semibold">${(plan.price / 12).toFixed(2)}/mo billed annually</p>
+                                            <p className="text-xs text-green-600 font-medium">${(plan.price / 12).toFixed(2)}/mo billed annually</p>
                                         )}
                                         <p className="text-sm text-muted-foreground mt-3">{plan.description}</p>
                                     </div>
@@ -335,9 +403,9 @@ export default function BillingOverview() {
                                         ))}
                                     </ul>
                                     <Button
-                                        disabled={isCurrent || isUpdating}
+                                        disabled={isCurrent || isRedirecting}
                                         onClick={() => { setSelectedPlan(plan.name); setIsConfirmOpen(true); }}
-                                        className={cn("w-full rounded-xl font-semibold", isCurrent ? "bg-muted text-muted-foreground cursor-default" : "shadow-lg shadow-primary/20")}
+                                        className={cn("w-full rounded-lg", isCurrent ? "bg-muted text-muted-foreground cursor-default" : "shadow-sm")}
                                         variant={isCurrent ? "outline" : "default"}
                                     >
                                         {isCurrent ? 'Current Plan' : `Switch to ${plan.name}`}
@@ -350,51 +418,51 @@ export default function BillingOverview() {
             </AnimatedDiv>
 
             {/* ── Product Access Comparison Table ── */}
-            <AnimatedDiv initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-3xl p-8 shadow-sm overflow-x-auto">
-                <h3 className="font-semibold text-xl mb-1">Product Access & Limits</h3>
-                <p className="text-sm font-bold text-muted-foreground mb-8">What you get with each plan</p>
+            <AnimatedDiv initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card/50 border border-border/50 rounded-xl p-6 shadow-sm overflow-x-auto">
+                <h3 className="font-semibold text-lg mb-1">Product Access & Limits</h3>
+                <p className="text-sm text-muted-foreground mb-6">What you get with each plan</p>
 
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b border-border/50">
-                            <th className="text-left py-4 pr-8 font-bold text-muted-foreground">Feature</th>
-                            {plans.map(p => <th key={p.id} className={cn("text-center py-4 px-4 font-bold", isCurrentPlan(p.name) ? "text-primary" : "text-muted-foreground")}>{p.name}</th>)}
+                            <th className="text-left py-3 pr-6 text-xs font-medium text-muted-foreground">Feature</th>
+                            {plans.map(p => <th key={p.id} className={cn("text-center py-3 px-3 text-xs font-medium", isCurrentPlan(p.name) ? "text-primary" : "text-muted-foreground")}>{p.name}</th>)}
                         </tr>
                     </thead>
                     <tbody>
                         <tr className="border-b border-border/30">
-                            <td colSpan={plans.length + 1} className="py-4 text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">Products</td>
+                            <td colSpan={plans.length + 1} className="py-3 text-xs font-medium text-muted-foreground">Products</td>
                         </tr>
                         {planDetails.snippets.map((row, i) => (
                             <tr key={i} className="border-b border-border/20 hover:bg-muted/20 transition-colors">
-                                <td className="py-3 pr-8 font-semibold">{row.product}</td>
+                                <td className="py-2.5 pr-6 font-medium text-sm">{row.product}</td>
                                 {plans.map(p => {
                                     const val = p.name === 'Free' ? row.free : p.name === 'Pro' ? row.pro : row.business;
-                                    return (<td key={p.id} className={cn("text-center py-3 px-4", val === '—' ? 'text-muted-foreground/40' : 'text-green-600 font-medium')}>{val}</td>);
+                                    return (<td key={p.id} className={cn("text-center py-2.5 px-3", val === '—' ? 'text-muted-foreground/40' : 'text-green-600 font-medium text-sm')}>{val}</td>);
                                 })}
                             </tr>
                         ))}
                         <tr className="border-b border-border/30">
-                            <td colSpan={plans.length + 1} className="py-4 text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">Limits</td>
+                            <td colSpan={plans.length + 1} className="py-3 text-xs font-medium text-muted-foreground">Limits</td>
                         </tr>
                         {planDetails.limits.map((row, i) => (
                             <tr key={i} className="border-b border-border/20 hover:bg-muted/20 transition-colors">
-                                <td className="py-3 pr-8 font-semibold">{row.product}</td>
+                                <td className="py-2.5 pr-6 font-medium text-sm">{row.product}</td>
                                 {plans.map(p => {
                                     const val = p.name === 'Free' ? row.free : p.name === 'Pro' ? row.pro : row.business;
-                                    return <td key={p.id} className={cn("text-center py-3 px-4 font-medium", val === '—' ? 'text-muted-foreground/40' : '')}>{val}</td>;
+                                    return <td key={p.id} className={cn("text-center py-2.5 px-3 text-sm", val === '—' ? 'text-muted-foreground/40' : '')}>{val}</td>;
                                 })}
                             </tr>
                         ))}
                         <tr className="border-b border-border/30">
-                            <td colSpan={plans.length + 1} className="py-4 text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">Support & Features</td>
+                            <td colSpan={plans.length + 1} className="py-3 text-xs font-medium text-muted-foreground">Support & Features</td>
                         </tr>
                         {planDetails.support.map((row, i) => (
                             <tr key={i} className="border-b border-border/20 hover:bg-muted/20 transition-colors">
-                                <td className="py-3 pr-8 font-semibold">{row.product}</td>
+                                <td className="py-2.5 pr-6 font-medium text-sm">{row.product}</td>
                                 {plans.map(p => {
                                     const val = p.name === 'Free' ? row.free : p.name === 'Pro' ? row.pro : row.business;
-                                    return (<td key={p.id} className={cn("text-center py-3 px-4", val === '—' ? 'text-muted-foreground/40' : 'text-green-600 font-medium')}>{val}</td>);
+                                    return (<td key={p.id} className={cn("text-center py-2.5 px-3", val === '—' ? 'text-muted-foreground/40' : 'text-green-600 font-medium text-sm')}>{val}</td>);
                                 })}
                             </tr>
                         ))}
@@ -414,23 +482,23 @@ export default function BillingOverview() {
                     <div className="relative z-10">
                         <div className="flex justify-between items-start mb-8">
                             <div>
-                                <p className="text-white/60 text-xs font-semibold mb-1">Current Plan</p>
+                                <p className="text-white/60 text-xs mb-1">Current Plan</p>
                                 <h2 className="text-3xl font-semibold flex items-center gap-3">
                                     {currentPlan} <Zap className="w-6 h-6 text-yellow-400 fill-yellow-400 animate-pulse" />
                                 </h2>
                             </div>
-                            <div className="bg-white/10 px-4 py-1.5 rounded-xl text-sm font-semibold backdrop-blur-md border border-white/20">
+                            <div className="bg-white/10 px-3 py-1 rounded-lg text-sm backdrop-blur-md border border-white/20">
                                 ${currentPlanPrice}/{currentInterval === 'year' ? 'yr' : 'mo'}
                             </div>
                         </div>
 
                         <div className="space-y-6 mb-10">
-                            <div className="space-y-2 group/usage">
-                                <div className="flex justify-between text-xs font-bold">
+                            <div className="space-y-1 group/usage">
+                                <div className="flex justify-between text-xs">
                                     <span className="text-white/70 flex items-center gap-1.5">Storage{ storagePercent > 85 && <AlertCircle className="w-3 h-3 text-orange-300 animate-pulse" /> }</span>
-                                    <span className="font-semibold">{usage?.storage?.used ?? "—"} / {usage?.storage?.total ?? "—"}</span>
+                                    <span>{usage?.storage?.used ?? "—"} / {usage?.storage?.total ?? "—"}</span>
                                 </div>
-                                <div className="w-full bg-black/30 rounded-full h-2.5 p-0.5 overflow-hidden border border-white/10 relative">
+                                <div className="w-full bg-black/30 rounded-full h-2 p-0.5 overflow-hidden border border-white/10">
                                     <AnimatedDiv initial={{ width: 0 }} animate={{ width: `${storagePercent}%` }}
                                         className={cn("h-full rounded-full transition-colors duration-500",
                                             storagePercent > 90 ? "bg-red-400 shadow-[0_0_15px_rgba(248,113,113,0.8)]" :
@@ -440,12 +508,12 @@ export default function BillingOverview() {
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-xs font-bold">
+                            <div className="space-y-1">
+                                <div className="flex justify-between text-xs">
                                     <span className="text-white/70">API / Downloads</span>
-                                    <span className="font-semibold">{usage?.apiCalls?.used ?? "—"} / {usage?.apiCalls?.total ?? "—"}</span>
+                                    <span>{usage?.apiCalls?.used ?? "—"} / {usage?.apiCalls?.total ?? "—"}</span>
                                 </div>
-                                <div className="w-full bg-black/30 rounded-full h-2.5 p-0.5 overflow-hidden border border-white/10">
+                                <div className="w-full bg-black/30 rounded-full h-2 p-0.5 overflow-hidden border border-white/10">
                                     <AnimatedDiv initial={{ width: 0 }} animate={{ width: `${apiPercent}%` }}
                                         className={cn("h-full rounded-full transition-colors duration-500",
                                             apiPercent > 90 ? "bg-red-400 shadow-[0_0_15px_rgba(248,113,113,0.8)]" :
@@ -457,7 +525,7 @@ export default function BillingOverview() {
                             </div>
                         </div>
 
-                        <div className="flex justify-between items-center text-sm font-semibold border-t border-white/10 pt-6">
+                        <div className="flex justify-between items-center text-sm border-t border-white/10 pt-6">
                             <span className="text-white/50">Next Cycle: {nextBillingDate}</span>
                             <span className="text-white flex items-center gap-1.5">
                                 <Lock className="w-2.5 h-2.5 opacity-50" />
@@ -470,18 +538,15 @@ export default function BillingOverview() {
                 </AnimatedDiv>
 
                 {/* Usage Chart */}
-                <div className="md:col-span-2 bg-card/50 backdrop-blur-xl border border-border/50 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <BarChart className="w-5 h-5 text-primary/20" />
-                    </div>
-                    <div className="flex justify-between items-center mb-8">
+                <div className="md:col-span-2 bg-card/50 border border-border/50 rounded-xl p-6 shadow-sm">
+                    <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h3 className="font-semibold text-xl leading-none mb-1">Spending Overview</h3>
-                            <p className="text-sm font-bold text-muted-foreground">Last 6 months</p>
+                            <h3 className="font-semibold text-lg leading-none mb-1">Spending Overview</h3>
+                            <p className="text-sm text-muted-foreground">Last 6 months</p>
                         </div>
-                        <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-full border border-border/50 shadow-inner">
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                            <span className="text-sm font-semibold text-muted-foreground">Trend 6M</span>
+                        <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-full border border-border/50">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                            <span className="text-xs text-muted-foreground">Trend 6M</span>
                         </div>
                     </div>
                     <div className="h-[200px] w-full">
@@ -509,59 +574,66 @@ export default function BillingOverview() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Payment Methods */}
-                <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-[2.5rem] p-8 shadow-sm">
-                    <div className="flex justify-between items-center mb-8">
+                <div className="bg-card/50 border border-border/50 rounded-xl p-6 shadow-sm">
+                    <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h3 className="font-semibold text-xl">Authorized Methods</h3>
-                            <p className="text-sm font-bold text-muted-foreground">Active payment vectors</p>
+                            <h3 className="font-semibold text-lg">Payment Methods</h3>
+                            <p className="text-sm text-muted-foreground">Active payment methods</p>
                         </div>
                         {canManageBilling && (
-                            <Button variant="ghost" size="sm" onClick={() => setIsAddCardOpen(true)}
-                                className="text-primary h-10 px-4 bg-primary/5 font-semibold text-sm hover:bg-primary/10 rounded-xl border border-primary/10 transition-all"
-                            ><Plus size={14} className="mr-2 stroke-[3px]" /> Add Entity</Button>
+                            <Button variant="outline" size="sm" className="rounded-lg gap-2" onClick={() => setIsDiscountOpen(true)}>
+                                <Tag className="w-4 h-4" /> Discount
+                            </Button>
                         )}
                     </div>
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         {isLoadingMethods ? (
-                            <div className="py-12 flex flex-col items-center justify-center gap-3 opacity-50">
-                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                                <span className="text-sm font-semibold text-primary">Loading payment methods...</span>
+                            <div className="py-8 flex flex-col items-center justify-center gap-3">
+                                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                                <span className="text-sm text-muted-foreground">Loading payment methods...</span>
                             </div>
                         ) : paymentMethods.length === 0 ? (
-                            <div className="py-16 flex flex-col items-center justify-center text-center gap-4 border-2 border-dashed border-border/50 rounded-[2rem] bg-muted/5">
-                                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground/30"><CreditCard className="w-8 h-8" /></div>
-                                <div><p className="font-semibold text-sm text-muted-foreground">No Methods Found</p><p className="text-xs text-muted-foreground/60 font-medium">Connect a credit source to enable services.</p></div>
+                            <div className="py-12 flex flex-col items-center justify-center text-center gap-4 border-2 border-dashed border-border/50 rounded-lg bg-muted/5">
+                                <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground"><CreditCard className="w-6 h-6" /></div>
+                                <div><p className="font-medium text-sm text-muted-foreground">No methods found</p><p className="text-xs text-muted-foreground/60">Payment methods are managed via Dodo Payments checkout.</p></div>
+                                {canManageBilling && (
+                                    <Button variant="outline" size="sm" className="rounded-lg gap-2" onClick={() => toast.info("Add payment method via checkout flow")}>
+                                        <Plus className="w-4 h-4" /> Add Method
+                                    </Button>
+                                )}
                             </div>
                         ) : (
                             paymentMethods.map((card) => (
-                                <div key={card.id} className="group relative flex items-center justify-between p-6 border border-border/50 rounded-[1.75rem] bg-background/50 hover:bg-muted/10 transition-all duration-500 hover:border-primary/20 hover:scale-[1.01]">
-                                    <div className="flex items-center gap-6">
-                                        <div className={cn("w-16 h-10 rounded-xl flex items-center justify-center shadow-lg border relative overflow-hidden transition-all duration-500 group-hover:scale-110 group-hover:-rotate-3",
+                                <div key={card.id} className="group relative flex items-center justify-between p-4 border border-border/50 rounded-lg bg-background/50 hover:bg-muted/10 transition-all hover:border-primary/20">
+                                    <div className="flex items-center gap-4">
+                                        <div className={cn("w-14 h-9 rounded-lg flex items-center justify-center shadow border relative overflow-hidden",
                                             (card.brand || '').toLowerCase() === 'visa' ? "bg-blue-600 border-blue-400/30" : "bg-slate-800 border-slate-600/30"
                                         )}>
                                             <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent" />
-                                            <span className="text-sm font-semibold text-white z-10">{card.brand}</span>
+                                            <span className="text-xs font-medium text-white z-10">{card.brand}</span>
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-sm leading-none mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity">•••• •••• •••• {card.last4}</p>
+                                            <p className="font-medium text-sm leading-none mb-1">•••• •••• •••• {card.last4}</p>
                                             <div className="flex items-center gap-2">
-                                                <p className="text-xs font-semibold text-muted-foreground opacity-60">Cycle {card.expiry}</p>
+                                                <p className="text-xs text-muted-foreground">Expires {card.expiry}</p>
                                                 <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                                                <p className="text-xs font-semibold text-muted-foreground opacity-60">{card.type}</p>
+                                                <p className="text-xs text-muted-foreground">{card.type}</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
                                         {card.isDefault ? (
-                                            <div className="px-4 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 flex items-center gap-2 shadow-sm">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                                <span className="text-sm font-semibold text-green-600">Primary</span>
+                                            <div className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                                <span className="text-xs font-medium text-green-600">Primary</span>
                                             </div>
                                         ) : (
                                             canManageBilling && (
-                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
-                                                    <Button variant="ghost" size="sm" onClick={() => setDefaultMethod(card.id)} className="h-9 px-4 text-sm font-semibold text-primary hover:bg-primary/10 rounded-xl">Activate</Button>
-                                                    <Button variant="ghost" size="sm" onClick={() => deleteMethod(card.id)} className="h-9 w-9 p-0 hover:bg-red-500/10 hover:text-red-500 rounded-xl text-muted-foreground"><Trash2 size={16} /></Button>
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                    <Button variant="ghost" size="sm" onClick={() => handleSetDefault(card.id)} disabled={isSettingDefault === card.id} className="h-8 px-2 rounded-md text-xs">
+                                                        {isSettingDefault === card.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Set Default"}
+                                                    </Button>
+                                                    <Button variant="ghost" size="sm" onClick={() => deleteMethod(card.id)} className="h-8 w-8 p-0 hover:bg-red-500/10 hover:text-red-500 rounded-md text-muted-foreground"><Trash2 size={14} /></Button>
                                                 </div>
                                             )
                                         )}
@@ -573,102 +645,113 @@ export default function BillingOverview() {
                 </div>
 
                 {/* Recent Invoices */}
-                <div className="bg-card/50 backdrop-blur-xl border border-border/50 rounded-[2.5rem] p-8 shadow-sm">
-                    <div className="flex justify-between items-center mb-8"><h3 className="font-semibold text-xl">Recent Ledger</h3></div>
+                <div className="bg-card/50 border border-border/50 rounded-xl p-6 shadow-sm">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="font-semibold text-lg">Recent Invoices</h3>
+                        <a href="/dashboard/billing/invoices" className="text-sm text-primary font-medium hover:underline">View All</a>
+                    </div>
                     <div className="space-y-1">
                         {isLoadingInvoices ? (
-                            <div className="py-12 flex flex-col items-center justify-center opacity-50"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+                            <div className="py-8 flex flex-col items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
                         ) : invoices.length === 0 ? (
-                            <p className="text-center py-12 text-muted-foreground text-sm font-medium">No transactions recorded yet.</p>
+                            <p className="text-center py-8 text-sm text-muted-foreground">No transactions recorded yet.</p>
                         ) : (
-                            invoices.slice(0, 4).map((inv, i) => (
-                                <div key={inv.id} className="flex items-center justify-between p-4 hover:bg-primary/[0.03] rounded-2xl transition-all cursor-pointer group animate-in fade-in slide-in-from-right-4 duration-500" style={{ animationDelay: `${i * 100}ms` }}>
-                                    <div className="flex items-center gap-5">
-                                        <div className="w-11 h-11 rounded-xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all group-hover:rotate-6"><FileText className="w-5 h-5" /></div>
-                                        <div><p className="font-semibold text-sm">{inv.amount}</p><p className="text-sm font-bold text-muted-foreground opacity-60">{new Date(inv.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</p></div>
-                                    </div>
+                            paginatedInvoices.map((inv, i) => (
+                                <div key={inv.id} className="flex items-center justify-between p-3 hover:bg-primary/[0.03] rounded-lg transition-all">
                                     <div className="flex items-center gap-4">
-                                        <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-lg border",
+                                        <div className="w-10 h-10 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground"><FileText className="w-5 h-5" /></div>
+                                        <div><p className="font-medium text-sm">{inv.amount}</p><p className="text-xs text-muted-foreground">{new Date(inv.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</p></div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className={cn("text-xs font-medium px-2 py-0.5 rounded-md border",
                                             inv.status === 'completed' ? "bg-green-500/10 text-green-600 border-green-500/10" : "bg-orange-500/10 text-orange-600 border-orange-500/10"
                                         )}>{inv.status}</span>
-                                        <button onClick={() => handleInvoiceDownload(inv)} className="p-2.5 hover:bg-muted bg-background border border-border rounded-xl text-muted-foreground hover:text-foreground transition-all shadow-sm"><Download className="w-4 h-4" /></button>
+                                        <button onClick={() => handleInvoiceDownload(inv)} className="p-2 hover:bg-muted bg-background border border-border rounded-lg text-muted-foreground hover:text-foreground transition-all"><Download className="w-4 h-4" /></button>
                                     </div>
                                 </div>
                             ))
                         )}
                     </div>
+                    {/* Pagination */}
+                    {invoices.length > INVOICES_PER_PAGE && (
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
+                            <p className="text-xs text-muted-foreground">
+                                {invoicePage} / {totalInvoicePages}
+                            </p>
+                            <div className="flex items-center gap-1">
+                                <Button variant="outline" size="sm" className="h-7 w-7 p-0 rounded-md" onClick={() => setInvoicePage(p => Math.max(1, p - 1))} disabled={invoicePage === 1}>
+                                    <ChevronLeft className="w-3 h-3" />
+                                </Button>
+                                <Button variant="outline" size="sm" className="h-7 w-7 p-0 rounded-md" onClick={() => setInvoicePage(p => Math.min(totalInvoicePages, p + 1))} disabled={invoicePage === totalInvoicePages}>
+                                    <ChevronRight className="w-3 h-3" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Confirm Plan Change Dialog */}
             <Dialog open={isConfirmOpen} onOpenChange={(o) => { if (!o) setIsConfirmOpen(false); }}>
-                <DialogContent className="sm:max-w-md rounded-[2.5rem] border-border/50">
+                <DialogContent className="sm:max-w-md rounded-xl">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl font-semibold">Switch to {selectedPlan}?</DialogTitle>
-                        <DialogDescription className="text-sm">{billingInterval === 'year' ? 'Yearly' : 'Monthly'} billing — proceed to payment.</DialogDescription>
+                        <DialogTitle className="text-xl font-semibold">Switch to {selectedPlan}?</DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground">You'll be redirected to Dodo Payments secure checkout to complete your upgrade.</DialogDescription>
                     </DialogHeader>
+                    <div className="p-4 bg-primary/5 rounded-lg border border-primary/10 flex items-start gap-3">
+                        <Shield className="w-5 h-5 text-primary mt-0.5" />
+                        <p className="text-sm text-muted-foreground">You will be redirected to a secure checkout page to complete payment.</p>
+                    </div>
                     <DialogFooter className="flex gap-3 sm:justify-end">
-                        <Button variant="ghost" onClick={() => setIsConfirmOpen(false)} className="rounded-xl">Cancel</Button>
-                        <Button onClick={handlePlanChange} disabled={isUpdating} className="rounded-xl shadow-lg shadow-primary/20">
-                            {isUpdating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</> : `Continue to Payment`}
+                        <Button variant="outline" onClick={() => setIsConfirmOpen(false)} className="rounded-lg" disabled={isRedirecting}>Cancel</Button>
+                        <Button onClick={handlePlanChange} disabled={isRedirecting} className="rounded-lg">
+                            {isRedirecting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecting...</> : `Continue to Checkout`}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Payment Dialog with Stripe Elements */}
-            <Dialog open={isPaymentOpen} onOpenChange={(o) => { if (!o) { setIsPaymentOpen(false); setPaymentClientSecret(null); } }}>
-                <DialogContent className="sm:max-w-md rounded-[2.5rem] border-border/50">
+            {/* Cancel Subscription Dialog */}
+            <Dialog open={isCancelOpen} onOpenChange={(o) => { if (!o) setIsCancelOpen(false); }}>
+                <DialogContent className="sm:max-w-md rounded-xl">
                     <DialogHeader>
-                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6"><CreditCard className="w-7 h-7 text-primary" /></div>
-                        <DialogTitle className="text-2xl font-semibold">Complete Payment</DialogTitle>
-                        <DialogDescription className="text-sm">Enter your card details to upgrade to {selectedPlan} ({billingInterval}ly).</DialogDescription>
+                        <DialogTitle className="text-xl font-semibold text-destructive">Cancel Subscription?</DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground">You will lose access to all premium features at the end of your current billing period.</DialogDescription>
                     </DialogHeader>
-                    {paymentClientSecret && stripeReady ? (
-                        <Elements stripe={defaultStripePromise} options={{ clientSecret: paymentClientSecret, appearance: { theme: 'night' } }}>
-                            <PlanPaymentForm
-                                clientSecret={paymentClientSecret}
-                                plan={selectedPlan || ''}
-                                interval={billingInterval}
-                                onSuccess={() => { setIsPaymentOpen(false); setPaymentClientSecret(null); refetchSubscription(); }}
-                                onCancel={() => { setIsPaymentOpen(false); setPaymentClientSecret(null); }}
-                            />
-                        </Elements>
-                    ) : (
-                        <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-                    )}
+                    <div className="p-4 bg-destructive/5 rounded-lg border border-destructive/10 flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
+                        <p className="text-sm text-muted-foreground">This action cannot be undone. You can resubscribe at any time.</p>
+                    </div>
+                    <DialogFooter className="flex gap-3 sm:justify-end">
+                        <Button variant="outline" onClick={() => setIsCancelOpen(false)} className="rounded-lg">Keep Subscription</Button>
+                        <Button variant="destructive" onClick={handleCancelSubscription} className="rounded-lg">
+                            Cancel Subscription
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Add Card Dialog */}
-            <Dialog open={isAddCardOpen} onOpenChange={(open) => { if (!open) setIsAddCardOpen(false); }}>
-                <DialogContent className="sm:max-w-md rounded-[2.5rem] border-border/50">
+            {/* Discount Code Dialog */}
+            <Dialog open={isDiscountOpen} onOpenChange={(o) => { if (!o) setIsDiscountOpen(false); }}>
+                <DialogContent className="sm:max-w-md rounded-xl">
                     <DialogHeader>
-                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6"><CreditCard className="w-7 h-7 text-primary" /></div>
-                        <DialogTitle className="text-3xl font-semibold">Register Method</DialogTitle>
-                        <DialogDescription className="text-sm">Connect a new payment method to your account via secure tokenization.</DialogDescription>
+                        <DialogTitle className="text-xl font-semibold">Apply Discount Code</DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground">Enter a valid discount code to apply to your subscription.</DialogDescription>
                     </DialogHeader>
-                    {stripeReady === null ? (
-                        <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-                    ) : stripeReady === false ? (
-                        <div className="flex flex-col items-center gap-4 py-12">
-                            <AlertCircle className="w-12 h-12 text-muted-foreground" />
-                            <p className="text-muted-foreground text-center">Payment system is not configured.</p>
-                            <Button variant="ghost" onClick={() => setIsAddCardOpen(false)} className="rounded-xl">Close</Button>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="p-4 bg-green-500/5 rounded-2xl border border-green-500/20 flex items-start gap-4">
-                                <Shield className="w-5 h-5 text-green-500 mt-0.5" />
-                                <p className="text-sm text-muted-foreground font-medium leading-relaxed">CARD DETAILS ARE TOKENIZED VIA STRIPE ELEMENTS.</p>
-                            </div>
-                            <div className="py-4">
-                                <Elements stripe={defaultStripePromise} options={{ appearance: { theme: 'night' } }}>
-                                    <AddCardForm onSuccess={() => { setIsAddCardOpen(false); refetchPaymentMethods(); }} onCancel={() => setIsAddCardOpen(false)} />
-                                </Elements>
-                            </div>
-                        </>
-                    )}
+                    <div className="space-y-4">
+                        <Input
+                            placeholder="Enter discount code"
+                            value={discountCode}
+                            onChange={(e) => setDiscountCode(e.target.value)}
+                            className="h-9 rounded-lg"
+                        />
+                    </div>
+                    <DialogFooter className="flex gap-3 sm:justify-end">
+                        <Button variant="outline" onClick={() => setIsDiscountOpen(false)} className="rounded-lg">Cancel</Button>
+                        <Button onClick={handleApplyDiscount} className="rounded-lg">
+                            Apply Code
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

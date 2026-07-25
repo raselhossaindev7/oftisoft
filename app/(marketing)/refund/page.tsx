@@ -80,7 +80,7 @@ export default function RefundPage() {
             <div className="container px-6 mx-auto relative z-10 space-y-24">
                 <div className="text-center space-y-6 max-w-4xl mx-auto">
                     <AnimatedDiv initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                        <Badge variant="outline" className="px-6 py-2 rounded-full border-emerald-500/30 bg-emerald-500/5 text-emerald-400 font-semibold tracking-[0.3em] text-[10px]">
+                        <Badge variant="outline" className="px-6 py-2 rounded-full border-emerald-500/30 bg-emerald-500/5 text-emerald-400 font-semibold tracking-[0.3em] text-xs">
                             {header?.badge ?? ""}
                         </Badge>
                     </AnimatedDiv>
@@ -151,7 +151,7 @@ export default function RefundPage() {
                                 {guarantee?.stats.map((stat, i) => (
                                     <Card key={i} className="bg-white/5 border-white/10 rounded-3xl p-6 text-center space-y-2">
                                         <h4 className="text-2xl font-semibold text-white tracking-tight">{stat.value}</h4>
-                                        <p className="text-[9px] font-semibold text-emerald-400 tracking-widest">{stat.label}</p>
+                                        <p className="text-xs font-semibold text-emerald-400 tracking-widest">{stat.label}</p>
                                     </Card>
                                 ))}
                             </div>
@@ -159,7 +159,7 @@ export default function RefundPage() {
                 </div>
 
                 <div className="pt-12 text-center">
-                    <p className="text-[10px] font-semibold tracking-[0.4rem] text-muted-foreground">
+                    <p className="text-xs font-semibold tracking-[0.4rem] text-muted-foreground">
                         {footer?.status ?? ""}
                     </p>
                 </div>

@@ -139,7 +139,7 @@ export default function ComparisonPage() {
                                 <TableCell key={p.id} className="py-6 px-6">
                                     <div className="flex flex-wrap gap-1">
                                         {p.compatibility.slice(0, 3).map(c => (
-                                            <span key={c} className="text-[10px] bg-muted px-2 py-0.5 rounded border border-border">{c}</span>
+                                            <span key={c} className="text-xs bg-muted px-2 py-0.5 rounded border border-border">{c}</span>
                                         ))}
                                     </div>
                                 </TableCell>
