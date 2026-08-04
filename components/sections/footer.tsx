@@ -67,6 +67,7 @@ const footerData = {
                 { id: "tools", href: "/tools", label: "Recommended Tools" },
                 { id: "status", href: "/status", label: "System Status" },
                 { id: "community", href: "/community", label: "Community" },
+                { id: "reviews", href: "https://www.trustpilot.com/review/oftisoft.com", label: "Trustpilot Reviews" },
             ],
         },
         {

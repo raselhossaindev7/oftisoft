@@ -6,22 +6,23 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { 
-    Mail, MapPin, Phone, Send, Globe, Zap, Terminal, Bot, Headset, ShieldCheck
+    Mail, MapPin, Phone, Send, Globe, Zap, Terminal, Bot, Headset, ShieldCheck, Star
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLeads } from "@/hooks/useLeads";
 import { useRef } from "react";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
-    Mail, MapPin, Phone, Send, Globe, Zap, Terminal, Bot, Headset, ShieldCheck
+    Mail, MapPin, Phone, Send, Globe, Zap, Terminal, Bot, Headset, ShieldCheck, Star
 };
 
 const pageData = {
     header: { badge: "CONNECT", titlePrefix: "Let's ", titleHighlight: "Talk", titleSuffix: "", description: "Have a project in mind? We'd love to hear about it. Schedule a free 15-minute discovery call." },
     contactInfo: [
-        { id: "email", iconName: "Mail", color: "text-blue-400", title: "EMAIL", value: "oftisoft@gmail.com" },
-        { id: "phone", iconName: "Phone", color: "text-green-400", title: "PHONE", value: "+8801757220402" },
+        { id: "email", iconName: "Mail", color: "text-blue-400", title: "EMAIL", value: "oftisoft@gmail.com", href: "mailto:oftisoft@gmail.com" },
+        { id: "phone", iconName: "Phone", color: "text-green-400", title: "PHONE", value: "+8801757220402", href: "tel:+8801757220402" },
         { id: "location", iconName: "MapPin", color: "text-purple-400", title: "HQ", value: "Satkhira, Khulna, Bangladesh" },
+        { id: "reviews", iconName: "Star", color: "text-emerald-400", title: "TRUSTPILOT REVIEWS", value: "oftisoft.com+621e607aaf@invite.trustpilot.com", href: "mailto:oftisoft.com+621e607aaf@invite.trustpilot.com" },
     ],
     statusNode: { title: "RESPONSE TIME", status: "Under 1hr", latencyText: "Average response time during business hours. Typically within 30 minutes." },
     form: { title: "Send a Message", description: "Fill out the form below and our team will get back to you within 24 hours.", nameLabel: "YOUR NAME", emailLabel: "EMAIL ADDRESS", subjectLabel: "SUBJECT", messageLabel: "MESSAGE", buttonText: "Send Message" },
@@ -95,7 +96,11 @@ export default function ContactPage() {
                                     </div>
                                     <div className="space-y-1">
                                         <h4 className="text-xs font-semibold tracking-widest text-muted-foreground">{item.title}</h4>
-                                        <p className="text-xl font-bold text-white tracking-tight">{item.value}</p>
+                                        {item.href ? (
+                                            <a href={item.href} className="text-xl font-bold text-white tracking-tight hover:text-primary transition-colors break-all">{item.value}</a>
+                                        ) : (
+                                            <p className="text-xl font-bold text-white tracking-tight">{item.value}</p>
+                                        )}
                                     </div>
                                 </AnimatedDiv>
                             );})}

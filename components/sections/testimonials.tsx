@@ -10,6 +10,7 @@ import { useHomeContentStore } from "@/lib/store/home-content";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import TrustpilotWidget from "@/components/trustpilot-widget";
 
 interface TestimonialData {
     id?: string;
@@ -132,6 +133,10 @@ export default function Testimonials() {
                         <TestimonialCard key={i} data={t} index={i} />
                     ))}
                 </div>
+            </div>
+
+            <div className="mt-6 flex justify-center">
+                <TrustpilotWidget />
             </div>
 
             <style jsx global>{`
