@@ -99,7 +99,7 @@ export default function Awards({ data }: { data?: any }) {
                             <Swiper effect={'cards'}
                                 grabCursor={true}
                                 modules={[EffectCards, Autoplay, Pagination]}
-                                autoplay={{ delay: 3000, disableOnInteraction: false }}
+                                autoplay={{ delay: 3000, disableOnInteraction: false, pauseOnMouseEnter: true }}
                                 pagination={{ clickable: true, dynamicBullets: true }}
                                 className="w-full aspect-[3/4]"
                             >

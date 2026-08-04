@@ -24,6 +24,8 @@ export default function ShopPage() {
     const { content } = useShopContentStore();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedSort, setSelectedSort] = useState("newest");
+    const [priceRange, setPriceRange] = useState([0, 1000]);
+    const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
 
     const productsFromApi = useMemo(() => mapApiProductsToShop(apiProducts), [apiProducts]);
     const bundlesFromApi = useMemo(() => mapApiBundlesToShop(apiBundles), [apiBundles]);
@@ -43,13 +45,24 @@ export default function ShopPage() {
             );
         }
 
+        // Price Range
+        result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+
+        // Subcategory / Compatibility filter
+        if (selectedSubcategories.length > 0) {
+            result = result.filter(p => {
+                const productTags = (p as any).tags || (p as any).compatibility || [];
+                return selectedSubcategories.some(sub => productTags.includes(sub) || p.name.toLowerCase().includes(sub.toLowerCase()));
+            });
+        }
+
         // Sort
   if (selectedSort === "price-low") result.sort((a, b) => a.price - b.price);
         if (selectedSort === "price-high") result.sort((a, b) => b.price - a.price);
         if (selectedSort === "popular") result.sort((a, b) => b.reviews - a.reviews);
 
         return result;
-    }, [searchQuery, selectedSort, products]);
+    }, [searchQuery, selectedSort, products, priceRange, selectedSubcategories]);
 
     return (
         <div className="space-y-24 pb-20">
@@ -88,7 +101,12 @@ export default function ShopPage() {
                                 <SheetHeader className="mb-4">
                                     <SheetTitle>Filters</SheetTitle>
                                 </SheetHeader>
-                                <ShopSidebar />
+                                <ShopSidebar
+                                    priceRange={priceRange}
+                                    onPriceRangeChange={setPriceRange}
+                                    selectedSubcategories={selectedSubcategories}
+                                    onSubcategoryChange={setSelectedSubcategories}
+                                />
                             </SheetContent>
                         </Sheet>
 
@@ -108,7 +126,12 @@ export default function ShopPage() {
                     {/* Desktop Sidebar */}
                     <aside className="hidden lg:block w-[280px] shrink-0">
                         <div className="sticky top-24">
-                            <ShopSidebar />
+                                    <ShopSidebar
+                                        priceRange={priceRange}
+                                        onPriceRangeChange={setPriceRange}
+                                        selectedSubcategories={selectedSubcategories}
+                                        onSubcategoryChange={setSelectedSubcategories}
+                                    />
                         </div>
                     </aside>
 

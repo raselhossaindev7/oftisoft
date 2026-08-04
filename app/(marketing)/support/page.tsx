@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3 } from "@/lib/animated";
-;
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Bot, MessageSquare, HelpCircle, Clock, Headset, ShieldCheck
 };
 

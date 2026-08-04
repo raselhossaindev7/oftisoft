@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Building2, Briefcase, Globe, Zap, Rocket, Clock, Award, Code2, Users
 };
 

@@ -27,7 +27,7 @@ import ServicePackages from "@/components/sections/services-page/service-package
 import ServiceOfferDetail from "@/components/sections/services-page/service-offer-detail";
 
 // Icon mapping matching the CMS
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Plus, Save, Trash2, LayoutTemplate, Grid, HelpCircle, Server, Database, Cloud, 
     Brain: Cpu, Smartphone, Layout, Video: Code, FileText: Box, Code2, 
     ClipboardCheck, Rocket, HeartPulse, Globe, Zap, Code, ShieldCheck, 

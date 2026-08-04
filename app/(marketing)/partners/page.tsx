@@ -31,7 +31,7 @@ import {
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Zap, Globe, Sparkles, ShieldCheck, Handshake, Users, Cpu, Workflow, Gem, Target, Briefcase, Box
 };
 
@@ -56,6 +56,10 @@ export default function PartnersPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (submitting) return;
+        if (!form.partnerType) {
+            toast.error("Please select a partner type");
+            return;
+        }
         setSubmitting(true);
         try {
             await api.post("/leads/partner-application", form);
@@ -72,7 +76,7 @@ export default function PartnersPage() {
     return (
         <div className="relative min-h-screen pt-32 pb-24 bg-[#020202]">
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-10%] left-[-10%] w-[80vw] h-[80vw] bg-primary/10 rounded-full blur-[160px] opacity-40 animate-pulse" />
+                <div className="absolute top-[-10%] left-[-10%] w-[80vw] h-[80vw] bg-primary/10 rounded-full blur-[160px] opacity-40" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-indigo-600/5 rounded-full blur-[140px] opacity-30" />
                 <div className="absolute inset-0 bg-grain opacity-[0.02]" />
             </div>

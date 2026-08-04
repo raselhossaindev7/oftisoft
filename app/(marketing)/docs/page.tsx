@@ -26,7 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 
 // Icon Map
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Layers, Cpu, ShieldCheck, Terminal, Zap, Code2, BookOpen, MessageSquare, Box, Globe, FileText
 };
 

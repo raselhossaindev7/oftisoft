@@ -7,7 +7,7 @@ import {
     ShieldCheck, Lock, Eye, Database, Globe, UserCheck, Server, Fingerprint
 } from "lucide-react";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     ShieldCheck, Lock, Eye, Database, Globe, UserCheck, Server, Fingerprint
 };
 

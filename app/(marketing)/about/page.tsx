@@ -16,7 +16,7 @@ import TeamShowcase from "@/components/sections/about/team-showcase";
 import CapabilityEngine from "@/components/sections/about/capability-engine";
 import { useMousePosition } from "@/hooks/useMousePosition";
 
-const iconMap: any = { Globe, Users, Zap, ShieldCheck: Globe };
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = { Globe, Users, Zap, ShieldCheck: Globe };
 
 const pageData = {
   hero: {

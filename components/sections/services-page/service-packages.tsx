@@ -19,7 +19,7 @@ import "swiper/css/effect-creative";
 import "swiper/css/navigation";
 import { useCart } from "@/hooks/use-cart";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Check, Sparkles, Rocket, Crown, ArrowRight, Zap, RefreshCw, Plus, Save, Trash2, 
     LayoutTemplate, Grid, HelpCircle, Server, Database, Cloud, Brain, Smartphone, 
     Layout, Video, FileText, Code2, ClipboardCheck, HeartPulse, Globe, Code, ShieldCheck, Layers
@@ -93,7 +93,7 @@ export default function ServicePackages() {
                             prevEl: '.pricing-prev',
                             nextEl: '.pricing-next',
                         }}
-                        autoplay={{ delay: 5000, disableOnInteraction: true }}
+                        autoplay={{ delay: 5000, disableOnInteraction: true, pauseOnMouseEnter: true }}
                         grabCursor={true}
                         centeredSlides={false}
                         breakpoints={{

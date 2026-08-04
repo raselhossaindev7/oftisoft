@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3 } from "@/lib/animated";
-;
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
@@ -91,7 +90,7 @@ export default function PopularPosts() {
                         1024: { slidesPerView: 3 },
                         1280: { slidesPerView: 3.5 },
                     }}
-                    autoplay={{ delay: 6000, disableOnInteraction: false }}
+                    autoplay={{ delay: 6000, disableOnInteraction: false, pauseOnMouseEnter: true }}
                     className="!pb-12 !overflow-visible"
                     loop={true}
                     centeredSlides={false} 

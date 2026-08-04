@@ -130,9 +130,9 @@ export default function PortfolioMain() {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             whileInView={{ opacity: 1, scale: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="group h-full cursor-pointer"
-                            onClick={() => window.location.href = `/portfolio/${project.slug || project.id}`}
+                            className="group h-full"
                         >
+                            <Link href={`/portfolio/${project.slug || project.id}`} className="block h-full">
                             <div className="h-full bg-card hover:bg-card/80 border border-border/50 hover:border-primary/20 rounded-[2rem] overflow-hidden cursor-pointer shadow-sm hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 flex flex-col relative group-hover:-translate-y-2">
                                 
                                 {/* Image Area */}
@@ -171,6 +171,7 @@ export default function PortfolioMain() {
                                     </div>
                                 </div>
                             </div>
+                            </Link>
                         </AnimatedDiv>
                     ))}
                 </div>

@@ -13,7 +13,7 @@ import {
     ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Globe, Scale, ShieldAlert, Clock, Lock, Eye, FileText, ShieldCheck: Shield,
 };
 

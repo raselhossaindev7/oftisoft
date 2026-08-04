@@ -84,7 +84,7 @@ export default function TechStack() {
                 </h2>
             </div>
             
-            <div className="relative flex flex-col gap-8 mask-gradient-x">
+            <div className="relative flex flex-col gap-8 mask-gradient-x-tech">
                 {/* Row 1: Left Scroll */}
                 <div className="flex gap-4 animate-scroll-left min-w-full hover:pause">
                     {[...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies, ...techStackContent.technologies].map((tech: Tech, i: number) => (
@@ -101,7 +101,7 @@ export default function TechStack() {
             </div>
 
             <style jsx global>{`
-                .mask-gradient-x { mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent); }
+                .mask-gradient-x-tech { mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent); }
                 .pause:hover { animation-play-state: paused; }
                 
                 @keyframes scroll-left {

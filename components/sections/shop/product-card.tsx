@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

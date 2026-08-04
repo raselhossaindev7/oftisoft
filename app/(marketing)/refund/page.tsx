@@ -14,7 +14,7 @@ import {
     CircleCheck
 } from "lucide-react";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     RotateCcw, ShoppingBag, Code, CreditCard, Clock, MailQuestion, Ban, CircleCheck
 };
 

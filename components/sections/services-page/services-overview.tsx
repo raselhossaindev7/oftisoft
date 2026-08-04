@@ -15,7 +15,7 @@ import { useState } from "react";
 
 
 // Icon mapping
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Plus, Save, Trash2, LayoutTemplate, Grid, HelpCircle, Server, Database, Cloud, 
     Brain, Smartphone, Layout, Video, FileText, Code2, ClipboardCheck, Rocket, 
     HeartPulse, Globe, Zap, Code, ShieldCheck, Sparkles, Layers, Crown, ArrowRight,

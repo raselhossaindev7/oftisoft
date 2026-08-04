@@ -1,5 +1,5 @@
 "use client"
-import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP, useScrollY, useScrollProgress, useTransform, useSpring, useMotionValue } from "@/lib/animated";
+import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP, useScrollY, useScrollProgress, useTransform, useMotionValue } from "@/lib/animated";
 
 import { useRef } from "react";
 import { 
@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Search, Lightbulb, PenTool, Code, CheckCircle, Rocket, Zap, Target, RefreshCw,
     Video, FileText, Code2, ClipboardCheck, HeartPulse, Plus, Save, Trash2, 
     LayoutTemplate, Grid, HelpCircle, Server, Database, Cloud, Brain, Smartphone, 

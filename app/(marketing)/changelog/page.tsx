@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GitBranch, Sparkles, ShieldCheck, Package } from "lucide-react";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Sparkles, ShieldCheck, Package, GitBranch
 };
 

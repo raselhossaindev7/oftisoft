@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search, Globe, Code2, Server, Smartphone, Brain, Cloud, Database, Monitor, Sparkles, ShieldCheck, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
 interface ServicesSidebarProps {
     className?: string;

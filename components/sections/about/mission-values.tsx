@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Zap,
     Award,
     Handshake,
@@ -79,9 +79,19 @@ export default function MissionValues({ data }: { data?: any }) {
                         <div className="relative">
                             <div className="absolute -left-6 top-0 text-8xl font-serif text-white/5 -z-10 leading-none">"</div>
                             <p className="text-lg md:text-xl text-muted-foreground/90 leading-relaxed font-normal">
-                                {mission?.quote?.split(mission.quoteHighlight || "")[0]}
-                                <span className="text-white font-medium">{mission?.quoteHighlight}</span>
-                                {mission?.quote?.split(mission.quoteHighlight || "")[1]}
+                                {(() => {
+                                    const quote = mission?.quote || "";
+                                    const highlight = mission?.quoteHighlight || "";
+                                    if (!highlight || !quote.includes(highlight)) return quote;
+                                    const idx = quote.indexOf(highlight);
+                                    return (
+                                        <>
+                                            {quote.slice(0, idx)}
+                                            <span className="text-white font-medium">{highlight}</span>
+                                            {quote.slice(idx + highlight.length)}
+                                        </>
+                                    );
+                                })()}
                             </p>
                         </div>
                     </AnimatedDiv>
@@ -101,7 +111,7 @@ export default function MissionValues({ data }: { data?: any }) {
                         slidesPerView={1.2}
                         centeredSlides={true}
                         loop={true}
-                        autoplay={{ delay: 3000, disableOnInteraction: false }}
+                        autoplay={{ delay: 3000, disableOnInteraction: false, pauseOnMouseEnter: true }}
                         pagination={{ clickable: true, dynamicBullets: true }}
                         breakpoints={{
                             640: { slidesPerView: 2.2, centeredSlides: false, spaceBetween: 24 }

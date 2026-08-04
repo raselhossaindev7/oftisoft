@@ -17,7 +17,7 @@ import { useBlogContentStore, type BlogCategory } from "@/lib/store/blog-content
 
 
 // Map icon string names to components
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Grid, Code, Smartphone, Brain, Cloud, Briefcase
 };
 
@@ -154,7 +154,7 @@ export default function BlogList() {
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                                     style={{ willChange: "transform, opacity" }}
-                                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                                    transition={{ duration: 0.4, delay: Math.min(index, 5) * 0.1 }}
                                     className="h-full"
                                 >
                                     <Link href={`/blog/${post.slug || post.id}`} className="group relative flex flex-col h-full block">
@@ -249,7 +249,7 @@ export default function BlogList() {
                 )}
 
                 {/* Load More Trigger (Visual Only for now) */}
-                {filteredPosts.length > 0 && (
+                {visibleCount < filteredPosts.length && (
                     <div className="mt-16 text-center">
                         <Button variant="outline" className="px-8 py-6 rounded-full bg-card hover:bg-muted hover:border-primary/30 transition-all font-medium text-sm shadow-sm hover:shadow-md" onClick={() => setVisibleCount(prev => prev + 6)}>
                             Load More Articles

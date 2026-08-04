@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP } from "@/lib/animated";
-;
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay, EffectCreative } from "swiper/modules";
@@ -130,7 +129,7 @@ export default function TechBreakdown() {
                             prev: { shadow: false, translate: [0, 0, -400] },
                             next: { translate: ['100%', 0, 0] },
                         }}
-                        autoplay={{ delay: 5000, disableOnInteraction: true }}
+                        autoplay={{ delay: 5000, disableOnInteraction: true, pauseOnMouseEnter: true }}
                         pagination={{ clickable: true }}
                         className="!pb-12"
                     >

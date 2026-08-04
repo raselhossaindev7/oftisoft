@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 // Icon Map
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Github, Slack, Bot, Globe, Share2, Code2, Zap, Terminal, Database, Cloud
 };
 

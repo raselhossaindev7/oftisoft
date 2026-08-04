@@ -1,6 +1,5 @@
 "use client"
 import { Animated, AnimatedDiv, AnimatedP } from "@/lib/animated";
-;
 
 import { useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -64,7 +63,7 @@ export default function AuthorSpotlight() {
                                 translate: ['100%', 0, 0],
                             },
                         }}
-                        autoplay={{ delay: 5000, disableOnInteraction: false }}
+                        autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }}
                         pagination={{ 
                             clickable: true,
                             type: 'bullets',

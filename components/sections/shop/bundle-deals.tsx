@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
 import { useShopContentStore } from "@/lib/store/shop-content";
 import type { Bundle } from "@/lib/store/shop-content";
@@ -11,6 +10,7 @@ import { ShoppingCart, ArrowRight, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useCart } from "@/hooks/use-cart";
 interface BundleDealsProps {
     bundles?: Bundle[];
 }
@@ -18,6 +18,19 @@ interface BundleDealsProps {
 export function BundleDeals({ bundles: bundlesProp }: BundleDealsProps = {}) {
     const { content } = useShopContentStore();
     const bundles = bundlesProp ?? content?.bundles ?? [];
+    const { addItem } = useCart();
+
+    const handleAddBundle = (bundle: Bundle) => {
+        addItem({
+            id: `bundle-${bundle.id}`,
+            name: bundle.name,
+            price: bundle.price,
+            image: bundle.image || '',
+            slug: `bundle-${bundle.id}`,
+            type: 'product'
+        });
+        toast.success('Bundle added to cart!');
+    };
 
     return (
         <section className="py-24 bg-secondary/10">
@@ -73,7 +86,7 @@ export function BundleDeals({ bundles: bundlesProp }: BundleDealsProps = {}) {
                                                     <p className="text-sm text-muted-foreground line-through">${bundle.originalPrice}</p>
                                                     <p className="text-4xl font-semibold text-primary">${bundle.price}</p>
                                                 </div>
-                                                <Button size="lg" className="rounded-full h-14 px-8 font-bold text-lg gap-2 shadow-xl shadow-primary/30" onClick={() => toast.success('Bundle added to cart!')}>
+                                                <Button size="lg" className="rounded-full h-14 px-8 font-bold text-lg gap-2 shadow-xl shadow-primary/30" onClick={() => handleAddBundle(bundle)}>
                                                     <ShoppingCart className="w-5 h-5" />
                                                     Grab the Bundle
                                                 </Button>

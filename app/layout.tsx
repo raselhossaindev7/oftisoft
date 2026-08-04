@@ -27,6 +27,7 @@ import CookieConsent from "@/components/cookie-consent";
 import { QueryProvider } from "@/lib/api/queries";
 import { AuthProvider } from "@/components/auth-provider";
 import SeoScripts from "@/components/seo-scripts";
+import MonetagAds from "@/components/monetag-ads";
 
 export const metadata: Metadata = defaultMetadata;
 export const viewport: Viewport = defaultViewport;
@@ -44,6 +45,7 @@ export default function RootLayout({
     >
       <head>
         <meta name="monetag" content="013c86a4f57c893a653e60cd9e30715d" />
+        <meta name="trustpilot-one-time-domain-verification-id" content="f716851e-e515-4d59-b5c2-cba5b363540f" />
         <meta name="msapplication-TileColor" content="#030014" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -97,6 +99,7 @@ export default function RootLayout({
                 <CartSheet />
                 <CookieConsent />
                 <SeoScripts />
+                <MonetagAds />
               </AuthProvider>
               <Toaster richColors position="top-right" />
             </QueryProvider>

@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP } from "@/lib/animated";
-;
 
 import { useShopContentStore } from "@/lib/store/shop-content";
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
@@ -56,6 +55,7 @@ export function ShopTestimonials() {
                         autoplay={{
                             delay: 5000,
                             disableOnInteraction: false,
+                            pauseOnMouseEnter: true,
                         }}
                         breakpoints={{
                             768: {

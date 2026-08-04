@@ -1,5 +1,5 @@
 "use client"
-import { AnimatedDiv, useScrollY, useScrollProgress, useTransform, useSpring, useMotionValue } from "@/lib/animated";
+import { AnimatedDiv, useScrollY, useScrollProgress, useTransform, useMotionValue } from "@/lib/animated";
 
 import CountUp from "react-countup";
 import { TrendingUp, Users, Zap, DollarSign, Star, Quote, ArrowRight } from "lucide-react";
@@ -114,7 +114,7 @@ export default function SuccessStories() {
                                 grabCursor={true}
                                 modules={[EffectCards, Autoplay, Pagination]}
                                 className="w-full max-w-sm md:max-w-md mx-auto"
-                                autoplay={{ delay: 5000 }}
+                                autoplay={{ delay: 5000, disableOnInteraction: false, pauseOnMouseEnter: true }}
                                 pagination={{ clickable: true }}
                             >
                                 {testimonials.map((t) => (

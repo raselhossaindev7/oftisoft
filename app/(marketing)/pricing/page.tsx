@@ -6,7 +6,7 @@ import { usePublicSubscriptionPlans, mapSubscriptionPlansToPricing } from "@/hoo
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Check, Zap, Rocket, Shield, Globe, Terminal, ArrowRight } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -16,20 +16,25 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import CTA from "@/components/sections/cta";
 
 export default function PricingPage() {
-    const { data: apiPlans = [] } = usePublicSubscriptionPlans('month');
+    const { data: apiPlans = [], isLoading } = usePublicSubscriptionPlans('month');
     const { content } = usePricingContentStore();
     const cart = useCart();
 
-    const plansFromApi = useMemo(() => mapSubscriptionPlansToPricing(apiPlans), [apiPlans.length]);
+    const parsePrice = (price: string | number) => {
+        if (typeof price === 'number') return price;
+        return Number(String(price).replace(/,/g, ''));
+    };
+
+    const plansFromApi = useMemo(() => mapSubscriptionPlansToPricing(apiPlans), [apiPlans]);
     const plans = plansFromApi.length > 0 ? plansFromApi : (content?.plans || []);
 
     const handleAddToCart = (plan: any) => {
-        const isNumeric = !isNaN(Number(plan.price));
-        if (isNumeric) {
+        const numericPrice = parsePrice(plan.price);
+        if (!isNaN(numericPrice) && numericPrice > 0) {
              cart.addItem({
                 id: `plan-${plan.name}`,
                 name: `${plan.name} License`,
-                price: Number(plan.price),
+                price: numericPrice,
                 image: '',
                 slug: `plan-${plan.name.toLowerCase().replace(/\s+/g, '-')}`,
                 type: 'service'
@@ -43,7 +48,7 @@ export default function PricingPage() {
         <div className="relative min-h-screen pt-32 pb-24 bg-[#020202]">
             {/* Neural Background Matrix */}
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[20%] left-[-10%] w-[70vw] h-[70vw] bg-primary/10 rounded-full blur-[140px] opacity-40 animate-pulse" />
+                <div className="absolute top-[20%] left-[-10%] w-[70vw] h-[70vw] bg-primary/10 rounded-full blur-[140px] opacity-40" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] bg-blue-600/5 rounded-full blur-[120px] opacity-30" />
             </div>
 
@@ -68,6 +73,17 @@ export default function PricingPage() {
                 </div>
 
                 {/* Pricing Cards */}
+                {isLoading ? (
+                    <div className="grid lg:grid-cols-3 gap-8 mb-20 md:mb-24">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="h-[500px] rounded-3xl bg-white/[0.02] border border-white/5 animate-pulse" />
+                        ))}
+                    </div>
+                ) : plans.length === 0 ? (
+                    <div className="text-center py-20 mb-20 md:mb-24">
+                        <p className="text-muted-foreground text-lg">No pricing plans available at this time.</p>
+                    </div>
+                ) : (
                 <div className="grid lg:grid-cols-3 gap-8 mb-20 md:mb-24">
                     {plans.map((plan, idx) => (
                         <AnimatedDiv key={plan.id}
@@ -111,7 +127,7 @@ export default function PricingPage() {
                                     </ul>
                                 </CardContent>
                                 <CardFooter className="p-6 md:p-8 pt-0">
-                                    {!isNaN(Number(plan.price)) ? (
+                                    {!isNaN(parsePrice(plan.price)) && parsePrice(plan.price) > 0 ? (
                                         <Button 
                                             onClick={() => handleAddToCart(plan)}
                                             className={cn(
@@ -140,6 +156,7 @@ export default function PricingPage() {
                         </AnimatedDiv>
                     ))}
                 </div>
+                )}
 
                 {/* FAQ Section */}
                 <div className="max-w-3xl mx-auto space-y-8 mb-16 md:mb-20">

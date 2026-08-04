@@ -2,6 +2,8 @@ import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP } from "@/li
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { 
     Zap, 
     ShieldCheck, 
@@ -14,7 +16,7 @@ import {
 } from "lucide-react";
 
 // Icon Map
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Cpu, Globe, ShieldCheck, Layers, Zap, Terminal, Code2
 };
 
@@ -132,7 +134,4 @@ export default function FeaturesPage() {
         </div>
     );
 }
-
-import Link from "next/link";
-import { cn } from "@/lib/utils";
 

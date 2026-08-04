@@ -94,10 +94,10 @@ export default function FounderIntro({ data }: { data?: any }) {
                                 <p className="text-white/60 text-base md:text-lg mb-6">{founder?.tagline ?? ""}</p>
                                 <div className="flex gap-3">
                                     {[
-                                        { Icon: Github, href: founder?.socials.github },
-                                        { Icon: Linkedin, href: founder?.socials.linkedin },
-                                        { Icon: Twitter, href: founder?.socials.twitter }
-                                    ].map(({ Icon, href }, i) => (
+                                        { Icon: Github, href: founder?.socials?.github },
+                                        { Icon: Linkedin, href: founder?.socials?.linkedin },
+                                        { Icon: Twitter, href: founder?.socials?.twitter }
+                                    ].filter(({ href }) => href).map(({ Icon, href }, i) => (
                                         <Button key={i} variant="outline" size="icon" className="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-black border-white/5 transition-all duration-300" asChild>
                                             <Link href={href || '#'}><Icon className="w-5 h-5" /></Link>
                                         </Button>

@@ -8,7 +8,7 @@ import {
     Check, X, Sparkles, Zap, Shield, Crown, HelpCircle, ArrowRight, Minus,
     Plus, Save, Trash2, LayoutTemplate, Grid, Server, Database, Cloud, 
     Brain, Smartphone, Layout, Video, FileText, Code2, ClipboardCheck, Rocket, 
-    HeartPulse, Globe, Code, ShieldCheck, Layers
+    HeartPulse, Globe, Code, ShieldCheck, Layers, Users, BarChart, Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -32,11 +32,11 @@ import {
 
 import { useCart } from "@/hooks/use-cart";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Check, X, Sparkles, Zap, Shield, Crown, HelpCircle, ArrowRight, Minus,
     Plus, Save, Trash2, LayoutTemplate, Grid, Server, Database, Cloud, 
     Brain, Smartphone, Layout, Video, FileText, Code2, ClipboardCheck, Rocket, 
-    HeartPulse, Globe, Code, ShieldCheck, Layers
+    HeartPulse, Globe, Code, ShieldCheck, Layers, Users, BarChart, Mail
 };
 
 const comparisonData = {
@@ -68,7 +68,6 @@ const comparisonData = {
 export default function ServiceComparison() {
     const cart = useCart();
     const { tiers, features } = comparisonData;
-    const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
     const handleAddToCart = (tier: any) => {
         const isCustom = tier.price === 'Custom';

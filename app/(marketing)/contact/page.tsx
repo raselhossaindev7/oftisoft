@@ -1,6 +1,5 @@
 "use client"
 import { AnimatedDiv, AnimatedH1, AnimatedH2, AnimatedH3, AnimatedP } from "@/lib/animated";
-;
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -11,8 +10,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLeads } from "@/hooks/useLeads";
+import { useRef } from "react";
 
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Mail, MapPin, Phone, Send, Globe, Zap, Terminal, Bot, Headset, ShieldCheck
 };
 
@@ -31,6 +31,7 @@ const pageData = {
 export default function ContactPage() {
     const { header, contactInfo, statusNode, form, footer } = pageData;
     const { createLead, isCreating } = useLeads();
+    const formRef = useRef<HTMLFormElement>(null);
 
     const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -47,8 +48,7 @@ export default function ContactPage() {
 
         createLead(data, {
             onSuccess: () => {
-                const formElement = document.getElementById('contact-form') as HTMLFormElement;
-                formElement?.reset();
+                formRef.current?.reset();
             }
         });
     };
@@ -127,24 +127,24 @@ export default function ContactPage() {
                                     <p className="text-lg text-muted-foreground font-medium">{form?.description ?? ""}</p>
                                 </CardHeader>
                                 <CardContent className="p-10 md:p-14 space-y-8 relative z-10">
-                                    <form id="contact-form" onSubmit={handleContactSubmit} className="space-y-8">
+                                    <form ref={formRef} id="contact-form" onSubmit={handleContactSubmit} className="space-y-8">
                                         <div className="grid md:grid-cols-2 gap-8">
                                             <div className="space-y-3">
-                                                <label className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.nameLabel ?? ""}</label>
-                                                <Input name="name" required className="h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold px-8 transition-all" placeholder="Architect Alpha" />
+                                                <label htmlFor="contact-name" className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.nameLabel ?? ""}</label>
+                                                <Input id="contact-name" name="name" required className="h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold px-8 transition-all" placeholder="Architect Alpha" />
                                             </div>
                                             <div className="space-y-3">
-                                                <label className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.emailLabel ?? ""}</label>
-                                                <Input name="email" required type="email" className="h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold px-8 transition-all" placeholder="alpha@network.com" />
+                                                <label htmlFor="contact-email" className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.emailLabel ?? ""}</label>
+                                                <Input id="contact-email" name="email" required type="email" className="h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold px-8 transition-all" placeholder="alpha@network.com" />
                                             </div>
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.subjectLabel ?? ""}</label>
-                                            <Input name="subject" required className="h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold px-8 transition-all" placeholder="Neural Engine Implementation" />
+                                            <label htmlFor="contact-subject" className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.subjectLabel ?? ""}</label>
+                                            <Input id="contact-subject" name="subject" required className="h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold px-8 transition-all" placeholder="Neural Engine Implementation" />
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.messageLabel ?? ""}</label>
-                                            <Textarea name="message" required className="min-h-[160px] rounded-[32px] bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold p-8 transition-all resize-none" placeholder="Describe the scope of your communication node..." />
+                                            <label htmlFor="contact-message" className="text-xs font-semibold tracking-widest text-muted-foreground ml-2">{form?.messageLabel ?? ""}</label>
+                                            <Textarea id="contact-message" name="message" required className="min-h-[160px] rounded-[32px] bg-white/5 border-white/10 text-white placeholder:text-white/20 focus-visible:ring-primary/50 text-lg font-bold p-8 transition-all resize-none" placeholder="Describe the scope of your communication node..." />
                                         </div>
                                     </form>
                                 </CardContent>

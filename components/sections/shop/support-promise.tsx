@@ -1,8 +1,7 @@
 "use client"
 import { AnimatedDiv } from "@/lib/animated";
-;
 
-import { ShieldCheck, RotateCcw, MessageSquare, Zap, Clock, BookmarkCheck } from "lucide-react";
+import { ShieldCheck, RotateCcw, Zap, BookmarkCheck } from "lucide-react";
 const promises = [
     {
         icon: ShieldCheck,

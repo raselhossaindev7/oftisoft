@@ -47,6 +47,8 @@ export default function ServiceOfferDetail({ offer }: ServiceOfferDetailProps) {
     offer.tiers.find((t) => t.name === selectedTier) ||
     offer.tiers[1] ||
     offer.tiers[0];
+
+  if (!tierData) return null;
   const tierIndex = offer.tiers.findIndex((t) => t.name === selectedTier);
 
   const { addItem } = useCart();
@@ -63,9 +65,7 @@ export default function ServiceOfferDetail({ offer }: ServiceOfferDetailProps) {
   };
 
   const handleContact = () => {
-    toast.success("Message sent to Oftisoft!", {
-      description: "I'll get back to you within 24 hours.",
-    });
+    window.location.href = '/contact';
   };
 
   const tierIcon = (name: string) => {
@@ -325,8 +325,8 @@ export default function ServiceOfferDetail({ offer }: ServiceOfferDetailProps) {
                   })}
                 </div>
               </div>
-              {[1, 2].map((i) => (
-                <ReviewCard key={i} />
+              {[0, 1].map((i) => (
+                <ReviewCard key={i} index={i} />
               ))}
             </div>
           </div>
@@ -495,7 +495,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   );
 }
 
-function ReviewCard() {
+function ReviewCard({ index = 0 }: { index?: number }) {
   const reviews = [
     {
       name: "Sarah M.",
@@ -510,7 +510,7 @@ function ReviewCard() {
       text: "Second time working with Oftisoft and once again exceeded expectations. Highly recommend for any programming project.",
     },
   ];
-  const review = reviews[Math.floor(Math.random() * reviews.length)];
+  const review = reviews[index % reviews.length];
   return (
     <div className="border border-border/40 rounded-xl p-4 mb-3">
       <div className="flex items-center justify-between mb-2">

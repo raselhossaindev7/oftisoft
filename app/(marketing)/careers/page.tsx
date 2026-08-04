@@ -17,7 +17,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 // Icon Map
-const iconMap: any = {
+const iconMap: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
     Cpu, Sparkles, Globe, Terminal, Briefcase, Rocket, Server
 };
 

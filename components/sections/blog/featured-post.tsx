@@ -25,6 +25,14 @@ export default function FeaturedPost() {
     const y = useTransform(scrollY, [0, 500], [0, 150]);
     const opacity = useTransform(scrollY, [0, 400], [1, 0]);
 
+    const safeIndex = Math.min(activeIndex, Math.max(0, featuredPosts.length - 1));
+
+    useEffect(() => {
+        if (activeIndex !== safeIndex) {
+            setActiveIndex(safeIndex);
+        }
+    }, [featuredPosts.length, safeIndex, activeIndex]);
+
     const handleNext = () => {
         if (featuredPosts.length === 0) return;
         setActiveIndex((prev) => (prev + 1) % featuredPosts.length);
@@ -36,11 +44,10 @@ export default function FeaturedPost() {
     };
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            handleNext();
-        }, 8000);
+        if (featuredPosts.length === 0) return;
+        const timer = setInterval(handleNext, 8000);
         return () => clearInterval(timer);
-    }, [activeIndex]);
+    }, [featuredPosts.length]);
 
     // Guard against empty featured posts
   if (featuredPosts.length === 0) {
@@ -52,7 +59,7 @@ export default function FeaturedPost() {
             {/* Dynamic Backgrounds */}
             <AnimatePresence mode="popLayout">
                 {featuredPosts.map((post, index) => (
-                    index === activeIndex && (
+                    index === safeIndex && (
                         <AnimatedDiv key={`bg-${post.id}`}
                             initial={{ opacity: 0, scale: 1.1 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -67,7 +74,7 @@ export default function FeaturedPost() {
                                 <Image src={post.coverImage}
                                     alt={post.title}
                                     fill className="object-cover"
-                                    priority={index === activeIndex}
+                                    priority={index === safeIndex}
                                 />
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-neutral-900 via-neutral-800 to-black" />
@@ -97,7 +104,7 @@ export default function FeaturedPost() {
 
             <div className="container px-4 mx-auto relative z-20 pb-20 md:pb-28">
                 <AnimatePresence mode="wait">
-                    <AnimatedDiv key={featuredPosts[activeIndex].id}
+                    <AnimatedDiv key={featuredPosts[safeIndex].id}
                         initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
                         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                         exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
@@ -117,27 +124,27 @@ export default function FeaturedPost() {
                                 <Badge 
                                     className={cn(
                                         "px-3 py-1 text-white backdrop-blur-md border border-white/10 shadow-lg bg-gradient-to-r border-0",
-                                        featuredPosts[activeIndex].gradient || "from-blue-600 to-violet-600"
+                                        featuredPosts[safeIndex].gradient || "from-blue-600 to-violet-600"
                                     )} 
                                 >
-                                    {categories.find(c => c.id === featuredPosts[activeIndex].category)?.label ?? ""}
+                                    {categories.find(c => c.id === featuredPosts[safeIndex].category)?.label ?? ""}
                                 </Badge>
                             </AnimatedDiv>
                         </div>
 
                         {/* Title */}
                         <h1 className="text-3xl md:text-6xl lg:text-7xl font-bold mb-6 md:mb-8 text-white leading-tight drop-shadow-2xl">
-                            {featuredPosts[activeIndex].title}
+                            {featuredPosts[safeIndex].title}
                         </h1>
 
                         {/* Author & Info */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-6 md:gap-8 text-white/90">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-white/20 to-white/5 border border-white/20 backdrop-blur flex items-center justify-center font-bold text-white shadow-lg text-sm md:text-base">
-                                    {authors.find(a => a.id === featuredPosts[activeIndex].authorId)?.initials ?? ""}
+                                    {authors.find(a => a.id === featuredPosts[safeIndex].authorId)?.initials ?? ""}
                                 </div>
                                 <div>
-                                    <p className="text-sm md:text-base font-bold text-white">{authors.find(a => a.id === featuredPosts[activeIndex].authorId)?.name ?? ""}</p>
+                                    <p className="text-sm md:text-base font-bold text-white">{authors.find(a => a.id === featuredPosts[safeIndex].authorId)?.name ?? ""}</p>
                                     <p className="text-xs md:text-xs text-white/60 tracking-widest">Author</p>
                                 </div>
                             </div>
@@ -147,17 +154,17 @@ export default function FeaturedPost() {
                             <div className="flex items-center gap-4 md:gap-6 text-xs md:text-sm font-medium">
                                 <div className="flex items-center gap-2">
                                     <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
-                                    <span>{featuredPosts[activeIndex].readTime}</span>
+                                    <span>{featuredPosts[safeIndex].readTime}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />
-                                    <span>{featuredPosts[activeIndex].date}</span>
+                                    <span>{featuredPosts[safeIndex].date}</span>
                                 </div>
                             </div>
 
                             <div className="sm:ml-auto">
                                 <Button asChild size="lg" className="rounded-full font-bold tracking-wide w-fit hover:scale-105 transition-transform bg-white text-black hover:bg-white/90">
-                                    <Link href={`/blog/${featuredPosts[activeIndex].slug || featuredPosts[activeIndex].id}`}>
+                                    <Link href={`/blog/${featuredPosts[safeIndex].slug || featuredPosts[safeIndex].id}`}>
                                         Read Article 
                                         <ArrowRight className="ml-2 w-4 h-4" />
                                     </Link>
