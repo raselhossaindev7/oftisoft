@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+
+concurrency:
+  group: deploy-oftisoft
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull and start container
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd /root/oftisoft
+            # Server clone is a pure mirror of master: reset any local dirt
+            # so stray server-side edits can never block a deploy.
+            # NOTE: /root/oftisoft/.env is gitignored — survives git clean.
+            git fetch origin
+            git reset --hard origin/master
+            git clean -fd
+            docker compose build
+            docker compose up -d --remove-orphans
+            docker image prune -f
+            docker ps --filter name=oftisoft-frontend-app
+
+      - name: Smoke test
+        if: always()
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            for i in $(seq 1 12); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' -L https://oftisoft.com/ || true)
+              if [ "$code" = "200" ]; then echo "OK: https://oftisoft.com -> $code"; exit 0; fi
+              sleep 5
+            done
+            echo "FAIL: https://oftisoft.com returned $code"
+            exit 1

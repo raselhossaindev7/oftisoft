@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ci-oftisoft-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Advisory for now (matches the other rhd repos).
+      - run: npm run lint
+        continue-on-error: true
+
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: /api
+          API_BACKEND_URL: https://api.oftisoft.com/api
+          NEXT_PUBLIC_SOCKET_URL: https://api.oftisoft.com
+          NEXT_PUBLIC_CDN_URL: https://cdn.oftisoft.com
+          NEXT_PUBLIC_FIREBASE_API_KEY: AIzaSyD897IFAChUyFHMFjqJRPJ6wS06jD30rBo
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: oftisoft-296de.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: oftisoft-296de
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: oftisoft-296de.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "90188203025"
+          NEXT_PUBLIC_FIREBASE_APP_ID: 1:90188203025:web:187d73e255b89f68511db0
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: G-6P4XFPQ4HK
+          NEXT_PUBLIC_MONETAG_SCRIPT_URL: https://quge5.com/88/tag.min.js
+          NEXT_PUBLIC_MONETAG_ZONE_ID: "263763"
+          NEXT_PUBLIC_MONETAG_SITE_ID: 013c86a4f57c893a653e60cd9e30715d
+          NEXT_PUBLIC_TRUSTPILOT_VERIFICATION_ID: f716851e-e515-4d59-b5c2-cba5b363540f
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51TOzNfGqa7a1zNTVA8QgMxJRp94RwNAzHtb0g6qknizLspQJVoxahYtbUG5Nvd9d3UW8sFAFLWUE82YnBpegWNmD00co5qmfvv
+          NEXT_TELEMETRY_DISABLED: 1

@@ -2,9 +2,17 @@ import type { NextConfig } from "next";
 
 const BACKEND_URL = process.env.API_BACKEND_URL || 'http://localhost:5500/api';
 
+// In production the backend URL MUST be configured — localhost fallback would break the app.
+if (process.env.NODE_ENV === 'production' && !process.env.API_BACKEND_URL) {
+  throw new Error('API_BACKEND_URL must be set in production (next.config.ts proxy target).');
+}
+
 const nextConfig: NextConfig = {
   trailingSlash: false,
-  output: undefined,
+  // Standalone output: bundles only the files needed at runtime into
+  // .next/standalone (with a minimal server.js) — that is what the Docker
+  // image ships. Ignored by Vercel, harmless elsewhere.
+  output: "standalone",
 
   // Proxy API requests to NestJS backend
   async rewrites() {
@@ -19,6 +27,12 @@ const nextConfig: NextConfig = {
   // Image optimization
   images: {
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.oftisoft.com',
+        port: '',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
